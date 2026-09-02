@@ -1892,7 +1892,7 @@
       const reassignPanel = document.getElementById('reassignPanel');
       const roomNavBar = document.getElementById('roomNavBar');
 
-      document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
+      if (document.getElementById('btnModeRoom')) document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
       document.getElementById('btnModeReassign').classList.toggle('btn-active', mode === 'reassign');
 
       singleContainer.style.display = 'none';

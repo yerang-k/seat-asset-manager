@@ -1135,8 +1135,7 @@
     <div class="topbar-actions">
       <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
       <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800; border:none;" onclick="openTeacherLinkModal()">🔗 교사용 조사 링크</button>
-      <button class="btn btn-outline" id="btnModeAll" onclick="selectRoom('all')">🏛️ 전체 교무실</button>
-      <button class="btn btn-outline" id="btnModeRoom" onclick="switchViewMode('room')">🏫 교무실별 뷰</button>
+
       <button class="btn btn-outline" id="btnModeReassign" onclick="switchViewMode('reassign')">👥 인사이동 모드</button>
       <button class="btn btn-outline" onclick="openSettingsModal()">⚙️ 설정</button>
       <button class="btn btn-light" onclick="refreshData()">🔄 새로고침</button>
@@ -1832,7 +1831,7 @@
       const reassignPanel = document.getElementById('reassignPanel');
       const roomNavBar = document.getElementById('roomNavBar');
 
-      document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
+      if (document.getElementById('btnModeRoom')) document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
       document.getElementById('btnModeReassign').classList.toggle('btn-active', mode === 'reassign');
 
       singleContainer.style.display = 'none';
