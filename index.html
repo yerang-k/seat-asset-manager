@@ -902,6 +902,16 @@
       <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="navigateRoom(1)">다음 교무실 ▶</button>
       <button class="btn btn-primary" onclick="openAddSeatModal()">➕ 이 교무실에 좌석 추가</button>
       <button class="btn btn-light" style="border: 1px solid #bbb;" onclick="resetCurrentRoomPositions()">🔄 기본 배치 복원</button>
+      
+      <!-- Seat Zoom & Size Controls (좌석 크기 전체 조절 바) -->
+      <div class="zoom-controls-wrap">
+        <span style="font-size: 0.78rem; font-weight: 700; color: #333;">🔍 좌석 크기:</span>
+        <button class="btn-zoom" onclick="adjustZoom(-0.1)" title="좌석 축소">➖</button>
+        <input type="range" class="zoom-slider" id="zoomRangeInput" min="70" max="150" step="5" value="100" oninput="onZoomSliderChange(this.value)" title="좌석 배율 조절">
+        <button class="btn-zoom" onclick="adjustZoom(0.1)" title="좌석 확대">➕</button>
+        <span id="zoomPercentLabel" style="font-size: 0.78rem; font-weight: 800; color: var(--primary); min-width: 38px; text-align: center;">100%</span>
+        <button class="btn btn-light" style="padding: 2px 7px; font-size: 0.72rem; border: 1px solid #ccc;" onclick="resetZoom()">초기화</button>
+      </div>
     </div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
@@ -1286,7 +1296,7 @@
   <script>
     // PRESET ROOM & SEAT DATA
     const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
-    const DEFAULT_COORDS = {"PRIN_01": {"x": 780, "y": 15, "w": 220, "h": 65}, "GYOMU_01": {"x": 30, "y": 95, "w": 110, "h": 75}, "GYOMU_02": {"x": 160, "y": 95, "w": 120, "h": 70}, "GYOMU_03": {"x": 295, "y": 95, "w": 120, "h": 70}, "GYOMU_04": {"x": 160, "y": 180, "w": 120, "h": 70}, "GYOMU_05": {"x": 295, "y": 180, "w": 120, "h": 70}, "GYOMU_06": {"x": 160, "y": 275, "w": 110, "h": 70}, "GYOMU_07": {"x": 280, "y": 275, "w": 110, "h": 70}, "GYOMU_08": {"x": 400, "y": 275, "w": 110, "h": 70}, "GYOMU_09": {"x": 160, "y": 360, "w": 110, "h": 70}, "GYOMU_10": {"x": 280, "y": 360, "w": 110, "h": 70}, "GYOMU_11": {"x": 400, "y": 360, "w": 110, "h": 70}, "GYOMU_12": {"x": 540, "y": 95, "w": 110, "h": 70}, "GYOMU_13": {"x": 660, "y": 95, "w": 110, "h": 70}, "GYOMU_14": {"x": 540, "y": 180, "w": 110, "h": 70}, "GYOMU_15": {"x": 660, "y": 180, "w": 110, "h": 70}, "GYOMU_16": {"x": 540, "y": 265, "w": 110, "h": 70}, "GYOMU_17": {"x": 660, "y": 265, "w": 110, "h": 70}, "GYOMU_18": {"x": 800, "y": 95, "w": 110, "h": 70}, "GYOMU_19": {"x": 920, "y": 95, "w": 110, "h": 70}, "GYOMU_20": {"x": 800, "y": 180, "w": 110, "h": 70}, "GYOMU_21": {"x": 920, "y": 180, "w": 110, "h": 70}, "G3_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G3_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G3_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G3_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G3_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G3_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G3_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G3_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G3_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G3_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G3_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G2_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G2_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G2_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G2_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G2_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G2_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G2_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G2_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G2_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G2_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G2_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G1_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G1_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G1_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G1_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G1_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G1_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G1_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G1_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G1_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G1_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G1_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "SAFE_01": {"x": 50, "y": 40, "w": 160, "h": 75}, "SAFE_02": {"x": 230, "y": 40, "w": 160, "h": 75}, "SAFE_03": {"x": 50, "y": 135, "w": 160, "h": 75}, "SAFE_04": {"x": 230, "y": 135, "w": 160, "h": 75}, "SAFE_05": {"x": 50, "y": 230, "w": 160, "h": 75}, "SAFE_06": {"x": 230, "y": 230, "w": 160, "h": 75}, "SAFE_07": {"x": 450, "y": 40, "w": 160, "h": 265}, "INFO_01": {"x": 50, "y": 50, "w": 190, "h": 80}, "INFO_02": {"x": 270, "y": 50, "w": 190, "h": 80}, "INFO_03": {"x": 50, "y": 160, "w": 190, "h": 80}, "INFO_04": {"x": 270, "y": 160, "w": 190, "h": 80}, "SUPP_01": {"x": 80, "y": 40, "w": 240, "h": 75}, "SUPP_02": {"x": 80, "y": 135, "w": 240, "h": 75}, "SUPP_03": {"x": 80, "y": 230, "w": 240, "h": 75}, "LIB_01": {"x": 100, "y": 70, "w": 260, "h": 85}, "WEE_01": {"x": 40, "y": 50, "w": 180, "h": 80}, "CAREER_01": {"x": 250, "y": 50, "w": 180, "h": 80}, "HEALTH_01": {"x": 460, "y": 50, "w": 160, "h": 75}, "HEALTH_02": {"x": 460, "y": 145, "w": 160, "h": 75}, "MEAL_01": {"x": 650, "y": 50, "w": 160, "h": 75}, "MEAL_02": {"x": 650, "y": 145, "w": 160, "h": 75}, "ADM_01": {"x": 50, "y": 50, "w": 140, "h": 250}, "ADM_02": {"x": 230, "y": 40, "w": 260, "h": 70}, "ADM_03": {"x": 530, "y": 40, "w": 260, "h": 70}, "ADM_04": {"x": 230, "y": 130, "w": 120, "h": 70}, "ADM_05": {"x": 370, "y": 130, "w": 120, "h": 70}, "ADM_06": {"x": 230, "y": 220, "w": 120, "h": 70}, "ADM_07": {"x": 370, "y": 220, "w": 120, "h": 70}, "ADM_08": {"x": 530, "y": 130, "w": 120, "h": 70}, "ADM_09": {"x": 670, "y": 130, "w": 120, "h": 70}, "ADM_10": {"x": 530, "y": 220, "w": 120, "h": 70}, "ADM_11": {"x": 670, "y": 220, "w": 120, "h": 70}, "SPEC_ART": {"x": 40, "y": 40, "w": 160, "h": 80}, "SPEC_MUSIC": {"x": 220, "y": 40, "w": 160, "h": 80}, "SPEC_PE_1": {"x": 400, "y": 40, "w": 160, "h": 80}, "SPEC_PE_2": {"x": 580, "y": 40, "w": 160, "h": 80}, "SPEC_PE_3": {"x": 760, "y": 40, "w": 160, "h": 80}, "SPEC_CONF_S": {"x": 40, "y": 150, "w": 160, "h": 80}, "SPEC_CONF_L": {"x": 220, "y": 150, "w": 160, "h": 80}, "SPEC_DUTY": {"x": 400, "y": 150, "w": 160, "h": 80}, "SPEC_DINE": {"x": 580, "y": 150, "w": 160, "h": 80}, "SPEC_PRINT": {"x": 760, "y": 150, "w": 160, "h": 80}, "SPEC_DORM": {"x": 40, "y": 260, "w": 160, "h": 80}};
+    const DEFAULT_COORDS = {"PRIN_01": {"x": 1040, "y": 15, "w": 330, "h": 75}, "GYOMU_01": {"x": 25, "y": 105, "w": 145, "h": 90}, "GYOMU_02": {"x": 190, "y": 105, "w": 145, "h": 90}, "GYOMU_03": {"x": 355, "y": 105, "w": 145, "h": 90}, "GYOMU_04": {"x": 190, "y": 210, "w": 145, "h": 90}, "GYOMU_05": {"x": 355, "y": 210, "w": 145, "h": 90}, "GYOMU_06": {"x": 190, "y": 325, "w": 145, "h": 90}, "GYOMU_07": {"x": 355, "y": 325, "w": 145, "h": 90}, "GYOMU_08": {"x": 520, "y": 325, "w": 145, "h": 90}, "GYOMU_09": {"x": 190, "y": 430, "w": 145, "h": 90}, "GYOMU_10": {"x": 355, "y": 430, "w": 145, "h": 90}, "GYOMU_11": {"x": 520, "y": 430, "w": 145, "h": 90}, "GYOMU_12": {"x": 700, "y": 105, "w": 145, "h": 90}, "GYOMU_13": {"x": 865, "y": 105, "w": 145, "h": 90}, "GYOMU_14": {"x": 700, "y": 210, "w": 145, "h": 90}, "GYOMU_15": {"x": 865, "y": 210, "w": 145, "h": 90}, "GYOMU_16": {"x": 700, "y": 315, "w": 145, "h": 90}, "GYOMU_17": {"x": 865, "y": 315, "w": 145, "h": 90}, "GYOMU_18": {"x": 1040, "y": 105, "w": 145, "h": 90}, "GYOMU_19": {"x": 1205, "y": 105, "w": 145, "h": 90}, "GYOMU_20": {"x": 1040, "y": 210, "w": 145, "h": 90}, "GYOMU_21": {"x": 1205, "y": 210, "w": 145, "h": 90}, "G3_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G3_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G3_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G3_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G3_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G3_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G3_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G3_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G3_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G3_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G3_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G2_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G2_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G2_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G2_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G2_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G2_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G2_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G2_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G2_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G2_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G2_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G1_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G1_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G1_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G1_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G1_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G1_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G1_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G1_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G1_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G1_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G1_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "SAFE_01": {"x": 45, "y": 30, "w": 180, "h": 90}, "SAFE_02": {"x": 245, "y": 30, "w": 180, "h": 90}, "SAFE_03": {"x": 45, "y": 135, "w": 180, "h": 90}, "SAFE_04": {"x": 245, "y": 135, "w": 180, "h": 90}, "SAFE_05": {"x": 45, "y": 240, "w": 180, "h": 90}, "SAFE_06": {"x": 245, "y": 240, "w": 180, "h": 90}, "SAFE_07": {"x": 485, "y": 30, "w": 180, "h": 300}, "INFO_01": {"x": 45, "y": 45, "w": 220, "h": 95}, "INFO_02": {"x": 295, "y": 45, "w": 220, "h": 95}, "INFO_03": {"x": 45, "y": 165, "w": 220, "h": 95}, "INFO_04": {"x": 295, "y": 165, "w": 220, "h": 95}, "SUPP_01": {"x": 75, "y": 35, "w": 280, "h": 90}, "SUPP_02": {"x": 75, "y": 140, "w": 280, "h": 90}, "SUPP_03": {"x": 75, "y": 245, "w": 280, "h": 90}, "LIB_01": {"x": 90, "y": 65, "w": 300, "h": 95}, "WEE_01": {"x": 35, "y": 45, "w": 210, "h": 95}, "CAREER_01": {"x": 275, "y": 45, "w": 210, "h": 95}, "HEALTH_01": {"x": 525, "y": 45, "w": 190, "h": 90}, "HEALTH_02": {"x": 525, "y": 150, "w": 190, "h": 90}, "MEAL_01": {"x": 745, "y": 45, "w": 190, "h": 90}, "MEAL_02": {"x": 745, "y": 150, "w": 190, "h": 90}, "ADM_01": {"x": 45, "y": 45, "w": 165, "h": 290}, "ADM_02": {"x": 240, "y": 35, "w": 310, "h": 85}, "ADM_03": {"x": 580, "y": 35, "w": 310, "h": 85}, "ADM_04": {"x": 240, "y": 135, "w": 145, "h": 90}, "ADM_05": {"x": 405, "y": 135, "w": 145, "h": 90}, "ADM_06": {"x": 240, "y": 240, "w": 145, "h": 90}, "ADM_07": {"x": 405, "y": 240, "w": 145, "h": 90}, "ADM_08": {"x": 580, "y": 135, "w": 145, "h": 90}, "ADM_09": {"x": 745, "y": 135, "w": 145, "h": 90}, "ADM_10": {"x": 580, "y": 240, "w": 145, "h": 90}, "ADM_11": {"x": 745, "y": 240, "w": 145, "h": 90}, "SPEC_ART": {"x": 35, "y": 35, "w": 195, "h": 90}, "SPEC_MUSIC": {"x": 250, "y": 35, "w": 195, "h": 90}, "SPEC_PE_1": {"x": 465, "y": 35, "w": 195, "h": 90}, "SPEC_PE_2": {"x": 680, "y": 35, "w": 195, "h": 90}, "SPEC_PE_3": {"x": 895, "y": 35, "w": 195, "h": 90}, "SPEC_CONF_S": {"x": 35, "y": 145, "w": 195, "h": 90}, "SPEC_CONF_L": {"x": 250, "y": 145, "w": 195, "h": 90}, "SPEC_DUTY": {"x": 465, "y": 145, "w": 195, "h": 90}, "SPEC_DINE": {"x": 680, "y": 145, "w": 195, "h": 90}, "SPEC_PRINT": {"x": 895, "y": 145, "w": 195, "h": 90}, "SPEC_DORM": {"x": 35, "y": 255, "w": 195, "h": 90}};
 
     const SAMPLE_DEVICES = [
       {
@@ -1351,19 +1361,7 @@
     ];
 
     // Room Canvas Dimensions (width, min-height)
-    const ROOM_CANVAS_DIMS = {
-      'gyomu_center': { w: 1040, h: 520 },
-      'grade3': { w: 880, h: 460 },
-      'grade2': { w: 880, h: 460 },
-      'grade1': { w: 880, h: 460 },
-      'safety': { w: 780, h: 450 },
-      'edu_info': { w: 620, h: 360 },
-      'support': { w: 500, h: 380 },
-      'library': { w: 500, h: 320 },
-      'counsel_health_meal': { w: 900, h: 360 },
-      'admin': { w: 940, h: 480 },
-      'special': { w: 980, h: 440 }
-    };
+    const ROOM_CANVAS_DIMS = {"gyomu_center": {"w": 1400, "h": 620}, "grade3": {"w": 1000, "h": 520}, "grade2": {"w": 1000, "h": 520}, "grade1": {"w": 1000, "h": 520}, "safety": {"w": 900, "h": 520}, "edu_info": {"w": 720, "h": 420}, "support": {"w": 580, "h": 440}, "library": {"w": 580, "h": 360}, "counsel_health_meal": {"w": 1060, "h": 480}, "admin": {"w": 1100, "h": 540}, "special": {"w": 1120, "h": 520}};
 
     let appState = {
       rooms: [],
@@ -1373,7 +1371,8 @@
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
-      geminiKey: localStorage.getItem('SOLNAE_GEMINI_KEY') || ''
+      geminiKey: localStorage.getItem('SOLNAE_GEMINI_KEY') || '',
+      canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1456,8 +1455,8 @@
 
     function initSeatPositions() {
       appState.seats.forEach(s => {
+        const defPos = DEFAULT_COORDS[s.seat_id];
         if (s.pos_x === undefined || s.pos_y === undefined) {
-          const defPos = DEFAULT_COORDS[s.seat_id];
           if (defPos) {
             s.pos_x = defPos.x;
             s.pos_y = defPos.y;
@@ -1466,9 +1465,15 @@
           } else {
             s.pos_x = 60;
             s.pos_y = 60;
-            s.width = 140;
-            s.height = 70;
+            s.width = 150;
+            s.height = 90;
           }
+        } else if (defPos && (!s.width || s.width < 135 || !s.height || s.height < 80)) {
+          // Automatically upgrade old stored data to the new spacious baseline dimensions
+          s.width = defPos.w;
+          s.height = defPos.h;
+          s.pos_x = defPos.x;
+          s.pos_y = defPos.y;
         }
       });
     }
@@ -1921,10 +1926,146 @@
           ${pcLineHtml}
           ${monLineHtml}
         </div>
+        <div class="seat-resize-handle" title="드래그하여 좌석 크기 조절 (더블클릭 시 기본크기 복원)">⤡</div>
       `;
 
       attachSeatDragListeners(cell, seatId);
+      const resizeHandle = cell.querySelector('.seat-resize-handle');
+      if (resizeHandle) attachSeatResizeListeners(resizeHandle, seatId);
       return cell;
+    }
+
+
+    // =========================================================================
+    // SEAT RESIZING (개별 좌석 크기 조절: 드래그 핸들 ⤡)
+    // =========================================================================
+    function attachSeatResizeListeners(handle, seatId) {
+      handle.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const cell = document.getElementById(`seat_${seatId}`);
+        if (!cell) return;
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startW = cell.offsetWidth;
+        const startH = cell.offsetHeight;
+        const zoom = appState.canvasZoom || 1.0;
+
+        cell.classList.add('is-resizing');
+        try {
+          handle.setPointerCapture(e.pointerId);
+        } catch(err) {}
+
+        function onResizeMove(me) {
+          me.preventDefault();
+          const dx = (me.clientX - startX) / zoom;
+          const dy = (me.clientY - startY) / zoom;
+
+          // 10px snap, min width 120, min height 65
+          const newW = Math.max(120, Math.round((startW + dx) / 10) * 10);
+          const newH = Math.max(65, Math.round((startH + dy) / 10) * 10);
+
+          cell.style.width = newW + 'px';
+          cell.style.height = newH + 'px';
+        }
+
+        function onResizeUp(ue) {
+          try {
+            handle.releasePointerCapture(ue.pointerId);
+          } catch(err) {}
+          window.removeEventListener('pointermove', onResizeMove);
+          window.removeEventListener('pointerup', onResizeUp);
+          window.removeEventListener('pointercancel', onResizeUp);
+          cell.classList.remove('is-resizing');
+
+          const finalW = parseInt(cell.style.width);
+          const finalH = parseInt(cell.style.height);
+
+          const seat = appState.seats.find(s => s.seat_id === seatId);
+          if (seat) {
+            seat.width = finalW;
+            seat.height = finalH;
+
+            if (appState.isGas) {
+              google.script.run.batchUpdateSeatPositions([{
+                seat_id: seatId,
+                pos_x: seat.pos_x,
+                pos_y: seat.pos_y
+              }]);
+            } else {
+              saveLocalData();
+            }
+
+            const name = seat.current_user || seat.seat_label;
+            showToast(`[${name}] 좌석 크기가 ${finalW}×${finalH}px로 조절되었습니다.`);
+          }
+        }
+
+        window.addEventListener('pointermove', onResizeMove);
+        window.addEventListener('pointerup', onResizeUp);
+        window.addEventListener('pointercancel', onResizeUp);
+      });
+
+      // Double-click to reset individual seat to default size
+      handle.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const cell = document.getElementById(`seat_${seatId}`);
+        const seat = appState.seats.find(s => s.seat_id === seatId);
+        if (cell && seat) {
+          const defPos = DEFAULT_COORDS[seatId] || { w: 150, h: 90 };
+          cell.style.width = defPos.w + 'px';
+          cell.style.height = defPos.h + 'px';
+          seat.width = defPos.w;
+          seat.height = defPos.h;
+          saveLocalData();
+          showToast(`[${seat.current_user || seat.seat_label}] 좌석 크기가 기본값(${defPos.w}×${defPos.h}px)으로 복원되었습니다.`);
+        }
+      });
+    }
+
+    // =========================================================================
+    // CANVAS ZOOM & SEAT SCALE (좌석 전체 확대/축소 슬라이더)
+    // =========================================================================
+    function setCanvasZoom(val) {
+      val = Math.max(0.7, Math.min(1.5, Math.round(val * 100) / 100));
+      appState.canvasZoom = val;
+      localStorage.setItem('SOLNAE_ZOOM', val);
+
+      const canvas = document.getElementById('activeRoomCanvas');
+      if (canvas) {
+        canvas.style.transform = `scale(${val})`;
+        canvas.style.transformOrigin = 'top left';
+
+        const wrapper = canvas.parentElement;
+        if (wrapper) {
+          // Adjust scrollable area to match scaled dimensions
+          const originalW = parseInt(canvas.style.width) || 1200;
+          const originalH = parseInt(canvas.style.height) || 600;
+          wrapper.style.minHeight = (originalH * val + 30) + 'px';
+        }
+      }
+
+      const pct = Math.round(val * 100);
+      const label = document.getElementById('zoomPercentLabel');
+      if (label) label.textContent = pct + '%';
+      const range = document.getElementById('zoomRangeInput');
+      if (range) range.value = pct;
+    }
+
+    function adjustZoom(delta) {
+      const cur = appState.canvasZoom || 1.0;
+      setCanvasZoom(cur + delta);
+    }
+
+    function onZoomSliderChange(val) {
+      setCanvasZoom(parseInt(val) / 100);
+    }
+
+    function resetZoom() {
+      setCanvasZoom(1.0);
+      showToast("좌석 크기 배율이 100%로 초기화되었습니다.");
     }
 
     // =========================================================================
@@ -2191,6 +2332,7 @@
       });
 
       updateTabBadges();
+      setCanvasZoom(appState.canvasZoom || 1.0);
     }
 
     function updateTabBadges() {
