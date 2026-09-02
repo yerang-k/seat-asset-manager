@@ -1759,6 +1759,25 @@
       }
     }
 
+    // Centralized view refresh dispatcher (handles 'all', 'special', and individual rooms safely)
+    function refreshCurrentView() {
+      if (appState.activeRoomId === 'all') {
+        const subControls = document.querySelector('.sub-controls-bar');
+        if (subControls) subControls.style.display = 'none';
+        document.getElementById('singleRoomContainer').style.display = 'block';
+        document.getElementById('reassignPanel').style.display = 'none';
+        renderAllRoomsView();
+      } else if (appState.activeRoomId === 'special') {
+        const subControls = document.querySelector('.sub-controls-bar');
+        if (subControls) subControls.style.display = 'flex';
+        renderSpecialRoomsView();
+      } else {
+        const subControls = document.querySelector('.sub-controls-bar');
+        if (subControls) subControls.style.display = 'flex';
+        renderActiveRoomView();
+      }
+    }
+
     // Select Room
     function selectRoom(roomId) {
       appState.activeRoomId = roomId;
@@ -1953,7 +1972,7 @@
         saveLocalData();
       }
 
-      renderActiveRoomView();
+      refreshCurrentView();
       showToast("좌석 배치가 기본 위치로 복원되었습니다.");
     }
 
@@ -2654,7 +2673,7 @@
               appState.seats.push(res.seat || newSeat);
               closeAddSeatModal();
               selectRoom(roomId);
-              renderActiveRoomView();
+              refreshCurrentView();
               updateTopStats();
               showToast(`좌석 [${label}]이(가) 추가되었습니다! 다른 좌석 위로 끌어다 놓으면 서로 자리를 교체할 수 있습니다.`);
               openSeatModal(seatId);
@@ -2671,7 +2690,7 @@
         saveLocalData();
         closeAddSeatModal();
         selectRoom(roomId);
-        renderActiveRoomView();
+        refreshCurrentView();
         updateTopStats();
         showToast(`좌석 [${label}]이(가) 추가되었습니다! 다른 좌석 위로 끌어다 놓으면 서로 자리를 교체할 수 있습니다.`);
         openSeatModal(seatId);
@@ -2698,7 +2717,7 @@
               appState.seats = appState.seats.filter(s => s.seat_id !== seatId);
               appState.devices = appState.devices.filter(d => d.seat_id !== seatId);
               closeSeatModal();
-              renderActiveRoomView();
+              refreshCurrentView();
               updateTopStats();
               showToast(`좌석 [${label}]이(가) 삭제되었습니다.`);
             } else {
@@ -2714,7 +2733,7 @@
         appState.devices = appState.devices.filter(d => d.seat_id !== seatId);
         saveLocalData();
         closeSeatModal();
-        renderActiveRoomView();
+        refreshCurrentView();
         updateTopStats();
         showToast(`좌석 [${label}]이(가) 삭제되었습니다.`);
       }
@@ -2870,8 +2889,16 @@
 function renderActiveRoomView() {
       const container = document.getElementById('singleRoomContainer');
       const rId = appState.activeRoomId;
+      if (rId === 'all') {
+        refreshCurrentView();
+        return;
+      }
       if (rId === 'special') {
         renderSpecialRoomsView();
+        return;
+      }
+      if (!PRESET_ROOMS.some(r => r.id === rId)) {
+        selectRoom('all');
         return;
       }
 
@@ -3182,7 +3209,7 @@ function renderActiveRoomView() {
         showToast(`좌석 [${seatId}] 사용자 정보가 저장되었습니다.`);
       }
 
-      renderActiveRoomView();
+      refreshCurrentView();
       updateTopStats();
     }
 
@@ -3233,7 +3260,7 @@ function renderActiveRoomView() {
               } else {
                 appState.devices.push(res.device);
               }
-              renderActiveRoomView();
+              refreshCurrentView();
               updateTopStats();
               showToast("기기 정보가 성공적으로 저장되었습니다.");
               openSeatModal(seatId);
@@ -3251,7 +3278,7 @@ function renderActiveRoomView() {
           appState.devices.push(payload);
         }
         saveLocalData();
-        renderActiveRoomView();
+        refreshCurrentView();
         updateTopStats();
         showToast("기기 정보가 저장되었습니다.");
         openSeatModal(seatId);
@@ -3270,7 +3297,7 @@ function renderActiveRoomView() {
           .withSuccessHandler(res => {
             if (res.success) {
               appState.devices = appState.devices.filter(d => d.device_id !== devId);
-              renderActiveRoomView();
+              refreshCurrentView();
               updateTopStats();
               showToast("기기가 삭제되었습니다.");
               openSeatModal(appState.currentSeatId);
@@ -3282,7 +3309,7 @@ function renderActiveRoomView() {
       } else {
         appState.devices = appState.devices.filter(d => d.device_id !== devId);
         saveLocalData();
-        renderActiveRoomView();
+        refreshCurrentView();
         updateTopStats();
         showToast("기기가 삭제되었습니다.");
         openSeatModal(appState.currentSeatId);
@@ -3474,7 +3501,7 @@ function renderActiveRoomView() {
           .withSuccessHandler(res => {
             if (res.success) {
               showToast(`총 ${res.count}개 좌석 정보가 성공적으로 갱신되었습니다!`);
-              renderActiveRoomView();
+              refreshCurrentView();
             } else {
               alert("일괄 저장 오류: " + res.error);
             }
@@ -3482,7 +3509,7 @@ function renderActiveRoomView() {
           .batchUpdateSeatUsers(updates);
       } else {
         saveLocalData();
-        renderActiveRoomView();
+        refreshCurrentView();
         showToast("인사이동 정보가 로컬에 일괄 저장되었습니다!");
       }
     }
