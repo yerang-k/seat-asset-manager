@@ -1253,7 +1253,7 @@
           <span style="font-size: 1.15rem;">🏫</span> <strong>교무실 선택:</strong>
         </label>
         <select id="roomSelectDropdown" class="room-select-dropdown" onchange="selectRoom(this.value)">
-          <option value="gyomu_center" selected>🏫 교무센터·교장실 (22석)</option>
+          <option value="gyomu_center" selected>🏫 교무센터 (22석)</option>
           <option value="grade3">🏫 3학년 교무실 (11석)</option>
           <option value="grade2">🏫 2학년 교무실 (11석)</option>
           <option value="grade1">🏫 1학년 교무실 (11석)</option>
@@ -2082,15 +2082,17 @@
       const pcModel = document.getElementById('pc_model_name').value.trim();
       const pcAsset = document.getElementById('pc_asset_number').value.trim();
       if (pcMfr || pcModel || pcAsset) {
+        const pcDevId = document.getElementById('pc_device_id').value || ('DEV_' + seatId + '_PC');
+        const pcSchoolAsset = document.getElementById('pc_school_asset_number') ? document.getElementById('pc_school_asset_number').value.trim() : '';
         devices.push({
-          device_id: document.getElementById('pc_device_id').value || `DEV_${seatId}_PC`,
+          device_id: pcDevId,
           seat_id: seatId,
           device_type: 'PC',
           manufacturer: pcMfr,
           model_name: pcModel,
           acquired_date: document.getElementById('pc_acquired_date').value.trim(),
           asset_number: pcAsset,
-          school_asset_number: (document.getElementById('pc_school_asset_number') ? document.getElementById('pc_school_asset_number').value.trim() : ''),
+          school_asset_number: pcSchoolAsset,
           notes: document.getElementById('pc_notes').value.trim()
         });
       }
@@ -2100,15 +2102,17 @@
       const mon1Model = document.getElementById('mon1_model_name').value.trim();
       const mon1Asset = document.getElementById('mon1_asset_number').value.trim();
       if (mon1Mfr || mon1Model || mon1Asset) {
+        const mon1DevId = document.getElementById('mon1_device_id').value || ('DEV_' + seatId + '_MON1');
+        const mon1SchoolAsset = document.getElementById('mon1_school_asset_number') ? document.getElementById('mon1_school_asset_number').value.trim() : '';
         devices.push({
-          device_id: document.getElementById('mon1_device_id').value || `DEV_${seatId}_MON1`,
+          device_id: mon1DevId,
           seat_id: seatId,
           device_type: 'MONITOR_1',
           manufacturer: mon1Mfr,
           model_name: mon1Model,
           acquired_date: document.getElementById('mon1_acquired_date').value.trim(),
           asset_number: mon1Asset,
-          school_asset_number: (document.getElementById('mon1_school_asset_number') ? document.getElementById('mon1_school_asset_number').value.trim() : ''),
+          school_asset_number: mon1SchoolAsset,
           notes: document.getElementById('mon1_notes').value.trim()
         });
       }
@@ -2120,15 +2124,17 @@
         const mon2Model = document.getElementById('mon2_model_name').value.trim();
         const mon2Asset = document.getElementById('mon2_asset_number').value.trim();
         if (mon2Mfr || mon2Model || mon2Asset) {
+          const mon2DevId = document.getElementById('mon2_device_id').value || ('DEV_' + seatId + '_MON2');
+          const mon2SchoolAsset = document.getElementById('mon2_school_asset_number') ? document.getElementById('mon2_school_asset_number').value.trim() : '';
           devices.push({
-            device_id: document.getElementById('mon2_device_id').value || `DEV_${seatId}_MON2`,
+            device_id: mon2DevId,
             seat_id: seatId,
             device_type: 'MONITOR_2',
             manufacturer: mon2Mfr,
             model_name: mon2Model,
             acquired_date: document.getElementById('mon2_acquired_date').value.trim(),
             asset_number: mon2Asset,
-            school_asset_number: (document.getElementById('mon2_school_asset_number') ? document.getElementById('mon2_school_asset_number').value.trim() : ''),
+            school_asset_number: mon2SchoolAsset,
             notes: document.getElementById('mon2_notes').value.trim()
           });
         }
@@ -2143,7 +2149,7 @@
 
       if (appState.isGas) {
         showToast("서버에 기기 정보를 제출하는 중...");
-        google.script.run
+        const runner = google.script.run
           .withSuccessHandler(function() {
             showToast("🎉 [" + userName + " 선생님] 기기 정보가 성공적으로 제출되었습니다!");
             closeSeatModal();
@@ -2151,8 +2157,8 @@
           })
           .withFailureHandler(function(err) {
             alert("제출 실패: " + (err ? err.message : ""));
-          })
-          .saveSeatDevices(seatId, { current_user: userName, extension: ext }, devices);
+          });
+        runner.saveSeatDevices(seatId, { current_user: userName, extension: ext }, devices);
       } else {
         saveLocalData();
         closeSeatModal();
