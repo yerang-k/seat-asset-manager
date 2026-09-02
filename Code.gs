@@ -167,6 +167,49 @@ function updateSeatUser(seatId, teacherName, extension) {
   }
 }
 
+/** 일반교사용 원터치 제출: 좌석 정보 및 귀속 기기 목록 일괄 저장 */
+function saveSeatDevices(seatId, seatInfo, deviceList) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // 1. 좌석 정보(선생님 성명, 내선번호) 갱신
+    if (seatInfo) {
+      updateSeatUser(seatId, seatInfo.current_user, seatInfo.extension);
+    }
+    
+    // 2. 기기 시트에서 해당 좌석의 기존 기기 삭제
+    const devSheet = ss.getSheetByName(SHEET_DEVICES);
+    const headers = devSheet.getRange(1, 1, 1, devSheet.getLastColumn()).getValues()[0];
+    const devData = devSheet.getDataRange().getValues();
+    const seatIdCol = headers.indexOf('seat_id');
+
+    for (let i = devData.length - 1; i >= 1; i--) {
+      if (String(devData[i][seatIdCol]) === String(seatId)) {
+        devSheet.deleteRow(i + 1);
+      }
+    }
+
+    // 3. 새로 입력된 기기들 추가
+    const nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+    if (deviceList && Array.isArray(deviceList)) {
+      deviceList.forEach(dev => {
+        if (!dev.device_id) {
+          dev.device_id = 'DEV_' + seatId + '_' + (dev.device_type || 'DEV') + '_' + Utilities.getUuid().substring(0, 4);
+        }
+        dev.registered_at = nowStr;
+        dev.updated_at = nowStr;
+        const rowValues = headers.map(h => dev[h] !== undefined ? dev[h] : '');
+        devSheet.appendRow(rowValues);
+      });
+    }
+
+    touchSeat_(ss, seatId);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 /** 인사이동 시 여러 좌석 일괄 사용자 갱신 */
 function batchUpdateSeatUsers(seatList) {
   try {
