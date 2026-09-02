@@ -38,11 +38,18 @@ function getInitialData() {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     ensureSheetsInitialized_(ss);
 
-    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    let seatSheet = ss.getSheetByName(SHEET_SEATS);
+    let seats = getSheetObjects_(seatSheet);
+
+    // 혹시라도 좌석이 0개라면 즉시 초기데이터생성 실행 후 다시 조회
+    if (!seats || seats.length === 0) {
+      초기데이터생성();
+      seatSheet = ss.getSheetByName(SHEET_SEATS);
+      seats = getSheetObjects_(seatSheet);
+    }
+
     const devSheet = ss.getSheetByName(SHEET_DEVICES);
     const roomSheet = ss.getSheetByName(SHEET_ROOMS);
-
-    const seats = getSheetObjects_(seatSheet);
     const devices = getSheetObjects_(devSheet);
     const rooms = getSheetObjects_(roomSheet);
 
@@ -666,13 +673,14 @@ function getSheetObjects_(sheet) {
   return results;
 }
 
-/** 필요한 시트가 없으면 생성 */
+/** 필요한 시트가 없거나 좌석 데이터가 비어있으면 자동 생성 */
 function ensureSheetsInitialized_(ss) {
   let seatSheet = ss.getSheetByName(SHEET_SEATS);
   let devSheet = ss.getSheetByName(SHEET_DEVICES);
   let roomSheet = ss.getSheetByName(SHEET_ROOMS);
 
-  if (!seatSheet || !devSheet || !roomSheet) {
+  // 시트가 없거나, 좌석 시트 행 개수가 1개 이하(헤더만 있거나 빈 시트)이면 즉시 자동 생성
+  if (!seatSheet || !devSheet || !roomSheet || seatSheet.getLastRow() <= 1) {
     초기데이터생성();
   }
 }
