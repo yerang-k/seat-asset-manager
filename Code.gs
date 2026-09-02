@@ -263,7 +263,9 @@ function analyzeLabelImage(base64Data) {
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
     const rawBase64 = mimeMatch ? mimeMatch[2] : base64Data;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // 최신 고속 비전 모델 Gemini 2.0 Flash 우선 호출
+    let modelName = 'gemini-2.0-flash';
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     const promptText = `당신은 대한민국 공립학교의 전산장비(컴퓨터 본체, 모니터, 노트북) 라벨 및 명판 전문 판독관입니다.
 첨부된 사진은 다음 두 가지 형태 중 하나입니다:
@@ -313,8 +315,15 @@ function analyzeLabelImage(base64Data) {
       muteHttpExceptions: true
     };
 
-    const res = UrlFetchApp.fetch(url, options);
-    const code = res.getResponseCode();
+    let res = UrlFetchApp.fetch(url, options);
+    let code = res.getResponseCode();
+    // 만약 2.0 모델 지원 불가 시 1.5 Flash로 자동 폴백
+    if (code !== 200 && code === 404) {
+      modelName = 'gemini-1.5-flash';
+      url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      res = UrlFetchApp.fetch(url, options);
+      code = res.getResponseCode();
+    }
     if (code !== 200) {
       return { success: false, error: `Gemini API 오류 (${code}): ` + res.getContentText() };
     }

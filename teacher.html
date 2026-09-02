@@ -3707,7 +3707,7 @@ function renderActiveRoomView() {
         const rawBase64 = base64Data.split(',')[1];
         const prompt = "Analyze this school computer/monitor inventory label sticker. Extract manufacturer (제조사), model_name (모델명), acquired_date (취득일자 또는 제조연월: YYYY-MM-DD or YYYY.MM), asset_number (물품관리번호), notes (특이사항). Output ONLY JSON with keys: manufacturer, model_name, acquired_date, asset_number, notes.";
         
-        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
