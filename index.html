@@ -1766,6 +1766,27 @@
     // Room Canvas Dimensions (width, min-height)
     const ROOM_CANVAS_DIMS = {"gyomu_center": {"w": 1400, "h": 620}, "grade3": {"w": 1000, "h": 520}, "grade2": {"w": 1000, "h": 520}, "grade1": {"w": 1000, "h": 520}, "safety": {"w": 900, "h": 520}, "edu_info": {"w": 720, "h": 420}, "support": {"w": 580, "h": 440}, "library": {"w": 580, "h": 360}, "counsel_health_meal": {"w": 1060, "h": 480}, "admin": {"w": 1100, "h": 540}, "special": {"w": 1180, "h": 560}};
 
+    // Safe Storage Wrappers (prevents iframe SecurityError in Google Apps Script web app)
+    function safeGetStorage(key, defaultVal = '') {
+      try {
+        if (typeof localStorage === 'undefined') return defaultVal;
+        const val = localStorage.getItem(key);
+        return val !== null ? val : defaultVal;
+      } catch (e) {
+        return defaultVal;
+      }
+    }
+    function safeSetStorage(key, val) {
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(key, val);
+      } catch (e) {}
+    }
+    function safeRemoveStorage(key) {
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
+      } catch (e) {}
+    }
+
     let appState = {
       rooms: [],
       seats: [],
@@ -1774,9 +1795,9 @@
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
-      geminiKey: localStorage.getItem('SOLNAE_GEMINI_KEY') || '',
-      canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0,
-      layoutLocked: localStorage.getItem('SOLNAE_LAYOUT_LOCKED') === 'true'
+      geminiKey: safeGetStorage('SOLNAE_GEMINI_KEY', ''),
+      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '1.0')) || 1.0,
+      layoutLocked: safeGetStorage('SOLNAE_LAYOUT_LOCKED') === 'true'
     };
 
     function initDefaultSeats() {
@@ -1804,7 +1825,7 @@
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    function bootstrapApp() {
       appState.isGas = typeof google !== 'undefined' && google.script && google.script.run;
       const modeText = document.getElementById('modeStatusText');
       if (modeText) {
@@ -1822,7 +1843,14 @@
 
       // 2. 서버에서 최신 데이터 비동기 동기화
       loadData();
-    });
+    }
+
+    // Google Apps Script iframe 환경에서 이미 DOM 로드가 완료된 경우 즉시 실행
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', bootstrapApp);
+    } else {
+      bootstrapApp();
+    }
 
     function loadData() {
       if (appState.isGas) {

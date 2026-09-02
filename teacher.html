@@ -1764,6 +1764,27 @@
     // Room Canvas Dimensions (width, min-height)
     const ROOM_CANVAS_DIMS = {"gyomu_center": {"w": 1400, "h": 620}, "grade3": {"w": 1000, "h": 520}, "grade2": {"w": 1000, "h": 520}, "grade1": {"w": 1000, "h": 520}, "safety": {"w": 900, "h": 520}, "edu_info": {"w": 720, "h": 420}, "support": {"w": 580, "h": 440}, "library": {"w": 580, "h": 360}, "counsel_health_meal": {"w": 1060, "h": 480}, "admin": {"w": 1100, "h": 540}, "special": {"w": 1180, "h": 560}};
 
+    // Safe Storage Wrappers (prevents iframe SecurityError in Google Apps Script web app)
+    function safeGetStorage(key, defaultVal = '') {
+      try {
+        if (typeof localStorage === 'undefined') return defaultVal;
+        const val = localStorage.getItem(key);
+        return val !== null ? val : defaultVal;
+      } catch (e) {
+        return defaultVal;
+      }
+    }
+    function safeSetStorage(key, val) {
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(key, val);
+      } catch (e) {}
+    }
+    function safeRemoveStorage(key) {
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
+      } catch (e) {}
+    }
+
     let appState = {
       rooms: [],
       seats: [],
@@ -1772,8 +1793,8 @@
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
-      geminiKey: localStorage.getItem('SOLNAE_GEMINI_KEY') || '',
-      canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0
+      geminiKey: safeGetStorage('SOLNAE_GEMINI_KEY', ''),
+      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '1.0')) || 1.0
     };
 
     function initDefaultSeats() {
@@ -1801,7 +1822,7 @@
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    function bootstrapApp() {
       appState.isGas = typeof google !== 'undefined' && google.script && google.script.run;
       const modeText = document.getElementById('modeStatusText');
       if (modeText) {
@@ -1819,7 +1840,14 @@
 
       // 2. 서버에서 최신 데이터 비동기 동기화
       loadData();
-    });
+    }
+
+    // Google Apps Script iframe 환경에서 이미 DOM 로드가 완료된 경우 즉시 실행
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', bootstrapApp);
+    } else {
+      bootstrapApp();
+    }
 
     function loadData() {
       if (appState.isGas) {
@@ -1873,34 +1901,24 @@
           })
           .getInitialData();
       } else {
-        let savedSeats = localStorage.getItem('SOLNAE_SEATS');
-        let savedDevs = localStorage.getItem('SOLNAE_DEVICES');
+        let savedSeats = safeGetStorage('SOLNAE_SEATS');
+        let savedDevs = safeGetStorage('SOLNAE_DEVICES');
 
-        if (!savedSeats) {
-          let initSeats = [];
-          PRESET_ROOMS.forEach(r => {
-            r.seats.forEach(s => {
-              const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 140, h: 70 };
-              initSeats.push({
-                seat_id: s.id,
-                room_id: r.id,
-                room_name: r.name + (r.floor ? ` (${r.floor})` : ''),
-                seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
-                current_user: s.user || '',
-                extension: s.ext || '',
-                pos_x: defPos.x,
-                pos_y: defPos.y,
-                width: defPos.w,
-                height: defPos.h
-              });
-            });
-          });
-          appState.seats = initSeats;
-          appState.devices = SAMPLE_DEVICES;
+        let parsedSeats = null;
+        try {
+          if (savedSeats) parsedSeats = JSON.parse(savedSeats);
+        } catch (e) {}
+
+        if (!parsedSeats || !Array.isArray(parsedSeats) || parsedSeats.length === 0) {
+          initDefaultSeats();
           saveLocalData();
         } else {
-          appState.seats = JSON.parse(savedSeats);
-          appState.devices = (savedDevs && JSON.parse(savedDevs).length > 0) ? JSON.parse(savedDevs) : SAMPLE_DEVICES;
+          appState.seats = parsedSeats;
+          try {
+            appState.devices = (savedDevs && JSON.parse(savedDevs).length > 0) ? JSON.parse(savedDevs) : SAMPLE_DEVICES;
+          } catch(e) {
+            appState.devices = SAMPLE_DEVICES;
+          }
           // Ensure GYOMU_01 is 교감
           const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
           if (g1 && g1.seat_label !== '교감') {
@@ -1950,8 +1968,8 @@
     }
 
     function saveLocalData() {
-      localStorage.setItem('SOLNAE_SEATS', JSON.stringify(appState.seats));
-      localStorage.setItem('SOLNAE_DEVICES', JSON.stringify(appState.devices));
+      safeSetStorage('SOLNAE_SEATS', JSON.stringify(appState.seats));
+      safeSetStorage('SOLNAE_DEVICES', JSON.stringify(appState.devices));
     }
 
     function refreshData() {
@@ -1965,19 +1983,21 @@
       const reassignPanel = document.getElementById('reassignPanel');
       const roomNavBar = document.getElementById('roomNavBar');
 
-      if (document.getElementById('btnModeRoom')) document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
-      document.getElementById('btnModeReassign').classList.toggle('btn-active', mode === 'reassign');
+      const btnRoom = document.getElementById('btnModeRoom');
+      if (btnRoom) btnRoom.classList.toggle('btn-active', mode === 'room');
+      const btnReassign = document.getElementById('btnModeReassign');
+      if (btnReassign) btnReassign.classList.toggle('btn-active', mode === 'reassign');
 
-      singleContainer.style.display = 'none';
-      reassignPanel.style.display = 'none';
+      if (singleContainer) singleContainer.style.display = 'none';
+      if (reassignPanel) reassignPanel.style.display = 'none';
 
       if (mode === 'room') {
-        singleContainer.style.display = 'block';
-        roomNavBar.style.display = 'block';
+        if (singleContainer) singleContainer.style.display = 'block';
+        if (roomNavBar) roomNavBar.style.display = 'block';
         renderActiveRoomView();
       } else if (mode === 'reassign') {
-        reassignPanel.style.display = 'block';
-        roomNavBar.style.display = 'none';
+        if (reassignPanel) reassignPanel.style.display = 'block';
+        if (roomNavBar) roomNavBar.style.display = 'none';
         renderReassignTable();
       }
     }
@@ -2018,17 +2038,21 @@
         }
       }
 
-      const canvasWrap = document.querySelector('.canvas-viewport-wrap');
-      const canvasEl = document.querySelector('.seat-canvas');
+      const canvasWrap = document.querySelector('.room-canvas-wrapper') || document.querySelector('.canvas-viewport-wrap');
+      const canvasEl = document.getElementById('activeRoomCanvas') || document.querySelector('.seat-canvas');
       if (canvasWrap && canvasEl) {
-        if (mobileFitMode && screenW < 950) {
+        const naturalW = parseInt(canvasEl.style.width) || 1200;
+        if (mobileFitMode && screenW < naturalW + 30) {
           const availableW = Math.max(280, canvasWrap.clientWidth || (screenW - 30));
-          const naturalW = 920;
-          const scale = Math.min(1, Math.max(0.3, availableW / naturalW));
-          canvasEl.style.zoom = scale;
+          const scale = Math.min(1, Math.max(0.25, availableW / naturalW));
+          canvasEl.style.transform = `scale(${scale})`;
+          canvasEl.style.transformOrigin = 'top left';
+          const naturalH = parseInt(canvasEl.style.height) || 600;
+          canvasWrap.style.minHeight = (naturalH * scale + 20) + 'px';
           canvasWrap.style.overflowX = 'hidden';
         } else {
-          canvasEl.style.zoom = 1;
+          canvasEl.style.transform = 'none';
+          canvasWrap.style.minHeight = '';
           canvasWrap.style.overflowX = 'auto';
         }
       }
@@ -3389,6 +3413,7 @@ function renderActiveRoomView() {
 
       updateTabBadges();
       setCanvasZoom(appState.canvasZoom || 1.0);
+      setTimeout(applyMobileScaling, 50);
     }
 
     function updateTabBadges() {
@@ -3931,14 +3956,14 @@ function renderActiveRoomView() {
     function saveSettings() {
       const key = document.getElementById('cfgGeminiKey').value.trim();
       appState.geminiKey = key;
-      localStorage.setItem('SOLNAE_GEMINI_KEY', key);
+      safeSetStorage('SOLNAE_GEMINI_KEY', key);
       closeSettingsModal();
       showToast("설정이 저장되었습니다.");
     }
     function resetToPresetData() {
       if (!confirm("전체 좌석 및 기기 데이터를 전주솔내고 2026 초기 상태로 초기화하시겠습니까?")) return;
-      localStorage.removeItem('SOLNAE_SEATS');
-      localStorage.removeItem('SOLNAE_DEVICES');
+      safeRemoveStorage('SOLNAE_SEATS');
+      safeRemoveStorage('SOLNAE_DEVICES');
       loadData();
       closeSettingsModal();
       showToast("데이터가 초기 상태로 리셋되었습니다.");
