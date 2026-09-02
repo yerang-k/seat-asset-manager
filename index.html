@@ -569,11 +569,61 @@
       box-sizing: border-box;
     }
     .landmark-door {
-      background: #d8ebd4;
-      border: 1.5px solid var(--border-dark);
-      color: #000;
-      font-size: 0.8rem;
-      letter-spacing: 1px;
+      background: #e2f0d9 !important;
+      border: 1.8px solid #2d6a4f !important;
+      color: #1b4332 !important;
+      font-size: 0.82rem !important;
+      position: absolute !important;
+      bottom: 16px !important;
+      z-index: 5 !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+      border-radius: 6px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.5px;
+    }
+
+    .corridor-boundary-line {
+      position: absolute;
+      left: 25px;
+      right: 25px;
+      bottom: 68px;
+      border-top: 1.8px dashed #b0bec5;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .corridor-boundary-tag {
+      position: absolute;
+      right: 15px;
+      top: -11px;
+      background: #ffffff;
+      padding: 1px 8px;
+      font-size: 0.72rem;
+      color: #78909c;
+      font-weight: 800;
+      border-radius: 4px;
+      border: 1px solid #cfd8dc;
+    }
+
+    /* Smart Snap Guidelines (자석 정렬 안내선) */
+    .snap-guide-line {
+      position: absolute;
+      pointer-events: none;
+      z-index: 45;
+      display: none;
+    }
+    .snap-guide-v {
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #1976d2;
+      box-shadow: 0 0 6px rgba(25, 118, 210, 0.75);
+    }
+    .snap-guide-h {
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #1976d2;
+      box-shadow: 0 0 6px rgba(25, 118, 210, 0.75);
     }
 
     /* Modal Styling */
@@ -1618,6 +1668,46 @@
       if (navigator.vibrate) navigator.vibrate(40);
     }
 
+
+    // Calculate Smart Column & Row Magnetic Snap
+    function getSmartSnappedPosition(curLeft, curTop, curW, curH, currentSeatId) {
+      const rId = appState.activeRoomId;
+      const otherSeats = appState.seats.filter(s => {
+        const belongs = (rId === 'gyomu_center') ? (s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01') : (s.room_id === rId);
+        return belongs && s.seat_id !== currentSeatId;
+      });
+
+      // Default to 20px grid snap
+      let snappedX = Math.round(curLeft / 20) * 20;
+      let snappedY = Math.round(curTop / 20) * 20;
+      let guideX = null;
+      let guideY = null;
+
+      // 1. Column magnet snap (check left edges of all other desks in room)
+      let minDiffX = 26; // generous 26px magnetic threshold
+      for (const s of otherSeats) {
+        const diffLeft = Math.abs(curLeft - s.pos_x);
+        if (diffLeft < minDiffX) {
+          minDiffX = diffLeft;
+          snappedX = s.pos_x; // Lock precisely to the other desk's X column!
+          guideX = s.pos_x;
+        }
+      }
+
+      // 2. Row magnet snap (check top edges of all other desks in room)
+      let minDiffY = 22; // generous 22px magnetic threshold
+      for (const s of otherSeats) {
+        const diffTop = Math.abs(curTop - s.pos_y);
+        if (diffTop < minDiffY) {
+          minDiffY = diffTop;
+          snappedY = s.pos_y; // Lock precisely to the other desk's Y row!
+          guideY = s.pos_y;
+        }
+      }
+
+      return { snappedX, snappedY, guideX, guideY };
+    }
+
     function onWindowPointerMove(e) {
       if (!dragState.targetEl) return;
 
@@ -1650,15 +1740,38 @@
         let newX = dragState.origLeft + dx;
         let newY = dragState.origTop + dy;
 
-        // Boundary constraints
+        // Boundary constraints: strictly prevent dragging into corridor/door area
+        const maxAllowedY = canvasH - elH - 75; // Leave at least 75px for corridor & doors!
         newX = Math.max(10, Math.min(canvasW - elW - 10, newX));
-        newY = Math.max(10, Math.min(canvasH - elH - 10, newY));
+        newY = Math.max(10, Math.min(maxAllowedY, newY));
 
         dragState.targetEl.style.left = newX + 'px';
         dragState.targetEl.style.top = newY + 'px';
 
         // DETECT HOVER OVER OTHER SEATS FOR MAGNETIC SWAP
         detectSwapTarget(newX, newY, elW, elH);
+
+        // SHOW SMART ALIGNMENT GUIDELINES WHILE DRAGGING
+        const snap = getSmartSnappedPosition(newX, newY, elW, elH, dragState.seatId);
+        const guideV = document.getElementById('snapGuideV');
+        const guideH = document.getElementById('snapGuideH');
+
+        if (guideV) {
+          if (snap.guideX !== null) {
+            guideV.style.left = snap.guideX + 'px';
+            guideV.style.display = 'block';
+          } else {
+            guideV.style.display = 'none';
+          }
+        }
+        if (guideH) {
+          if (snap.guideY !== null) {
+            guideH.style.top = snap.guideY + 'px';
+            guideH.style.display = 'block';
+          } else {
+            guideH.style.display = 'none';
+          }
+        }
       }
     }
 
@@ -1733,6 +1846,12 @@
       window.removeEventListener('pointerup', onWindowPointerUp);
       window.removeEventListener('pointercancel', onWindowPointerUp);
 
+      // Always hide smart guidelines on release
+      const guideV = document.getElementById('snapGuideV');
+      const guideH = document.getElementById('snapGuideH');
+      if (guideV) guideV.style.display = 'none';
+      if (guideH) guideH.style.display = 'none';
+
       const el = dragState.targetEl;
       if (!el) return;
 
@@ -1795,36 +1914,39 @@
           }
         } else if (seatA) {
           // ==========================================
-          // CASE 2: SNAP TO GRID & STAY AT NEW SPOT!
-          // (맞교환이 아니더라도 원하는 빈자리에 좌석을 자유롭게 배치)
+          // CASE 2: SMART COLUMN & ROW MAGNET SNAP!
+          // (기존 책상 열/행에 자석처럼 100% 반듯하게 정렬)
           // ==========================================
           const curLeft = parseInt(el.style.left) || dragState.origLeft;
           const curTop = parseInt(el.style.top) || dragState.origTop;
+          const elW = el.offsetWidth;
+          const elH = el.offsetHeight;
 
-          // 10px grid snap
-          const snappedX = Math.round(curLeft / 10) * 10;
-          const snappedY = Math.round(curTop / 10) * 10;
+          // Compute smart snap (locks to same column X and same row Y)
+          const snap = getSmartSnappedPosition(curLeft, curTop, elW, elH, seatA.seat_id);
+          const finalX = snap.snappedX;
+          const finalY = snap.snappedY;
 
-          el.style.left = snappedX + 'px';
-          el.style.top = snappedY + 'px';
+          el.style.left = finalX + 'px';
+          el.style.top = finalY + 'px';
 
-          seatA.pos_x = snappedX;
-          seatA.pos_y = snappedY;
+          seatA.pos_x = finalX;
+          seatA.pos_y = finalY;
 
           if (appState.isGas) {
-            google.script.run.updateSeatPosition(seatA.seat_id, snappedX, snappedY);
+            google.script.run.updateSeatPosition(seatA.seat_id, finalX, finalY);
           } else {
             saveLocalData();
           }
 
-          // Expand canvas height if needed
+          // Dynamically expand canvas height if seat is near the bottom
           const canvas = document.getElementById('activeRoomCanvas');
-          if (canvas && (snappedY + el.offsetHeight + 40 > canvas.clientHeight)) {
-            canvas.style.height = (snappedY + el.offsetHeight + 60) + 'px';
+          if (canvas && (finalY + elH + 110 > canvas.clientHeight)) {
+            canvas.style.height = (finalY + elH + 120) + 'px';
           }
 
           const displayName = seatA.current_user || seatA.seat_label;
-          showToast(`좌석 [${displayName}]이(가) 새 위치에 배치되었습니다.`);
+          showToast(`좌석 [${displayName}]이(가) 그리드에 반듯하게 정렬되었습니다.`);
         }
       } else {
         // CASE 3: Quick tap/click (open modal)
@@ -2260,34 +2382,52 @@
 
       const dims = ROOM_CANVAS_DIMS[rId] || { w: 900, h: 480 };
       
-      let maxSeatY = 0;
+      // Calculate lowest point of any seat to ensure doors are NEVER overlapped
+      let maxSeatBottom = 0;
       roomSeats.forEach(s => {
-        if (s.pos_y && s.pos_y > maxSeatY) maxSeatY = s.pos_y;
+        const bottom = (s.pos_y || 0) + (s.height || 90);
+        if (bottom > maxSeatBottom) maxSeatBottom = bottom;
       });
-      const effectiveH = Math.max(dims.h, maxSeatY + 110);
+      // Always guarantee at least 120px of clear space below the lowest seat for corridor and doors
+      const effectiveH = Math.max(dims.h, maxSeatBottom + 120);
 
-      // Landmarks HTML - GYOMU_CENTER: Removed 소회의실 연접 completely!
-      let landmarksHtml = '';
+      // Landmarks HTML: Doors are ALWAYS anchored at bottom: 16px of the canvas!
+      let landmarksHtml = `
+        <div class="corridor-boundary-line">
+          <span class="corridor-boundary-tag">◀ 교무실 복도 및 출입구 구역 (좌석 침범 방지) ▶</span>
+        </div>
+      `;
+
       if (rId === 'gyomu_center') {
-        landmarksHtml = `
-          <div class="room-landmark landmark-door" style="left: 170px; top: 450px; width: 130px; height: 32px;">🚪 출입구 1 (좌측)</div>
-          <div class="room-landmark landmark-door" style="left: 550px; top: 450px; width: 130px; height: 32px;">🚪 출입구 2 (중앙)</div>
-          <div class="room-landmark landmark-door" style="left: 840px; top: 450px; width: 130px; height: 32px;">🚪 출입구 3 (우측)</div>
+        landmarksHtml += `
+          <div class="room-landmark landmark-door" style="left: 190px; bottom: 16px; width: 140px; height: 36px;">🚪 출입구 1 (좌측)</div>
+          <div class="room-landmark landmark-door" style="left: 700px; bottom: 16px; width: 140px; height: 36px;">🚪 출입구 2 (중앙)</div>
+          <div class="room-landmark landmark-door" style="left: 1080px; bottom: 16px; width: 140px; height: 36px;">🚪 출입구 3 (우측)</div>
         `;
       } else if (rId === 'grade3' || rId === 'grade2' || rId === 'grade1') {
-        landmarksHtml = `
-          <div class="room-landmark landmark-door" style="left: 660px; top: 340px; width: 130px; height: 32px;">🚪 교무실 출입구</div>
+        landmarksHtml += `
+          <div class="room-landmark landmark-door" style="left: 665px; bottom: 16px; width: 140px; height: 36px;">🚪 교무실 출입구</div>
         `;
       } else if (rId === 'safety') {
-        landmarksHtml = `
-          <div class="room-landmark landmark-door" style="left: 50px; top: 340px; width: 120px; height: 32px;">🚪 출입구</div>
+        landmarksHtml += `
+          <div class="room-landmark landmark-door" style="left: 45px; bottom: 16px; width: 130px; height: 36px;">🚪 출입구</div>
         `;
       } else if (rId === 'admin') {
-        landmarksHtml = `
-          <div class="room-landmark landmark-door" style="left: 300px; top: 330px; width: 130px; height: 32px;">🚪 출입구 1 (중앙)</div>
-          <div class="room-landmark landmark-door" style="left: 630px; top: 330px; width: 130px; height: 32px;">🚪 출입구 2 (우측)</div>
+        landmarksHtml += `
+          <div class="room-landmark landmark-door" style="left: 240px; bottom: 16px; width: 140px; height: 36px;">🚪 출입구 1 (중앙)</div>
+          <div class="room-landmark landmark-door" style="left: 700px; bottom: 16px; width: 140px; height: 36px;">🚪 출입구 2 (우측)</div>
+        `;
+      } else {
+        landmarksHtml += `
+          <div class="room-landmark landmark-door" style="right: 50px; bottom: 16px; width: 130px; height: 36px;">🚪 출입구</div>
         `;
       }
+
+      // Add smart snap guideline elements
+      landmarksHtml += `
+        <div id="snapGuideV" class="snap-guide-line snap-guide-v"></div>
+        <div id="snapGuideH" class="snap-guide-line snap-guide-h"></div>
+      `;
 
       container.innerHTML = `
         <div class="single-room-card">
