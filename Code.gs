@@ -271,7 +271,9 @@ function analyzeLabelImage(base64Data) {
 1. [학교 K-에듀파인 / RFID 물품관리 라벨] (흰색 바탕 격자무늬 스티커)
    - "규격명" 항목을 세심히 분석하십시오. (예: "데스크톱컴퓨터, 엠컴, T273-3210, Intel Core i7 12700" -> 제조사: "엠컴", 모델명: "T273-3210")
    - "취득일자" 항목에서 연월일만 추출하십시오. 괄호 안 내용(예: 괄호 안 연수)은 제거하십시오. (예: "2023-07-14(5년)" -> "2023-07-14")
-   - "비고" 또는 "분류번호" 항목에서 고유 관리번호(예: "KKR-GAP-0011248986" 또는 "43211507-24459634")를 찾아 물품관리번호(asset_number)로 추출하십시오.
+   - "비고" 란을 정밀하게 분석하여 다음 두 가지 번호를 각각 분리 추출하십시오:
+     * "KKR-GAP-..." 번호 또는 조달청 바코드 식별번호 -> 물품관리번호 (RFID) (asset_number)
+     * "M000018563" 등 "M"으로 시작하는 8~10자리 학교 자체 물품대장번호 -> 자체 물품관리대장번호 (school_asset_number)
    - CPU 사양(Intel Core i7...), 취득단가 등은 특이사항(notes)에 기재하십시오.
 
 2. [제조사 KC인증 / 제품 규격 명판 스티커] (검은색 또는 은색 명판)
@@ -286,7 +288,8 @@ function analyzeLabelImage(base64Data) {
   "manufacturer": "제조사명 (예: 엠텍정보, 엠컴, 삼성전자, LG전자, 삼보컴퓨터 등)",
   "model_name": "모델명 (예: T273-3210, DM500SDA 등)",
   "acquired_date": "취득일자 또는 제조연월 (예: 2023-07-14 또는 2023.05)",
-  "asset_number": "물품관리번호 (학교 라벨의 번호, 없으면 빈 문자열)",
+  "asset_number": "물품관리번호 (RFID / KKR-GAP-... 번호, 없으면 빈 문자열)",
+  "school_asset_number": "자체 물품관리대장번호 (M으로 시작하는 학교 자체 번호, 없으면 빈 문자열)",
   "notes": "특이사항 (CPU 사양, 취득단가, 시리얼번호 등)"
 }
 식별할 수 없는 필드는 빈 문자열("")로 두십시오.`;
@@ -417,9 +420,9 @@ const ROOM_TAB_DEFS = [
 
 const VIEW_HEADERS = [
   '교무실', '좌석 ID', '좌석 명칭', '선생님 성명', '내선번호', '조사상태',
-  '본체 제조사', '본체 모델명', '본체 취득일자', '본체 관리번호',
-  '모니터1 제조사', '모니터1 모델명', '모니터1 취득일자', '모니터1 관리번호',
-  '모니터2 제조사', '모니터2 모델명', '모니터2 취득일자', '모니터2 관리번호',
+  '본체 제조사', '본체 모델명', '본체 취득일자', '본체 관리번호(RFID)', '본체 자체대장번호',
+  '모니터1 제조사', '모니터1 모델명', '모니터1 취득일자', '모니터1 관리번호(RFID)', '모니터1 자체대장번호',
+  '모니터2 제조사', '모니터2 모델명', '모니터2 취득일자', '모니터2 관리번호(RFID)', '모니터2 자체대장번호',
   '특이사항', '라벨 사진', '최근 수정일시'
 ];
 
@@ -464,14 +467,17 @@ function buildSeatViewRow_(seat, devices) {
     pc ? (pc.model_name || '') : '',
     pc ? (pc.acquired_date || '') : '',
     pc ? (pc.asset_number || '') : '',
+    pc ? (pc.school_asset_number || '') : '',
     mon1 ? (mon1.manufacturer || '') : '',
     mon1 ? (mon1.model_name || '') : '',
     mon1 ? (mon1.acquired_date || '') : '',
     mon1 ? (mon1.asset_number || '') : '',
+    mon1 ? (mon1.school_asset_number || '') : '',
     mon2 ? (mon2.manufacturer || '') : '',
     mon2 ? (mon2.model_name || '') : '',
     mon2 ? (mon2.acquired_date || '') : '',
     mon2 ? (mon2.asset_number || '') : '',
+    mon2 ? (mon2.school_asset_number || '') : '',
     notesText,
     photoText,
     seat.updated_at || Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss')
@@ -684,7 +690,7 @@ function 초기데이터생성() {
   }
   const devHeaders = [
     'device_id', 'seat_id', 'device_type', 'manufacturer', 'model_name',
-    'acquired_date', 'asset_number', 'item_code', 'serial_number',
+    'acquired_date', 'asset_number', 'school_asset_number', 'item_code', 'serial_number',
     'photo_url', 'photo_id', 'notes', 'registered_at', 'updated_at'
   ];
 

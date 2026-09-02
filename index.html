@@ -1434,8 +1434,12 @@
               <input type="text" id="pc_acquired_date" placeholder="예: 2022-05-18 또는 2022.05">
             </div>
             <div class="form-group">
-              <label>물품관리번호</label>
-              <input type="text" id="pc_asset_number" placeholder="예: 2022-1234-567890">
+              <label>물품관리번호 (RFID)</label>
+              <input type="text" id="pc_asset_number" placeholder="예: KKR-GAP-0011248986">
+            </div>
+            <div class="form-group">
+              <label>자체 물품관리대장번호</label>
+              <input type="text" id="pc_school_asset_number" placeholder="예: M000018563">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
@@ -1484,8 +1488,12 @@
               <input type="text" id="mon1_acquired_date" placeholder="예: 2021-11-20 또는 2021.11">
             </div>
             <div class="form-group">
-              <label>물품관리번호</label>
-              <input type="text" id="mon1_asset_number" placeholder="예: 2021-9876-543210">
+              <label>물품관리번호 (RFID)</label>
+              <input type="text" id="mon1_asset_number" placeholder="예: KKR-GAP-...">
+            </div>
+            <div class="form-group">
+              <label>자체 물품관리대장번호</label>
+              <input type="text" id="mon1_school_asset_number" placeholder="예: M000018564">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
@@ -1534,8 +1542,12 @@
               <input type="text" id="mon2_acquired_date" placeholder="예: 2020-08-15 또는 2020.08">
             </div>
             <div class="form-group">
-              <label>물품관리번호</label>
-              <input type="text" id="mon2_asset_number" placeholder="예: 2019-1122-334455">
+              <label>물품관리번호 (RFID)</label>
+              <input type="text" id="mon2_asset_number" placeholder="예: KKR-GAP-...">
+            </div>
+            <div class="form-group">
+              <label>자체 물품관리대장번호</label>
+              <input type="text" id="mon2_school_asset_number" placeholder="예: M000018565">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
@@ -3336,6 +3348,7 @@ function renderActiveRoomView() {
         document.getElementById('pc_model_name').value = pc.model_name || '';
         document.getElementById('pc_acquired_date').value = pc.acquired_date || '';
         document.getElementById('pc_asset_number').value = pc.asset_number || '';
+        if (document.getElementById('pc_school_asset_number')) document.getElementById('pc_school_asset_number').value = pc.school_asset_number || '';
         document.getElementById('pc_notes').value = pc.notes || '';
         document.getElementById('badge_pc').className = 'device-pill pill-pc';
         document.getElementById('badge_pc').textContent = '등록완료';
@@ -3354,6 +3367,7 @@ function renderActiveRoomView() {
         document.getElementById('mon1_model_name').value = mon1.model_name || '';
         document.getElementById('mon1_acquired_date').value = mon1.acquired_date || '';
         document.getElementById('mon1_asset_number').value = mon1.asset_number || '';
+        if (document.getElementById('mon1_school_asset_number')) document.getElementById('mon1_school_asset_number').value = mon1.school_asset_number || '';
         document.getElementById('mon1_notes').value = mon1.notes || '';
         document.getElementById('badge_monitor1').className = 'device-pill pill-monitor';
         document.getElementById('badge_monitor1').textContent = '등록완료';
@@ -3372,6 +3386,7 @@ function renderActiveRoomView() {
         document.getElementById('mon2_model_name').value = mon2.model_name || '';
         if (document.getElementById('mon2_acquired_date')) document.getElementById('mon2_acquired_date').value = mon2.acquired_date || '';
         document.getElementById('mon2_asset_number').value = mon2.asset_number || '';
+        if (document.getElementById('mon2_school_asset_number')) document.getElementById('mon2_school_asset_number').value = mon2.school_asset_number || '';
         if (document.getElementById('mon2_notes')) document.getElementById('mon2_notes').value = mon2.notes || '';
         document.getElementById('badge_monitor2').className = 'device-pill pill-monitor';
         document.getElementById('badge_monitor2').textContent = '등록완료';
@@ -3396,7 +3411,7 @@ function renderActiveRoomView() {
 
     function resetDeviceForms() {
       ['pc', 'mon1', 'mon2'].forEach(prefix => {
-        ['device_id', 'manufacturer', 'model_name', 'acquired_date', 'asset_number', 'item_code', 'serial_number', 'notes'].forEach(f => {
+        ['device_id', 'manufacturer', 'model_name', 'acquired_date', 'asset_number', 'school_asset_number', 'item_code', 'serial_number', 'notes'].forEach(f => {
           const el = document.getElementById(`${prefix}_${f}`);
           if (el) el.value = '';
         });
@@ -3452,6 +3467,7 @@ function renderActiveRoomView() {
       const model = document.getElementById(`${prefix}_model_name`).value.trim();
       const date = document.getElementById(`${prefix}_acquired_date`) ? document.getElementById(`${prefix}_acquired_date`).value.trim() : '';
       const asset = document.getElementById(`${prefix}_asset_number`).value.trim();
+      const schoolAsset = document.getElementById(`${prefix}_school_asset_number`) ? document.getElementById(`${prefix}_school_asset_number`).value.trim() : '';
       const itemCode = document.getElementById(`${prefix}_item_code`) ? document.getElementById(`${prefix}_item_code`).value.trim() : '';
       const sn = document.getElementById(`${prefix}_serial_number`) ? document.getElementById(`${prefix}_serial_number`).value.trim() : '';
       const notes = document.getElementById(`${prefix}_notes`) ? document.getElementById(`${prefix}_notes`).value.trim() : '';
@@ -3472,6 +3488,7 @@ function renderActiveRoomView() {
         model_name: model,
         acquired_date: date,
         asset_number: asset,
+        school_asset_number: schoolAsset,
         item_code: itemCode,
         serial_number: sn,
         notes: notes,
@@ -3660,6 +3677,7 @@ function renderActiveRoomView() {
         { key: 'model_name', id: `${prefix}_model_name` },
         { key: 'acquired_date', id: `${prefix}_acquired_date` },
         { key: 'asset_number', id: `${prefix}_asset_number` },
+        { key: 'school_asset_number', id: `${prefix}_school_asset_number` },
         { key: 'notes', id: `${prefix}_notes` }
       ];
 
