@@ -1,4 +1,3 @@
-<!-- ★★★ 전주솔내고 교사용 좌석배치 최종수정본 (2026-09-02 적용) ★★★ -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -809,15 +808,20 @@
       color: #fff;
       padding: 14px 20px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 6px 10px;
     }
     .modal-header h2 {
       font-size: 1.15rem;
       font-weight: 700;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
+      word-break: keep-all;
+      min-width: 0;
     }
     .modal-close {
       background: transparent;
@@ -843,7 +847,7 @@
       border-radius: 8px;
       padding: 12px 16px;
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr; /* 교사용 화면은 모바일 위주라 항상 세로 1열 */
       gap: 12px;
     }
     .meta-group label {
@@ -873,8 +877,10 @@
     }
     .device-card-header {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
       margin-bottom: 12px;
       padding-bottom: 8px;
       border-bottom: 1px solid #eee;
@@ -883,8 +889,11 @@
       font-size: 1rem;
       font-weight: 800;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 6px;
+      word-break: keep-all;
+      min-width: 0;
     }
 
     .camera-scan-btn {
@@ -900,6 +909,8 @@
       align-items: center;
       gap: 6px;
       transition: all 0.15s;
+      word-break: keep-all;
+      white-space: nowrap;
     }
     .camera-scan-btn:hover {
       background: #c8e6c9;
@@ -907,7 +918,7 @@
 
     .device-form-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr; /* 교사용 화면은 모바일 위주라 항상 세로 1열 */
       gap: 10px;
     }
     .form-group {
@@ -916,7 +927,7 @@
       gap: 3px;
     }
     .form-group.full {
-      grid-column: span 2;
+      grid-column: span 1;
     }
     .form-group label {
       font-size: 0.78rem;
@@ -1037,91 +1048,6 @@
       .search-box { max-width: 100%; }
     }
   
-    /* Mobile Viewport Scaler */
-    .mobile-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #ffffff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .btn-mobile-toggle {
-      background: #1e3a8a;
-      color: #fff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.2s;
-    }
-    .btn-mobile-toggle:hover { background: #1e40af; }
-
-    .mobile-scale-viewport {
-      width: 100%;
-      position: relative;
-      transition: height 0.2s ease;
-    }
-    .auto-scaler-content {
-      width: 1060px;
-      transform-origin: top left;
-      transition: transform 0.2s ease;
-    }
-    .canvas-viewport-wrap {
-      width: 100%;
-      position: relative;
-      overflow-x: auto;
-      transition: height 0.2s ease;
-    }
-    .canvas-scaler-content {
-      transform-origin: top left;
-      transition: transform 0.2s ease;
-    }
-
-    /* Remove gray line on cards */
-    .bp-seat-cell, .seat-cell {
-      cursor: pointer !important;
-      touch-action: manipulation;
-    }
-    .bp-seat-cell:active, .seat-cell:active {
-      transform: scale(0.96) !important;
-      filter: brightness(0.93);
-    }
-
-    @media (max-width: 680px) {
-      .modal-card {
-        width: 95vw !important;
-        max-width: 95vw !important;
-        margin: 10px auto !important;
-      }
-      .modal-body {
-        padding: 14px !important;
-        gap: 14px !important;
-      }
-      .form-grid, .device-form-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .form-group input {
-        font-size: 16px !important;
-        padding: 9px 11px !important;
-      }
-      .btn-ocr {
-        padding: 8px 14px !important;
-        font-size: 0.85rem !important;
-      }
-    }
-
-  
     /* Room Selector Dropdown Bar */
     .room-nav-bar {
       background: #ffffff;
@@ -1208,11 +1134,38 @@
       }
     }
 
-  
-    /* Disable and hide all resize handles in teacher view */
+      /* Elegant diagonal corner resize grip */
     .seat-resize-handle {
-      display: none !important;
-      pointer-events: none !important;
+      position: absolute;
+      right: 3px;
+      bottom: 3px;
+      width: 12px;
+      height: 12px;
+      cursor: se-resize;
+      background: linear-gradient(
+        135deg,
+        transparent 0%,
+        transparent 45%,
+        #94a3b8 45%,
+        #94a3b8 55%,
+        transparent 55%,
+        transparent 70%,
+        #94a3b8 70%,
+        #94a3b8 80%,
+        transparent 80%,
+        transparent 90%,
+        #94a3b8 90%,
+        #94a3b8 100%
+      );
+      opacity: 0.65;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10;
+      user-select: none;
+      touch-action: none;
+    }
+    .seat-cell:hover .seat-resize-handle {
+      opacity: 1;
+      transform: scale(1.15);
     }
 
   </style>
@@ -1223,38 +1176,28 @@
   <header class="app-topbar">
     <div class="app-title-wrap">
       <h1>전주솔내고등학교 교직원 좌석·기기 관리</h1>
-      <span class="app-badge" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;">교사용 모바일</span>
+      <span class="app-badge">교사용 모바일</span>
     </div>
     <div class="topbar-actions">
-      <button class="btn-mobile-toggle" id="btnMobileFitToggle" onclick="toggleMobileFit()">📱 화면 맞춤 (Fit)</button>
-      
-      <a href="index.html" class="btn btn-outline" style="text-decoration:none;">🔒 관리자 모드</a>
+      <button class="btn btn-light" onclick="refreshData()">🔄 새로고침</button>
     </div>
   </header>
-
-  
-  <!-- Mobile Guide & Fit Toggle Banner -->
-  <div class="main-container" style="padding-top: 10px; padding-bottom: 4px;">
-    <div class="mobile-toolbar">
-      <div style="font-size: 0.84rem; color: #334155; display: flex; align-items: center; gap: 6px;">
-        <span>📸 <strong>안내:</strong> 좌석을 터치하면 본인 컴퓨터·모니터 정보를 확인하고 스마트폰 카메라로 라벨을 촬영해 제출할 수 있습니다.</span>
-      </div>
-      <div>
-        
-      </div>
+  <div style="max-width: 1400px; margin: 0 auto; padding: 10px 20px 0;">
+    <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: #3730a3;">
+      📱 안내: 좌석을 터치하면 본인 컴퓨터·모니터 정보를 확인하고 등록할 수 있습니다.
     </div>
   </div>
 
   <!-- ROOM SELECTOR TAB BAR -->
     <!-- ROOM SELECTOR DROPDOWN BAR -->
   <nav class="room-nav-bar" id="roomNavBar">
-    <div class="room-dropdown-container" style="justify-content: center;">
-      <div class="room-dropdown-left" style="max-width: 600px; width: 100%;">
+    <div class="room-dropdown-container">
+      <div class="room-dropdown-left">
         <label for="roomSelectDropdown" class="room-dropdown-label">
           <span style="font-size: 1.15rem;">🏫</span> <strong>교무실 선택:</strong>
         </label>
         <select id="roomSelectDropdown" class="room-select-dropdown" onchange="selectRoom(this.value)">
-          <option value="gyomu_center" selected>🏫 교무센터 (22석)</option>
+          <option value="gyomu_center" selected>🏫 교무센터·교장실 (22석)</option>
           <option value="grade3">🏫 3학년 교무실 (11석)</option>
           <option value="grade2">🏫 2학년 교무실 (11석)</option>
           <option value="grade1">🏫 1학년 교무실 (11석)</option>
@@ -1267,12 +1210,31 @@
           <option value="special">🎨 특별실 (11석)</option>
         </select>
       </div>
+      <div class="room-dropdown-nav-btns">
+        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(-1)" title="이전 교무실">
+          ◀ 이전
+        </button>
+        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(1)" title="다음 교무실">
+          다음 ▶
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- SUB CONTROLS (Search only for teachers) -->
-  <div class="sub-controls-bar" style="justify-content: flex-end;">
-    <div class="search-box" style="max-width: 400px; width: 100%;">
+  <!-- SUB CONTROLS (Navigation arrows & Search) -->
+  <div class="sub-controls-bar">
+    <div class="room-nav-arrows">
+      <!-- Seat Zoom & Size Controls (좌석 크기 전체 조절 바) -->
+      <div class="zoom-controls-wrap">
+        <span style="font-size: 0.78rem; font-weight: 700; color: #333;">🔍 좌석 크기:</span>
+        <button class="btn-zoom" onclick="adjustZoom(-0.1)" title="좌석 축소">➖</button>
+        <input type="range" class="zoom-slider" id="zoomRangeInput" min="70" max="150" step="5" value="100" oninput="onZoomSliderChange(this.value)" title="좌석 배율 조절">
+        <button class="btn-zoom" onclick="adjustZoom(0.1)" title="좌석 확대">➕</button>
+        <span id="zoomPercentLabel" style="font-size: 0.78rem; font-weight: 800; color: var(--primary); min-width: 38px; text-align: center;">100%</span>
+        <button class="btn btn-light" style="padding: 2px 7px; font-size: 0.72rem; border: 1px solid #ccc;" onclick="resetZoom()">초기화</button>
+      </div>
+    </div>
+    <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="선생님 성명 / 좌석 / 모델명 검색" oninput="handleSearch(this.value)">
     </div>
@@ -1411,8 +1373,6 @@
       </div>
 
       <div class="modal-body">
-        
-        <!-- Seat User Info Bar -->
         <div class="seat-meta-box">
           <div class="meta-group">
             <label>👤 현재 사용자 (선생님 성명)</label>
@@ -1455,6 +1415,7 @@
 
           <div class="device-form-grid" id="form_pc">
             <input type="hidden" id="pc_device_id">
+            <input type="hidden" id="pc_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
               <input type="text" id="pc_manufacturer" placeholder="예: 삼성전자, LG전자, 삼보" list="mfgList">
@@ -1496,7 +1457,7 @@
         <div class="device-section-card">
           <div class="device-card-header">
             <div class="device-type-title">
-              🖥️ 모니터 1
+              <span style="white-space: nowrap;">🖥️ 모니터&nbsp;1</span>
               <span id="badge_monitor1" class="device-pill pill-missing">미등록</span>
             </div>
             <div>
@@ -1509,6 +1470,7 @@
 
           <div class="device-form-grid" id="form_monitor1">
             <input type="hidden" id="mon1_device_id">
+            <input type="hidden" id="mon1_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
               <input type="text" id="mon1_manufacturer" placeholder="예: LG전자, 삼성전자, 한성" list="mfgList">
@@ -1550,7 +1512,7 @@
         <div class="device-section-card" id="card_monitor2" style="background: #fafafa;">
           <div class="device-card-header">
             <div class="device-type-title">
-              🖥️ 보조 모니터 (모니터 2)
+              <span style="white-space: nowrap;">🖥️ 보조&nbsp;모니터&nbsp;(모니터&nbsp;2)</span>
               <span id="badge_monitor2" class="device-pill pill-missing">미등록</span>
             </div>
             <div>
@@ -1563,6 +1525,7 @@
 
           <div class="device-form-grid" id="form_monitor2">
             <input type="hidden" id="mon2_device_id">
+            <input type="hidden" id="mon2_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
               <input type="text" id="mon2_manufacturer" placeholder="예: LG전자, 삼성전자" list="mfgList">
@@ -1597,11 +1560,12 @@
 
       </div>
 
-      <div class="modal-footer" style="position: sticky; bottom: 0; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
-        <button class="btn btn-light" onclick="closeSeatModal()">닫기</button>
-        <button type="button" class="btn btn-primary" style="font-size: 0.96rem; font-weight: 800; padding: 10px 22px; background: #2e7d32;" onclick="submitTeacherSurveyFromModal()">
-          💾 기기 정보 제출 완료
-        </button>
+      <div class="modal-footer">
+        <div></div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.8rem; color: #666;">💡 라벨 사진을 찍으면 AI가 자동으로 필드를 채워줍니다.</span>
+          <button class="btn btn-light" onclick="closeSeatModal()">닫기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1633,6 +1597,36 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" onclick="saveSettings()">저장 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teacher Link Modal -->
+  <div class="modal-backdrop" id="teacherLinkModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2 style="display: flex; align-items: center; gap: 8px;">🔗 교사용 설문 조사 링크</h2>
+        <button class="modal-close" onclick="closeTeacherLinkModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: #475569; margin-bottom: 12px; line-height: 1.5;">
+          선생님들께 전달하실 전용 조사 링크입니다.<br>
+          스마트폰이나 PC에서 링크를 열면 <strong>별도 구글 로그인 없이 본인 좌석을 찾아 컴퓨터·모니터 사진을 바로 제출</strong>할 수 있습니다.
+        </p>
+
+        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+          <input type="text" id="teacherLinkInput" readonly style="flex: 1; padding: 10px 12px; font-size: 0.88rem; font-weight: 700; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; color: #1e293b;" onclick="this.select()">
+          <button class="btn btn-primary" onclick="copyTeacherLink()" style="font-weight: 800; white-space: nowrap; padding: 0 16px;">📋 복사</button>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #166534; line-height: 1.5;">
+          💡 <strong>메신저 공지 팁</strong><br>
+          쿨메신저 또는 학년/교무실 카톡방에 위 링크를 복사하여 전달해 주세요.
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-outline" onclick="openTeacherLinkInNewTab()" style="font-size: 0.85rem;">↗️ 교사용 화면 새 창 열기</button>
+        <button class="btn btn-light" onclick="closeTeacherLinkModal()">닫기</button>
       </div>
     </div>
   </div>
@@ -1697,7 +1691,7 @@
       'LIB_01': { name: '도서실', loc: '', icon: '📚' }
     };
 
-    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "", "user": "", "ext": ""}]}];
+    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "", "phone": "", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "", "phone": "", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "", "user": "", "ext": ""}]}];
     const DEFAULT_COORDS = {"PRIN_01": {"x": 1040, "y": 15, "w": 330, "h": 75}, "GYOMU_01": {"x": 25, "y": 105, "w": 145, "h": 90}, "GYOMU_02": {"x": 190, "y": 105, "w": 145, "h": 90}, "GYOMU_03": {"x": 355, "y": 105, "w": 145, "h": 90}, "GYOMU_04": {"x": 190, "y": 210, "w": 145, "h": 90}, "GYOMU_05": {"x": 355, "y": 210, "w": 145, "h": 90}, "GYOMU_06": {"x": 190, "y": 325, "w": 145, "h": 90}, "GYOMU_07": {"x": 355, "y": 325, "w": 145, "h": 90}, "GYOMU_08": {"x": 520, "y": 325, "w": 145, "h": 90}, "GYOMU_09": {"x": 190, "y": 430, "w": 145, "h": 90}, "GYOMU_10": {"x": 355, "y": 430, "w": 145, "h": 90}, "GYOMU_11": {"x": 520, "y": 430, "w": 145, "h": 90}, "GYOMU_12": {"x": 700, "y": 105, "w": 145, "h": 90}, "GYOMU_13": {"x": 865, "y": 105, "w": 145, "h": 90}, "GYOMU_14": {"x": 700, "y": 210, "w": 145, "h": 90}, "GYOMU_15": {"x": 865, "y": 210, "w": 145, "h": 90}, "GYOMU_16": {"x": 700, "y": 315, "w": 145, "h": 90}, "GYOMU_17": {"x": 865, "y": 315, "w": 145, "h": 90}, "GYOMU_18": {"x": 1040, "y": 105, "w": 145, "h": 90}, "GYOMU_19": {"x": 1205, "y": 105, "w": 145, "h": 90}, "GYOMU_20": {"x": 1040, "y": 210, "w": 145, "h": 90}, "GYOMU_21": {"x": 1205, "y": 210, "w": 145, "h": 90}, "G3_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G3_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G3_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G3_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G3_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G3_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G3_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G3_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G3_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G3_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G3_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G2_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G2_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G2_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G2_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G2_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G2_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G2_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G2_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G2_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G2_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G2_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G1_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G1_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G1_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G1_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G1_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G1_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G1_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G1_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G1_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G1_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G1_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "SAFE_01": {"x": 45, "y": 30, "w": 180, "h": 90}, "SAFE_02": {"x": 245, "y": 30, "w": 180, "h": 90}, "SAFE_03": {"x": 45, "y": 135, "w": 180, "h": 90}, "SAFE_04": {"x": 245, "y": 135, "w": 180, "h": 90}, "SAFE_05": {"x": 45, "y": 240, "w": 180, "h": 90}, "SAFE_06": {"x": 245, "y": 240, "w": 180, "h": 90}, "SAFE_07": {"x": 485, "y": 30, "w": 180, "h": 300}, "INFO_01": {"x": 45, "y": 45, "w": 220, "h": 95}, "INFO_02": {"x": 295, "y": 45, "w": 220, "h": 95}, "INFO_03": {"x": 45, "y": 165, "w": 220, "h": 95}, "INFO_04": {"x": 295, "y": 165, "w": 220, "h": 95}, "SUPP_01": {"x": 75, "y": 35, "w": 280, "h": 90}, "SUPP_02": {"x": 75, "y": 140, "w": 280, "h": 90}, "SUPP_03": {"x": 75, "y": 245, "w": 280, "h": 90}, "LIB_01": {"x": 90, "y": 65, "w": 300, "h": 95}, "WEE_01": {"x": 35, "y": 45, "w": 210, "h": 95}, "CAREER_01": {"x": 275, "y": 45, "w": 210, "h": 95}, "HEALTH_01": {"x": 525, "y": 45, "w": 190, "h": 90}, "HEALTH_02": {"x": 525, "y": 150, "w": 190, "h": 90}, "MEAL_01": {"x": 745, "y": 45, "w": 190, "h": 90}, "MEAL_02": {"x": 745, "y": 150, "w": 190, "h": 90}, "ADM_01": {"x": 45, "y": 45, "w": 165, "h": 290}, "ADM_02": {"x": 240, "y": 35, "w": 310, "h": 85}, "ADM_03": {"x": 580, "y": 35, "w": 310, "h": 85}, "ADM_04": {"x": 240, "y": 135, "w": 145, "h": 90}, "ADM_05": {"x": 405, "y": 135, "w": 145, "h": 90}, "ADM_06": {"x": 240, "y": 240, "w": 145, "h": 90}, "ADM_07": {"x": 405, "y": 240, "w": 145, "h": 90}, "ADM_08": {"x": 580, "y": 135, "w": 145, "h": 90}, "ADM_09": {"x": 745, "y": 135, "w": 145, "h": 90}, "ADM_10": {"x": 580, "y": 240, "w": 145, "h": 90}, "ADM_11": {"x": 745, "y": 240, "w": 145, "h": 90}, "SPEC_ART": {"x": 35, "y": 60, "w": 205, "h": 105}, "SPEC_MUSIC": {"x": 260, "y": 60, "w": 205, "h": 105}, "SPEC_PE_1": {"x": 485, "y": 60, "w": 205, "h": 105}, "SPEC_PE_2": {"x": 710, "y": 60, "w": 205, "h": 105}, "SPEC_PE_3": {"x": 935, "y": 60, "w": 205, "h": 105}, "SPEC_CONF_S": {"x": 35, "y": 235, "w": 205, "h": 105}, "SPEC_CONF_L": {"x": 260, "y": 235, "w": 205, "h": 105}, "SPEC_PRINT": {"x": 485, "y": 235, "w": 205, "h": 105}, "SPEC_DUTY": {"x": 35, "y": 410, "w": 205, "h": 105}, "SPEC_DINE": {"x": 260, "y": 410, "w": 205, "h": 105}, "SPEC_DORM": {"x": 485, "y": 410, "w": 205, "h": 105}};
 
     const SAMPLE_DEVICES = [
@@ -1790,12 +1784,13 @@
       rooms: [],
       seats: [],
       devices: [],
-      activeRoomId: 'gyomu_center',
+      activeRoomId: 'all',
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
       geminiKey: safeGetStorage('SOLNAE_GEMINI_KEY', ''),
-      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '1.0')) || 1.0
+      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '1.0')) || 1.0,
+      layoutLocked: true // 교사용 화면은 배치 이동/크기조절 불가 (항상 잠금)
     };
 
     function initDefaultSeats() {
@@ -1843,83 +1838,137 @@
       loadData();
     }
 
-    // Google Apps Script iframe 환경에서 이미 DOM 로드가 완료된 경우 즉시 실행
-    if (document.readyState === 'loading') {
-      window.addEventListener('DOMContentLoaded', bootstrapApp);
-    } else {
+    // Google Apps Script iframe 환경에서 로드 완료 시점 감지가 가끔 어긋나는 문제 대응:
+    // readyState 체크, DOMContentLoaded, load, 지연 타이머까지 중복으로 걸어 반드시 한 번은 실행되게 보장
+    var __bootstrapped = false;
+    function __runBootstrapOnce() {
+      if (__bootstrapped) return;
+      __bootstrapped = true;
       bootstrapApp();
+    }
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', __runBootstrapOnce);
+    } else {
+      __runBootstrapOnce();
+    }
+    window.addEventListener('load', __runBootstrapOnce);
+    setTimeout(__runBootstrapOnce, 1000);
+
+    function showSyncRetryPrompt(msg) {
+      var existing = document.getElementById('syncRetryBtn');
+      if (existing) existing.parentNode.removeChild(existing);
+      var btn = document.createElement('button');
+      btn.id = 'syncRetryBtn';
+      btn.textContent = msg || '서버 연결이 지연되고 있습니다. 눌러서 다시 시도';
+      btn.style.position = 'fixed';
+      btn.style.top = '0';
+      btn.style.left = '0';
+      btn.style.right = '0';
+      btn.style.width = '100%';
+      btn.style.zIndex = '99999';
+      btn.style.padding = '10px';
+      btn.style.background = '#dc2626';
+      btn.style.color = '#fff';
+      btn.style.fontWeight = '700';
+      btn.style.border = 'none';
+      btn.style.cursor = 'pointer';
+      btn.onclick = function() {
+        btn.parentNode.removeChild(btn);
+        loadData();
+      };
+      document.body.insertBefore(btn, document.body.firstChild);
     }
 
     function loadData() {
       if (appState.isGas) {
         showToast("서버에서 최신 데이터를 불러오는 중...");
+        var syncTimer = setTimeout(showSyncRetryPrompt, 8000);
         google.script.run
           .withSuccessHandler(res => {
-            if (res.success) {
-              if (res.seats && res.seats.length > 0) {
-                appState.seats = res.seats;
-                appState.devices = res.devices || [];
-                appState.rooms = res.rooms || [];
-              } else {
-                // 시트 데이터가 비어있을 때 안전한 기본 98석 자동 복원
-                let initSeats = [];
-                PRESET_ROOMS.forEach(r => {
-                  r.seats.forEach(s => {
-                    const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 140, h: 70 };
-                    initSeats.push({
-                      seat_id: s.id,
-                      room_id: r.id,
-                      room_name: r.name,
-                      seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
-                      current_user: s.user || '',
-                      extension: s.ext || '',
-                      pos_x: defPos.x,
-                      pos_y: defPos.y,
-                      width: defPos.w,
-                      height: defPos.h
+            clearTimeout(syncTimer);
+            var retryBtn = document.getElementById('syncRetryBtn');
+            if (retryBtn) retryBtn.parentNode.removeChild(retryBtn);
+            try {
+              if (res.success) {
+                if (res.webAppUrl) appState.webAppUrl = res.webAppUrl;
+                if (res.seats && res.seats.length > 0) {
+                  appState.seats = res.seats;
+                  appState.devices = res.devices || [];
+                  appState.rooms = res.rooms || [];
+                } else {
+                  // 시트 데이터가 비어있을 때 안전한 기본 98석 자동 복원
+                  let initSeats = [];
+                  PRESET_ROOMS.forEach(r => {
+                    r.seats.forEach(s => {
+                      const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 140, h: 70 };
+                      initSeats.push({
+                        seat_id: s.id,
+                        room_id: r.id,
+                        room_name: r.name,
+                        seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
+                        current_user: s.user || '',
+                        extension: s.ext || '',
+                        pos_x: defPos.x,
+                        pos_y: defPos.y,
+                        width: defPos.w,
+                        height: defPos.h
+                      });
                     });
                   });
-                });
-                appState.seats = initSeats;
-                appState.devices = SAMPLE_DEVICES;
-              }
-              // Fix GYOMU_01 label to 교감
-              const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
-              if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
+                  appState.seats = initSeats;
+                  appState.devices = SAMPLE_DEVICES;
+                }
+                // Fix GYOMU_01 label to 교감
+                const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
+                if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
 
-              initSeatPositions();
-              renderActiveRoomView();
-              updateTopStats();
-              updateTabBadges();
-              selectRoom(appState.activeRoomId);
-              showToast("데이터를 성공적으로 동기화했습니다.");
-            } else {
-              alert("데이터 로딩 오류: " + res.error);
+                initSeatPositions();
+                renderActiveRoomView();
+                updateTopStats();
+                updateTabBadges();
+                selectRoom(appState.activeRoomId);
+                showToast("데이터를 성공적으로 동기화했습니다. (좌석 " + appState.seats.length + "개)");
+              } else {
+                showSyncRetryPrompt('서버 오류: ' + res.error + ' (눌러서 다시 시도)');
+              }
+            } catch (renderErr) {
+              showSyncRetryPrompt('처리 오류: ' + renderErr.message + ' (눌러서 다시 시도)');
             }
           })
           .withFailureHandler(err => {
-            alert("서버 연결 실패: " + err.message);
+            clearTimeout(syncTimer);
+            showSyncRetryPrompt();
           })
           .getInitialData();
       } else {
-        let savedSeats = safeGetStorage('SOLNAE_SEATS');
-        let savedDevs = safeGetStorage('SOLNAE_DEVICES');
+        let savedSeats = localStorage.getItem('SOLNAE_SEATS');
+        let savedDevs = localStorage.getItem('SOLNAE_DEVICES');
 
-        let parsedSeats = null;
-        try {
-          if (savedSeats) parsedSeats = JSON.parse(savedSeats);
-        } catch (e) {}
-
-        if (!parsedSeats || !Array.isArray(parsedSeats) || parsedSeats.length === 0) {
-          initDefaultSeats();
+        if (!savedSeats) {
+          let initSeats = [];
+          PRESET_ROOMS.forEach(r => {
+            r.seats.forEach(s => {
+              const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 140, h: 70 };
+              initSeats.push({
+                seat_id: s.id,
+                room_id: r.id,
+                room_name: r.name + (r.floor ? ` (${r.floor})` : ''),
+                seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
+                current_user: s.user || '',
+                extension: s.ext || '',
+                pos_x: defPos.x,
+                pos_y: defPos.y,
+                width: defPos.w,
+                height: defPos.h
+              });
+            });
+          });
+          appState.seats = initSeats;
+          appState.devices = SAMPLE_DEVICES;
           saveLocalData();
         } else {
-          appState.seats = parsedSeats;
-          try {
-            appState.devices = (savedDevs && JSON.parse(savedDevs).length > 0) ? JSON.parse(savedDevs) : SAMPLE_DEVICES;
-          } catch(e) {
-            appState.devices = SAMPLE_DEVICES;
-          }
+          appState.seats = JSON.parse(savedSeats);
+          appState.devices = (savedDevs && JSON.parse(savedDevs).length > 0) ? JSON.parse(savedDevs) : SAMPLE_DEVICES;
           // Ensure GYOMU_01 is 교감
           const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
           if (g1 && g1.seat_label !== '교감') {
@@ -1939,11 +1988,7 @@
         const defPos = DEFAULT_COORDS[s.seat_id];
         const isInvalid = s.pos_x === undefined || s.pos_x === null || s.pos_x === '' || isNaN(Number(s.pos_x)) ||
                           s.pos_y === undefined || s.pos_y === null || s.pos_y === '' || isNaN(Number(s.pos_y));
-        // Auto-detect corrupted diagonal or collapsed positions
-        const isCorruptedPrin = (s.seat_id === 'PRIN_01' && (s.pos_x < 200 || s.pos_y > 80));
-        const isCorruptedGyomu1 = (s.seat_id === 'GYOMU_01' && s.pos_y > 250);
-
-        if (isInvalid || isCorruptedPrin || isCorruptedGyomu1) {
+        if (isInvalid) {
           if (defPos) {
             s.pos_x = defPos.x;
             s.pos_y = defPos.y;
@@ -1958,7 +2003,7 @@
         } else {
           s.pos_x = Number(s.pos_x);
           s.pos_y = Number(s.pos_y);
-          if (defPos && (!s.width || s.width < 135 || !s.height || s.height < 80)) {
+          if (defPos && (!s.width || s.width < 120 || !s.height || s.height < 65)) {
             s.width = defPos.w;
             s.height = defPos.h;
           }
@@ -1969,8 +2014,8 @@
     }
 
     function saveLocalData() {
-      safeSetStorage('SOLNAE_SEATS', JSON.stringify(appState.seats));
-      safeSetStorage('SOLNAE_DEVICES', JSON.stringify(appState.devices));
+      localStorage.setItem('SOLNAE_SEATS', JSON.stringify(appState.seats));
+      localStorage.setItem('SOLNAE_DEVICES', JSON.stringify(appState.devices));
     }
 
     function refreshData() {
@@ -1984,190 +2029,24 @@
       const reassignPanel = document.getElementById('reassignPanel');
       const roomNavBar = document.getElementById('roomNavBar');
 
-      const btnRoom = document.getElementById('btnModeRoom');
-      if (btnRoom) btnRoom.classList.toggle('btn-active', mode === 'room');
-      const btnReassign = document.getElementById('btnModeReassign');
-      if (btnReassign) btnReassign.classList.toggle('btn-active', mode === 'reassign');
+      if (document.getElementById('btnModeRoom')) document.getElementById('btnModeRoom').classList.toggle('btn-active', mode === 'room');
+      document.getElementById('btnModeReassign').classList.toggle('btn-active', mode === 'reassign');
 
-      if (singleContainer) singleContainer.style.display = 'none';
-      if (reassignPanel) reassignPanel.style.display = 'none';
+      singleContainer.style.display = 'none';
+      reassignPanel.style.display = 'none';
 
       if (mode === 'room') {
-        if (singleContainer) singleContainer.style.display = 'block';
-        if (roomNavBar) roomNavBar.style.display = 'block';
+        singleContainer.style.display = 'block';
+        roomNavBar.style.display = 'block';
         renderActiveRoomView();
       } else if (mode === 'reassign') {
-        if (reassignPanel) reassignPanel.style.display = 'block';
-        if (roomNavBar) roomNavBar.style.display = 'none';
+        reassignPanel.style.display = 'block';
+        roomNavBar.style.display = 'none';
         renderReassignTable();
       }
     }
 
     // Centralized view refresh dispatcher (handles 'all', 'special', and individual rooms safely)
-    
-    // Mobile Auto-Scaling Controller
-    let mobileFitMode = true;
-
-    function toggleMobileFit() {
-      mobileFitMode = !mobileFitMode;
-      const b1 = document.getElementById('btnMobileFitToggle');
-      const b2 = document.getElementById('btnMobileFitToggle2');
-      const txt = mobileFitMode ? '📱 화면 맞춤 (Fit)' : '🔍 크게 보기 (100%)';
-      const bg = mobileFitMode ? '#1e3a8a' : '#047857';
-      if (b1) { b1.textContent = txt; b1.style.background = bg; }
-      if (b2) { b2.textContent = txt; b2.style.background = bg; }
-      applyMobileScaling();
-    }
-
-    function applyMobileScaling() {
-      const screenW = window.innerWidth;
-      const bpArea = document.getElementById('blueprintMountArea');
-      const bpScaler = document.getElementById('blueprintScaleWrapper');
-
-      if (bpArea && bpScaler) {
-        if (mobileFitMode && screenW < 1110) {
-          const availableW = Math.max(280, screenW - 24);
-          const naturalW = 1110;
-          const scale = Math.min(1, Math.max(0.25, availableW / naturalW));
-          bpScaler.style.zoom = scale;
-          bpScaler.style.width = '1110px';
-          bpArea.style.overflowX = 'hidden';
-        } else {
-          bpScaler.style.zoom = 1;
-          bpScaler.style.width = '100%';
-          bpArea.style.overflowX = 'auto';
-        }
-      }
-
-      const canvasWrap = document.querySelector('.room-canvas-wrapper') || document.querySelector('.canvas-viewport-wrap');
-      const canvasEl = document.getElementById('activeRoomCanvas') || document.querySelector('.seat-canvas');
-      if (canvasWrap && canvasEl) {
-        const naturalW = parseInt(canvasEl.style.width) || 1200;
-        if (mobileFitMode && screenW < naturalW + 30) {
-          const availableW = Math.max(280, canvasWrap.clientWidth || (screenW - 30));
-          const scale = Math.min(1, Math.max(0.25, availableW / naturalW));
-          canvasEl.style.transform = `scale(${scale})`;
-          canvasEl.style.transformOrigin = 'top left';
-          const naturalH = parseInt(canvasEl.style.height) || 600;
-          canvasWrap.style.minHeight = (naturalH * scale + 20) + 'px';
-          canvasWrap.style.overflowX = 'hidden';
-        } else {
-          canvasEl.style.transform = 'none';
-          canvasWrap.style.minHeight = '';
-          canvasWrap.style.overflowX = 'auto';
-        }
-      }
-    }
-
-    window.addEventListener('resize', applyMobileScaling);
-    window.addEventListener('orientationchange', function() { setTimeout(applyMobileScaling, 200); });
-
-    // Submit teacher survey from modal
-    function submitTeacherSurveyFromModal() {
-      const seatId = appState.currentSeatId;
-      if (!seatId) return;
-
-      const userName = document.getElementById('modalSeatUser').value.trim();
-      const ext = document.getElementById('modalSeatExt').value.trim();
-
-      if (!userName) {
-        alert("선생님의 성함을 입력해 주세요.");
-        document.getElementById('modalSeatUser').focus();
-        return;
-      }
-
-      const devices = [];
-
-      // 1. PC
-      const pcMfr = document.getElementById('pc_manufacturer').value.trim();
-      const pcModel = document.getElementById('pc_model_name').value.trim();
-      const pcAsset = document.getElementById('pc_asset_number').value.trim();
-      if (pcMfr || pcModel || pcAsset) {
-        const pcDevId = document.getElementById('pc_device_id').value || ('DEV_' + seatId + '_PC');
-        const pcSchoolAsset = document.getElementById('pc_school_asset_number') ? document.getElementById('pc_school_asset_number').value.trim() : '';
-        devices.push({
-          device_id: pcDevId,
-          seat_id: seatId,
-          device_type: 'PC',
-          manufacturer: pcMfr,
-          model_name: pcModel,
-          acquired_date: document.getElementById('pc_acquired_date').value.trim(),
-          asset_number: pcAsset,
-          school_asset_number: pcSchoolAsset,
-          notes: document.getElementById('pc_notes').value.trim()
-        });
-      }
-
-      // 2. Monitor 1
-      const mon1Mfr = document.getElementById('mon1_manufacturer').value.trim();
-      const mon1Model = document.getElementById('mon1_model_name').value.trim();
-      const mon1Asset = document.getElementById('mon1_asset_number').value.trim();
-      if (mon1Mfr || mon1Model || mon1Asset) {
-        const mon1DevId = document.getElementById('mon1_device_id').value || ('DEV_' + seatId + '_MON1');
-        const mon1SchoolAsset = document.getElementById('mon1_school_asset_number') ? document.getElementById('mon1_school_asset_number').value.trim() : '';
-        devices.push({
-          device_id: mon1DevId,
-          seat_id: seatId,
-          device_type: 'MONITOR_1',
-          manufacturer: mon1Mfr,
-          model_name: mon1Model,
-          acquired_date: document.getElementById('mon1_acquired_date').value.trim(),
-          asset_number: mon1Asset,
-          school_asset_number: mon1SchoolAsset,
-          notes: document.getElementById('mon1_notes').value.trim()
-        });
-      }
-
-      // 3. Monitor 2
-      const chkNoMon2 = document.getElementById('chkNoMonitor2');
-      if (!chkNoMon2 || !chkNoMon2.checked) {
-        const mon2Mfr = document.getElementById('mon2_manufacturer').value.trim();
-        const mon2Model = document.getElementById('mon2_model_name').value.trim();
-        const mon2Asset = document.getElementById('mon2_asset_number').value.trim();
-        if (mon2Mfr || mon2Model || mon2Asset) {
-          const mon2DevId = document.getElementById('mon2_device_id').value || ('DEV_' + seatId + '_MON2');
-          const mon2SchoolAsset = document.getElementById('mon2_school_asset_number') ? document.getElementById('mon2_school_asset_number').value.trim() : '';
-          devices.push({
-            device_id: mon2DevId,
-            seat_id: seatId,
-            device_type: 'MONITOR_2',
-            manufacturer: mon2Mfr,
-            model_name: mon2Model,
-            acquired_date: document.getElementById('mon2_acquired_date').value.trim(),
-            asset_number: mon2Asset,
-            school_asset_number: mon2SchoolAsset,
-            notes: document.getElementById('mon2_notes').value.trim()
-          });
-        }
-      }
-
-      const seat = appState.seats.find(s => s.seat_id === seatId);
-      if (seat) {
-        seat.current_user = userName;
-        seat.extension = ext;
-      }
-      appState.devices = appState.devices.filter(d => d.seat_id !== seatId).concat(devices);
-
-      if (appState.isGas) {
-        showToast("서버에 기기 정보를 제출하는 중...");
-        const runner = google.script.run
-          .withSuccessHandler(function() {
-            showToast("🎉 [" + userName + " 선생님] 기기 정보가 성공적으로 제출되었습니다!");
-            closeSeatModal();
-            refreshCurrentView();
-          })
-          .withFailureHandler(function(err) {
-            alert("제출 실패: " + (err ? err.message : ""));
-          });
-        runner.saveSeatDevices(seatId, { current_user: userName, extension: ext }, devices);
-      } else {
-        saveLocalData();
-        closeSeatModal();
-        refreshCurrentView();
-        showToast("🎉 [" + userName + " 선생님] 기기 정보가 성공적으로 저장되었습니다!");
-      }
-    }
-
     function refreshCurrentView() {
       if (appState.activeRoomId === 'all') {
         const subControls = document.querySelector('.sub-controls-bar');
@@ -2188,7 +2067,7 @@
 
     // Select Room
     function selectRoom(roomId) {
-      if (roomId === 'all') roomId = 'gyomu_center';
+      if (roomId === 'all') roomId = 'gyomu_center'; // 교사용 화면은 전체 배치도 노출 안 함
       appState.activeRoomId = roomId;
       const dd = document.getElementById('roomSelectDropdown');
       if (dd && dd.value !== roomId) {
@@ -2260,28 +2139,25 @@
             </div>
           </div>
           <div style="display: flex; gap: 8px;">
-            
+            <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800;" onclick="openTeacherLinkModal()">🔗 교사용 링크 복사</button>
             
           </div>
         </div>
 
-        <div id="blueprintMountArea" class="mobile-scale-viewport" style="background: #eaeded; padding: 10px; border-radius: 10px; border: 1.5px solid #cbd5e1; box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);">
-          <div id="blueprintScaleWrapper" class="auto-scaler-content"></div>
+        <div id="blueprintMountArea" style="overflow-x: auto; background: #eaeded; padding: 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);">
         </div>
       `;
 
       const tmpl = document.getElementById('tmplSchoolFloorPlan');
       if (tmpl) {
         const clone = tmpl.content.cloneNode(true);
-        const mount = document.getElementById('blueprintScaleWrapper') || document.getElementById('blueprintMountArea');
-        mount.appendChild(clone);
+        document.getElementById('blueprintMountArea').appendChild(clone);
       }
 
       populateBlueprintSeats();
       updateTabBadges();
       const badgeAll = document.getElementById('badge_count_all');
       if (badgeAll) badgeAll.textContent = totalSeats;
-      applyMobileScaling();
     }
 
         function populateBlueprintSeats() {
@@ -2356,7 +2232,7 @@
     }
 
     function navigateRoom(dir) {
-      const fullOrder = ['all', ...ROOM_ORDER];
+      const fullOrder = ROOM_ORDER; // 교사용 화면은 전체 배치도 제외
       let idx = fullOrder.indexOf(appState.activeRoomId);
       if (idx === -1) idx = 0;
       let nextIdx = idx + dir;
@@ -2382,7 +2258,7 @@
 
       if (appState.isGas) {
         const roomSeats = appState.seats.filter(s => (rId === 'gyomu_center') ? (s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01') : (s.room_id === rId));
-        google.script.run.batchUpdateSeatPositions(roomSeats.map(s => ({ seat_id: s.seat_id, pos_x: s.pos_x, pos_y: s.pos_y })));
+        google.script.run.batchUpdateSeatPositions(roomSeats.map(s => ({ seat_id: s.seat_id, pos_x: s.pos_x, pos_y: s.pos_y, width: s.width, height: s.height })));
       } else {
         saveLocalData();
       }
@@ -2408,13 +2284,58 @@
     };
 
     function attachSeatDragListeners(el, seatId) {
-      // Disabled in teacher mode: read-only
-      el.style.cursor = "pointer";
-      el.onclick = () => openSeatModal(seatId);
+      el.addEventListener('pointerdown', (e) => onSeatPointerDown(e, el, seatId));
+    }
+
+    
+    // Layout Lock Controller
+    function toggleLayoutLock() {
+      // 교사용 화면은 좌석 배치를 옮기거나 크기 조절할 수 없도록 항상 고정
+      showToast("🔒 교사용 화면에서는 좌석 배치를 변경할 수 없습니다. 좌석을 눌러 정보를 등록해 주세요.");
+    }
+
+    function updateLayoutLockUI() {
+      // 교사용 화면은 배치가 항상 고정 상태이므로 이동모드 전환 버튼을 노출하지 않음
+      document.querySelectorAll('.seat-resize-handle').forEach(h => {
+        h.style.display = 'none';
+      });
+      document.querySelectorAll('.seat-cell').forEach(cell => {
+        cell.style.cursor = 'pointer';
+      });
+
+      const banner = document.querySelector('.drag-hint-banner');
+      if (banner) {
+        banner.innerHTML = `
+          <span>📱 <strong>안내:</strong> 좌석을 눌러 본인 컴퓨터·모니터 정보를 확인하고 등록할 수 있습니다.</span>
+        `;
+        banner.style.background = '#f1f8f3';
+        banner.style.borderColor = '#c8e6c9';
+      }
+    }
+
+    function toggleSeatIndividualLock(isLocked) {
+      const seatId = appState.currentSeatId;
+      if (!seatId) return;
+      const seat = appState.seats.find(s => s.seat_id === seatId);
+      if (seat) {
+        seat.is_locked = isLocked;
+        if (appState.isGas) {
+          google.script.run.updateSeatInfo(seatId, { is_locked: isLocked });
+        } else {
+          saveLocalData();
+        }
+        refreshCurrentView();
+        showToast(isLocked ? `🔒 [${seat.seat_label}] 좌석 위치가 고정되었습니다.` : `🔓 [${seat.seat_label}] 좌석 고정이 해제되었습니다.`);
+      }
     }
 
     function onSeatPointerDown(e, el, seatId) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const chkSeat = appState.seats.find(s => s.seat_id === seatId);
+      if (chkSeat && chkSeat.is_locked && !appState.layoutLocked) {
+        showToast(`🔒 [${chkSeat.seat_label}] 좌석은 개별 고정되어 있습니다.`);
+        return;
+      }
 
       const canvas = document.getElementById('activeRoomCanvas');
       if (!canvas) return;
@@ -2429,10 +2350,12 @@
       dragState.active = false;
       dragState.currentSwapTargetId = null;
 
-      // Long-press timer (250ms)
-      dragState.longPressTimer = setTimeout(() => {
-        startSeatDrag(e, el, seatId);
-      }, 250);
+      // Long-press timer (250ms) - 배치가 고정된 경우 드래그 자체를 시작하지 않음 (클릭으로 모달만 열림)
+      if (!appState.layoutLocked) {
+        dragState.longPressTimer = setTimeout(() => {
+          startSeatDrag(e, el, seatId);
+        }, 250);
+      }
 
       window.addEventListener('pointermove', onWindowPointerMove);
       window.addEventListener('pointerup', onWindowPointerUp);
@@ -2497,8 +2420,8 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (!dragState.active) {
-        // Desktop mouse: start drag if moved > 5px
-        if (e.pointerType === 'mouse' && dist > 5) {
+        // Desktop mouse: start drag if moved > 5px (배치 고정 시에는 드래그 시작 금지)
+        if (e.pointerType === 'mouse' && dist > 5 && !appState.layoutLocked) {
           clearTimeout(dragState.longPressTimer);
           startSeatDrag(e, dragState.targetEl, dragState.seatId);
         } else if (e.pointerType === 'touch' && dist > 8) {
@@ -2849,13 +2772,13 @@
           <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">
             ${nameHtml}
           </div>
-          ${extHtml}
+          ${extHtml}${seat.is_locked ? '<span style="font-size:0.75rem; margin-left:4px;" title="위치 고정됨">🔒</span>' : ''}
         </div>
         <div class="seat-device-block">
           ${pcLineHtml}
           ${monLineHtml}
         </div>
-        <div class="seat-resize-handle" title="드래그하여 좌석 크기 조절 (더블클릭 시 기본크기 복원)">⤡</div>
+        <div class="seat-resize-handle" title="드래그하여 좌석 크기 조절 (더블클릭 시 기본크기 복원)"></div>
       `;
 
       attachSeatDragListeners(cell, seatId);
@@ -2869,6 +2792,8 @@
     // SEAT RESIZING (개별 좌석 크기 조절: 드래그 핸들 ⤡)
     // =========================================================================
     function attachSeatResizeListeners(handle, seatId) {
+      handle.style.display = 'none'; // 교사용 화면은 좌석 크기조절 불가
+      return;
       handle.addEventListener('pointerdown', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -2921,7 +2846,9 @@
               google.script.run.batchUpdateSeatPositions([{
                 seat_id: seatId,
                 pos_x: seat.pos_x,
-                pos_y: seat.pos_y
+                pos_y: seat.pos_y,
+                width: finalW,
+                height: finalH
               }]);
             } else {
               saveLocalData();
@@ -2948,7 +2875,17 @@
           cell.style.height = defPos.h + 'px';
           seat.width = defPos.w;
           seat.height = defPos.h;
-          saveLocalData();
+          if (appState.isGas) {
+            google.script.run.batchUpdateSeatPositions([{
+              seat_id: seatId,
+              pos_x: seat.pos_x,
+              pos_y: seat.pos_y,
+              width: defPos.w,
+              height: defPos.h
+            }]);
+          } else {
+            saveLocalData();
+          }
           showToast(`[${seat.current_user || seat.seat_label}] 좌석 크기가 기본값(${defPos.w}×${defPos.h}px)으로 복원되었습니다.`);
         }
       });
@@ -2958,7 +2895,29 @@
     // CANVAS ZOOM & SEAT SCALE (좌석 전체 확대/축소 슬라이더)
     // =========================================================================
     function setCanvasZoom(val) {
-      // Disabled in teacher mode
+      val = Math.max(0.7, Math.min(1.5, Math.round(val * 100) / 100));
+      appState.canvasZoom = val;
+      localStorage.setItem('SOLNAE_ZOOM', val);
+
+      const canvas = document.getElementById('activeRoomCanvas');
+      if (canvas) {
+        canvas.style.transform = `scale(${val})`;
+        canvas.style.transformOrigin = 'top left';
+
+        const wrapper = canvas.parentElement;
+        if (wrapper) {
+          // Adjust scrollable area to match scaled dimensions
+          const originalW = parseInt(canvas.style.width) || 1200;
+          const originalH = parseInt(canvas.style.height) || 600;
+          wrapper.style.minHeight = (originalH * val + 30) + 'px';
+        }
+      }
+
+      const pct = Math.round(val * 100);
+      const label = document.getElementById('zoomPercentLabel');
+      if (label) label.textContent = pct + '%';
+      const range = document.getElementById('zoomRangeInput');
+      if (range) range.value = pct;
     }
 
     function adjustZoom(delta) {
@@ -3155,7 +3114,12 @@
       // Helper to generate a room box HTML
       function generateRoomBoxHtml(r, isPeWide = false) {
         let seatCardsHtml = '';
-        r.seat_ids.forEach(sId => {
+        // 미리 정의된 좌석(seat_ids) + 나중에 이 세부 구역으로 추가된 좌석(special_subroom_id) 합치기
+        const extraSeatIds = appState.seats
+          .filter(s => s.room_id === 'special' && s.special_subroom_id === r.id && !r.seat_ids.includes(s.seat_id))
+          .map(s => s.seat_id);
+        const allSeatIds = r.seat_ids.concat(extraSeatIds);
+        allSeatIds.forEach(sId => {
           const seat = appState.seats.find(s => s.seat_id === sId);
           if (!seat) return;
           const devs = appState.devices.filter(d => d.seat_id === sId);
@@ -3207,7 +3171,7 @@
                 <span style="font-weight: 800; font-size: 1rem; color: #0f172a;">${r.icon} ${r.name}</span>
                 <span style="font-size: 0.76rem; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; margin-left: 6px;">${r.floor}</span>
               </div>
-              <span style="font-size: 0.76rem; color: #475569; font-weight: 600;">${r.seat_ids.length}석</span>
+              <span style="font-size: 0.76rem; color: #475569; font-weight: 600;">${allSeatIds.length}석</span>
             </div>
             <div style="padding: 12px; background: #fafafa; flex: 1; align-items: stretch; ${flexStyle}">
               ${seatCardsHtml}
@@ -3224,6 +3188,7 @@
         const others = allSpecs.filter(r => !['spec_art', 'spec_music', 'spec_pe'].includes(r.id));
 
         contentHtml = `
+          <!-- Row 1: 미술실 (슬림) + 음악실 (슬림) + 체육과실 (3좌석 나란히 수평 배치) -->
           <div style="display: flex; gap: 14px; align-items: stretch; margin-bottom: 14px;">
             <div style="width: 260px; flex-shrink: 0;">
               ${generateRoomBoxHtml(art, false)}
@@ -3236,6 +3201,7 @@
             </div>
           </div>
 
+          <!-- Row 2: 나머지 특별실들 (소회의실, 대회의실, 당직실, 식생활관, 인쇄실, 기숙사) -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
             ${others.map(r => generateRoomBoxHtml(r, false)).join('')}
           </div>
@@ -3251,9 +3217,9 @@
       }
 
       const activeObj = allSpecs.find(r => r.id === specialSubroomFilter);
-      const currentRoomTitle = (specialSubroomFilter === 'all') 
-        ? '특별실 전체 (교내 각 층)' 
-        : `${activeObj.icon} ${activeObj.name} (${activeObj.floor})`;
+      const currentRoomTitle = (specialSubroomFilter === 'all')
+        ? '특별실 전체 (교내 각 층)'
+        : `${activeObj.icon} ${activeObj.name}` + (activeObj.floor ? ` (${activeObj.floor})` : '');
 
       container.innerHTML = `
         <div class="single-room-card">
@@ -3276,7 +3242,6 @@
       `;
 
       updateTabBadges();
-      setTimeout(applyMobileScaling, 50);
     }
 function renderActiveRoomView() {
       const container = document.getElementById('singleRoomContainer');
@@ -3398,10 +3363,14 @@ function renderActiveRoomView() {
                 <span>✅ 조사완료: <strong style="color: #2e7d32;">${roomDoneCount}석</strong> (${roomSeatsCount > 0 ? Math.round((roomDoneCount/roomSeatsCount)*100) : 0}%)</span>
               </div>
             </div>
-
           </div>
 
-
+          <div style="padding: 12px 18px 0;">
+            <div class="drag-hint-banner">
+              <span>💡 <strong>자유 이동 & 맞교환 안내:</strong> 좌석을 <strong>빈 공간으로 끌어놓으면 그 자리에 착 붙고</strong>, <strong>다른 좌석 위로 끌어놓으면 서로 자리가 맞교환</strong>됩니다. (클릭 시 기기 등록)</span>
+              <span style="font-size: 0.78rem; font-weight: 700; color: #2e7d32;">자동 저장 됨</span>
+            </div>
+          </div>
 
           <div class="room-canvas-wrapper">
             <div class="room-canvas" id="activeRoomCanvas" style="width: ${dims.w}px; height: ${effectiveH}px;">
@@ -3420,7 +3389,7 @@ function renderActiveRoomView() {
 
       updateTabBadges();
       setCanvasZoom(appState.canvasZoom || 1.0);
-      setTimeout(applyMobileScaling, 50);
+      updateLayoutLockUI();
     }
 
     function updateTabBadges() {
@@ -3429,7 +3398,9 @@ function renderActiveRoomView() {
         const totalSeats = appState.seats.length;
         Array.from(dd.options).forEach(opt => {
           const rId = opt.value;
-          if (rId !== 'all') {
+          if (rId === 'all') {
+            opt.textContent = `🏛️ 전체 교무실 배치도 (${totalSeats}석)`;
+          } else {
             const seats = appState.seats.filter(s => {
               if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
               return s.room_id === rId;
@@ -3494,6 +3465,8 @@ function renderActiveRoomView() {
       document.getElementById('modalRoomName').textContent = seat.room_name || '교무실';
       document.getElementById('modalSeatUser').value = seat.current_user || '';
       document.getElementById('modalSeatExt').value = seat.extension || '';
+      const chkIndLock = document.getElementById('chkSeatIndividualLock');
+      if (chkIndLock) chkIndLock.checked = !!seat.is_locked;
 
       resetDeviceForms();
 
@@ -3569,9 +3542,12 @@ function renderActiveRoomView() {
 
     function resetDeviceForms() {
       ['pc', 'mon1', 'mon2'].forEach(prefix => {
-        ['device_id', 'manufacturer', 'model_name', 'acquired_date', 'asset_number', 'school_asset_number', 'item_code', 'serial_number', 'notes'].forEach(f => {
+        ['device_id', 'manufacturer', 'model_name', 'acquired_date', 'asset_number', 'school_asset_number', 'item_code', 'serial_number', 'notes', 'photo_url_pending'].forEach(f => {
           const el = document.getElementById(`${prefix}_${f}`);
-          if (el) el.value = '';
+          if (el) {
+            el.value = '';
+            delete el.dataset.photoId;
+          }
         });
       });
       document.getElementById('badge_pc').className = 'device-pill pill-missing';
@@ -3632,6 +3608,10 @@ function renderActiveRoomView() {
       
       const thumbEl = document.getElementById(`${prefix}_photo_thumb`);
       const photoBase64 = thumbEl && thumbEl.src && thumbEl.src.startsWith('data:') ? thumbEl.src : '';
+      // AI 판독 시 이미 드라이브에 업로드된 사진이 있으면 재업로드하지 않고 그 링크를 그대로 사용
+      const pendingEl = document.getElementById(`${prefix}_photo_url_pending`);
+      const pendingPhotoUrl = pendingEl ? pendingEl.value : '';
+      const pendingPhotoId = pendingEl ? pendingEl.dataset.photoId : '';
 
       if (!mfg && !model && !asset) {
         alert("제조사, 모델명 또는 물품관리번호 중 최소 하나는 입력해 주세요.");
@@ -3649,9 +3629,14 @@ function renderActiveRoomView() {
         school_asset_number: schoolAsset,
         item_code: itemCode,
         serial_number: sn,
-        notes: notes,
-        photo_base64: photoBase64
+        notes: notes
       };
+      if (pendingPhotoUrl) {
+        payload.photo_url = pendingPhotoUrl;
+        payload.photo_id = pendingPhotoId;
+      } else {
+        payload.photo_base64 = photoBase64;
+      }
 
       if (appState.isGas) {
         showToast("기기 정보를 저장 중...");
@@ -3769,7 +3754,15 @@ function renderActiveRoomView() {
             banner.style.display = 'none';
             if (res.success && res.data) {
               populateOcrResults(res.data, targetType);
-              showToast("Gemini AI가 라벨 정보를 판독했습니다!");
+              if (res.photo_url) {
+                const prefix = targetType === 'PC' ? 'pc' : (targetType === 'MONITOR_1' ? 'mon1' : 'mon2');
+                const pendingEl = document.getElementById(`${prefix}_photo_url_pending`);
+                if (pendingEl) {
+                  pendingEl.value = res.photo_url;
+                  pendingEl.dataset.photoId = res.photo_id || '';
+                }
+              }
+              showToast("Gemini AI가 라벨 정보를 판독했습니다! (사진은 드라이브에 저장됨)");
             } else {
               alert("AI 라벨 분석 실패: " + (res.error || "알 수 없는 오류"));
             }
@@ -3778,7 +3771,7 @@ function renderActiveRoomView() {
             banner.style.display = 'none';
             alert("AI 호출 오류: " + err.message);
           })
-          .analyzeLabelImage(base64Data);
+          .analyzeLabelImage(base64Data, appState.currentSeatId, targetType);
       } else {
         const key = appState.geminiKey || '';
         if (!key) {
@@ -3800,7 +3793,7 @@ function renderActiveRoomView() {
         const rawBase64 = base64Data.split(',')[1];
         const prompt = "Analyze this school computer/monitor inventory label sticker. Extract manufacturer (제조사), model_name (모델명), acquired_date (취득일자 또는 제조연월: YYYY-MM-DD or YYYY.MM), asset_number (물품관리번호), notes (특이사항). Output ONLY JSON with keys: manufacturer, model_name, acquired_date, asset_number, notes.";
         
-        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -3963,14 +3956,98 @@ function renderActiveRoomView() {
     function saveSettings() {
       const key = document.getElementById('cfgGeminiKey').value.trim();
       appState.geminiKey = key;
-      safeSetStorage('SOLNAE_GEMINI_KEY', key);
+      localStorage.setItem('SOLNAE_GEMINI_KEY', key);
       closeSettingsModal();
       showToast("설정이 저장되었습니다.");
     }
+
+    // =========================================================================
+    // TEACHER LINK MODAL & COPY CONTROLLERS
+    // =========================================================================
+    function getTeacherLinkUrl() {
+      if (appState.webAppUrl) {
+        return appState.webAppUrl.split('?')[0].split('#')[0] + '?page=teacher';
+      }
+      try {
+        const topUrl = (window.top !== window && window.top.location.href) ? window.top.location.href : window.location.href;
+        if (topUrl.includes('script.google.com')) {
+          return topUrl.split('?')[0].split('#')[0] + '?page=teacher';
+        }
+      } catch (e) {}
+
+      const cur = window.location.href.split('?')[0].split('#')[0];
+      if (cur.includes('script.google.com') || appState.isGas) {
+        return cur + '?page=teacher';
+      }
+      return cur.replace(/index\.html$/i, '') + 'teacher.html';
+    }
+
+    function openTeacherLinkModal() {
+      const modal = document.getElementById('teacherLinkModal');
+      const input = document.getElementById('teacherLinkInput');
+      const url = getTeacherLinkUrl();
+      if (input) input.value = url;
+      if (modal) modal.style.display = 'flex';
+      copyTextToClipboard(url);
+    }
+
+    function closeTeacherLinkModal() {
+      const modal = document.getElementById('teacherLinkModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openTeacherLinkInNewTab() {
+      const url = getTeacherLinkUrl();
+      window.open(url, '_blank');
+    }
+
+    function copyTeacherLink() {
+      const input = document.getElementById('teacherLinkInput');
+      const url = input && input.value ? input.value : getTeacherLinkUrl();
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+      }
+      copyTextToClipboard(url);
+    }
+
+    function copyTextToClipboard(text) {
+      if (!text) return;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("📋 교사용 조사 링크가 복사되었습니다!");
+        }).catch(() => {
+          execCopyFallback(text);
+        });
+      } else {
+        execCopyFallback(text);
+      }
+    }
+
+    function execCopyFallback(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'fixed';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showToast("📋 교사용 조사 링크가 복사되었습니다!");
+        } else {
+          prompt("아래 교사용 링크를 복사(Ctrl+C)하세요:", text);
+        }
+      } catch (e) {
+        prompt("아래 교사용 링크를 복사(Ctrl+C)하세요:", text);
+      }
+      document.body.removeChild(el);
+    }
     function resetToPresetData() {
       if (!confirm("전체 좌석 및 기기 데이터를 전주솔내고 2026 초기 상태로 초기화하시겠습니까?")) return;
-      safeRemoveStorage('SOLNAE_SEATS');
-      safeRemoveStorage('SOLNAE_DEVICES');
+      localStorage.removeItem('SOLNAE_SEATS');
+      localStorage.removeItem('SOLNAE_DEVICES');
       loadData();
       closeSettingsModal();
       showToast("데이터가 초기 상태로 리셋되었습니다.");
