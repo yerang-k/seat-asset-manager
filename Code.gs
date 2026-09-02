@@ -12,11 +12,17 @@ const SHEET_DEVICES = '기기';
 const SHEET_ROOMS = '교무실';
 const PHOTO_FOLDER_NAME = '[전주솔내고] 기기관리_사진';
 
-/** 웹앱 진입점 */
+/** 웹앱 진입점 (일반교사용: ?page=teacher, 관리자용: ?page=admin 또는 기본) */
 function doGet(e) {
-  const template = HtmlService.createTemplateFromFile('index');
+  const page = (e && e.parameter && e.parameter.page) ? e.parameter.page : 'admin';
+  const file = (page === 'teacher') ? 'teacher' : 'index';
+  const title = (page === 'teacher')
+    ? '전주솔내고 교직원 컴퓨터·모니터 현황 조사 (교사용)'
+    : '전주솔내고 좌석별 PC·모니터 관리 시스템 (관리자)';
+
+  const template = HtmlService.createTemplateFromFile(file);
   return template.evaluate()
-    .setTitle('전주솔내고 좌석별 PC·모니터 관리 시스템')
+    .setTitle(title)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

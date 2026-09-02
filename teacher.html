@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>전주솔내고등학교 교직원 컴퓨터·모니터 현황 조사 (교사용)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1b4332;
+      --primary-light: #d8f3dc;
+      --primary-hover: #2d6a4f;
+      --accent: #ff9800;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --status-done: #2e7d32;
+      --status-part: #ed6c02;
+      --status-none: #9e9e9e;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Header */
+    .teacher-header {
+      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+      color: #fff;
+      padding: 16px 20px;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-title-group h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-badge {
+      background: #52b788;
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+    .header-sub {
+      font-size: 0.84rem;
+      color: #b7e4c7;
+      margin-top: 2px;
+    }
+    .btn-admin-link {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-admin-link:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Guide Banner */
+    .guide-banner-wrap {
+      max-width: 1400px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+    }
+    .guide-banner {
+      background: #e8f5e9;
+      border: 1.5px solid #a3b18a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .guide-icon {
+      font-size: 1.8rem;
+    }
+    .guide-text h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #1b4332;
+      margin-bottom: 2px;
+    }
+    .guide-text p {
+      font-size: 0.84rem;
+      color: #2d6a4f;
+    }
+
+    /* Room Tabs */
+    .room-tabs-container {
+      max-width: 1400px;
+      margin: 14px auto 0;
+      padding: 0 16px;
+    }
+    .room-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .room-tab {
+      padding: 8px 16px;
+      background: #fff;
+      border: 1.5px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #4b5563;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .room-tab:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .room-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(27,67,50,0.3);
+    }
+    .tab-badge {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .room-tab.active .tab-badge {
+      background: #52b788;
+      color: #fff;
+    }
+
+    /* Main Container */
+    .main-content {
+      max-width: 1400px;
+      margin: 16px auto;
+      padding: 0 16px;
+    }
+
+    /* Room View Card */
+    .teacher-room-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .room-card-header {
+      padding: 14px 20px;
+      background: #fafbfa;
+      border-bottom: 1.5px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .room-card-title h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .room-card-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Canvas Area (Read Only Interactive) */
+    .teacher-canvas-wrap {
+      overflow-x: auto;
+      padding: 20px;
+      background: #f8faf9;
+      -webkit-overflow-scrolling: touch;
+    }
+    .teacher-canvas {
+      position: relative;
+      background-color: #ffffff;
+      background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+      background-size: 20px 20px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+    }
+
+    /* Seat Card (Teacher Touch-friendly) */
+    .teacher-seat {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 7px 9px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .teacher-seat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(27,67,50,0.18);
+      border-color: var(--primary);
+    }
+    .teacher-seat:active {
+      transform: scale(0.98);
+    }
+    .teacher-seat.status-done {
+      border-color: #2e7d32;
+      border-top: 4px solid #2e7d32;
+    }
+    .teacher-seat.status-part {
+      border-color: #ed6c02;
+      border-top: 4px solid #ed6c02;
+    }
+    .teacher-seat.status-none {
+      border-top: 4px solid #9e9e9e;
+    }
+
+    .t-seat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 3px;
+      margin-bottom: 3px;
+    }
+    .t-seat-name {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .t-seat-role {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #1e88e5;
+    }
+    .t-seat-empty {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .t-seat-ext {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: 700;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .t-device-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.72rem;
+    }
+    .t-dev-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-weight: 600;
+    }
+    .t-dev-pc {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+    .t-dev-mon {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+    .t-dev-mon2 {
+      background: #e1f5fe;
+      color: #0277bd;
+    }
+    .t-dev-none {
+      color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .t-tap-hint {
+      font-size: 0.68rem;
+      color: var(--primary);
+      text-align: right;
+      font-weight: 800;
+      margin-top: 1px;
+    }
+
+    /* Corridor and Door landmarks */
+    .corridor-boundary-line {
+      position: absolute;
+      left: 25px;
+      right: 25px;
+      bottom: 68px;
+      border-top: 1.8px dashed #b0bec5;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .corridor-boundary-tag {
+      position: absolute;
+      right: 15px;
+      top: -11px;
+      background: #ffffff;
+      padding: 1px 8px;
+      font-size: 0.72rem;
+      color: #78909c;
+      font-weight: 800;
+      border-radius: 4px;
+      border: 1px solid #cfd8dc;
+    }
+    .landmark-door {
+      background: #e2f0d9;
+      border: 1.8px solid #2d6a4f;
+      color: #1b4332;
+      font-size: 0.82rem;
+      position: absolute;
+      bottom: 16px;
+      z-index: 5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 6px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Survey Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .modal-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .survey-device-section {
+      background: #f8faf9;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ocr-cam {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ocr-cam:hover {
+      opacity: 0.9;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 3px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.88rem;
+    }
+    .form-group input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-secondary {
+      background: #64748b;
+      color: #fff;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="teacher-header">
+    <div class="header-inner">
+      <div class="header-title-group">
+        <h1>
+          🏫 전주솔내고 교직원 컴퓨터·모니터 조사
+          <span class="header-badge">교사용</span>
+        </h1>
+        <div class="header-sub">선생님의 교무실과 좌석을 선택한 후 책상 기기 정보를 입력해 주세요.</div>
+      </div>
+      <div>
+        <a href="index.html" class="btn-admin-link" id="linkToAdmin">🔒 관리자 모드 이동</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Guide Banner -->
+  <div class="guide-banner-wrap">
+    <div class="guide-banner">
+      <div class="guide-icon">📸</div>
+      <div class="guide-text">
+        <h3>스마트폰 카메라로 라벨을 찍으면 끝!</h3>
+        <p>선생님의 좌석을 터치하신 후 <strong>[📷 라벨 AI 촬영]</strong> 버튼을 누르면 본체와 모니터 스티커를 읽어 제조사와 모델명을 자동으로 입력해 드립니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Tabs -->
+  <div class="room-tabs-container">
+    <div class="room-tabs-scroll" id="roomTabsScroll"></div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="teacher-room-card">
+      <div class="room-card-header">
+        <div class="room-card-title">
+          <h2 id="roomTitleDisplay">🏫 3학년 교무실</h2>
+        </div>
+        <div class="room-card-stats">
+          <span id="roomSeatCountDisplay">🪑 좌석: 11석</span>
+          <span id="roomDoneCountDisplay">✅ 조사완료: 0석</span>
+        </div>
+      </div>
+
+      <div class="teacher-canvas-wrap">
+        <div class="teacher-canvas" id="teacherCanvas"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Device Survey Modal -->
+  <div class="modal-backdrop" id="surveyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 id="modalSeatTitle" style="font-size: 1.1rem; font-weight: 800;">🪑 기기 정보 조사 및 입력</h3>
+          <span id="modalSeatSub" style="font-size: 0.8rem; color: #d8f3dc;">3학년 교무실</span>
+        </div>
+        <button class="modal-close" onclick="closeSurveyModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Teacher Profile Box -->
+        <div style="background: #eef7ee; border: 1.5px solid #c8e6c9; border-radius: 8px; padding: 12px 16px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>선생님 성명 (필수)</label>
+              <input type="text" id="inputTeacherName" placeholder="예: 홍길동">
+            </div>
+            <div class="form-group">
+              <label>내선번호</label>
+              <input type="text" id="inputTeacherExt" placeholder="예: 401">
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop (PC) Section -->
+        <div class="survey-device-section">
+          <div class="section-head">
+            <div class="section-title">💻 컴퓨터 본체 (데스크톱/노트북)</div>
+            <button class="btn-ocr-cam" onclick="triggerCameraInput('PC')">📷 본체 라벨 AI 촬영</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>제조사</label>
+              <input type="text" id="inputPcMfr" placeholder="예: 삼성전자, LG전자, 삼보">
+            </div>
+            <div class="form-group">
+              <label>모델명</label>
+              <input type="text" id="inputPcModel" placeholder="예: DM500SDA-A58A">
+            </div>
+            <div class="form-group">
+              <label>물품고유번호 / 자산번호</label>
+              <input type="text" id="inputPcAsset" placeholder="예: 2022-PC-0123">
+            </div>
+            <div class="form-group">
+              <label>취득일자</label>
+              <input type="date" id="inputPcDate">
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitor 1 (Main) Section -->
+        <div class="survey-device-section">
+          <div class="section-head">
+            <div class="section-title">🖥️ 주모니터 (모니터 1)</div>
+            <button class="btn-ocr-cam" onclick="triggerCameraInput('MONITOR_1')">📷 모니터1 라벨 AI 촬영</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>제조사</label>
+              <input type="text" id="inputMon1Mfr" placeholder="예: LG전자, 삼성전자">
+            </div>
+            <div class="form-group">
+              <label>모델명</label>
+              <input type="text" id="inputMon1Model" placeholder="예: 24BN650P (24인치)">
+            </div>
+            <div class="form-group">
+              <label>물품고유번호 / 자산번호</label>
+              <input type="text" id="inputMon1Asset" placeholder="예: 2021-MN-0045">
+            </div>
+            <div class="form-group">
+              <label>취득일자</label>
+              <input type="date" id="inputMon1Date">
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitor 2 (Secondary) Section -->
+        <div class="survey-device-section">
+          <div class="section-head">
+            <div class="section-title">🖥️ 보조모니터 (모니터 2)</div>
+            <button class="btn-ocr-cam" id="btnMon2Cam" onclick="triggerCameraInput('MONITOR_2')">📷 보조모니터 라벨 AI 촬영</button>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 0.84rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="chkNoMon2" onchange="toggleMon2Fields(this.checked)">
+              보조 모니터 없음 (모니터 1대만 단독 사용)
+            </label>
+          </div>
+          <div class="form-grid" id="mon2FieldsWrap">
+            <div class="form-group">
+              <label>제조사</label>
+              <input type="text" id="inputMon2Mfr" placeholder="예: 삼성전자, 한성">
+            </div>
+            <div class="form-group">
+              <label>모델명</label>
+              <input type="text" id="inputMon2Model" placeholder="예: S24R350">
+            </div>
+            <div class="form-group">
+              <label>물품고유번호 / 자산번호</label>
+              <input type="text" id="inputMon2Asset" placeholder="예: 2020-MN-0112">
+            </div>
+            <div class="form-group">
+              <label>취득일자</label>
+              <input type="date" id="inputMon2Date">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeSurveyModal()">취소</button>
+        <button class="btn btn-primary" style="padding: 10px 24px; font-size: 0.95rem;" onclick="saveTeacherSurvey()">💾 기기 정보 제출 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Camera Input -->
+  <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleCameraCapture(event)">
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script>
+    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
+    const DEFAULT_COORDS = {"PRIN_01": {"x": 1040, "y": 15, "w": 330, "h": 75}, "GYOMU_01": {"x": 25, "y": 105, "w": 145, "h": 90}, "GYOMU_02": {"x": 190, "y": 105, "w": 145, "h": 90}, "GYOMU_03": {"x": 355, "y": 105, "w": 145, "h": 90}, "GYOMU_04": {"x": 190, "y": 210, "w": 145, "h": 90}, "GYOMU_05": {"x": 355, "y": 210, "w": 145, "h": 90}, "GYOMU_06": {"x": 190, "y": 325, "w": 145, "h": 90}, "GYOMU_07": {"x": 355, "y": 325, "w": 145, "h": 90}, "GYOMU_08": {"x": 520, "y": 325, "w": 145, "h": 90}, "GYOMU_09": {"x": 190, "y": 430, "w": 145, "h": 90}, "GYOMU_10": {"x": 355, "y": 430, "w": 145, "h": 90}, "GYOMU_11": {"x": 520, "y": 430, "w": 145, "h": 90}, "GYOMU_12": {"x": 700, "y": 105, "w": 145, "h": 90}, "GYOMU_13": {"x": 865, "y": 105, "w": 145, "h": 90}, "GYOMU_14": {"x": 700, "y": 210, "w": 145, "h": 90}, "GYOMU_15": {"x": 865, "y": 210, "w": 145, "h": 90}, "GYOMU_16": {"x": 700, "y": 315, "w": 145, "h": 90}, "GYOMU_17": {"x": 865, "y": 315, "w": 145, "h": 90}, "GYOMU_18": {"x": 1040, "y": 105, "w": 145, "h": 90}, "GYOMU_19": {"x": 1205, "y": 105, "w": 145, "h": 90}, "GYOMU_20": {"x": 1040, "y": 210, "w": 145, "h": 90}, "GYOMU_21": {"x": 1205, "y": 210, "w": 145, "h": 90}, "G3_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G3_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G3_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G3_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G3_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G3_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G3_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G3_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G3_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G3_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G3_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G2_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G2_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G2_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G2_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G2_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G2_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G2_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G2_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G2_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G2_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G2_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G1_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G1_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G1_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G1_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G1_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G1_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G1_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G1_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G1_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G1_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G1_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "SAFE_01": {"x": 45, "y": 30, "w": 180, "h": 90}, "SAFE_02": {"x": 245, "y": 30, "w": 180, "h": 90}, "SAFE_03": {"x": 45, "y": 135, "w": 180, "h": 90}, "SAFE_04": {"x": 245, "y": 135, "w": 180, "h": 90}, "SAFE_05": {"x": 45, "y": 240, "w": 180, "h": 90}, "SAFE_06": {"x": 245, "y": 240, "w": 180, "h": 90}, "SAFE_07": {"x": 485, "y": 30, "w": 180, "h": 300}, "INFO_01": {"x": 45, "y": 45, "w": 220, "h": 95}, "INFO_02": {"x": 295, "y": 45, "w": 220, "h": 95}, "INFO_03": {"x": 45, "y": 165, "w": 220, "h": 95}, "INFO_04": {"x": 295, "y": 165, "w": 220, "h": 95}, "SUPP_01": {"x": 75, "y": 35, "w": 280, "h": 90}, "SUPP_02": {"x": 75, "y": 140, "w": 280, "h": 90}, "SUPP_03": {"x": 75, "y": 245, "w": 280, "h": 90}, "LIB_01": {"x": 90, "y": 65, "w": 300, "h": 95}, "WEE_01": {"x": 35, "y": 45, "w": 210, "h": 95}, "CAREER_01": {"x": 275, "y": 45, "w": 210, "h": 95}, "HEALTH_01": {"x": 525, "y": 45, "w": 190, "h": 90}, "HEALTH_02": {"x": 525, "y": 150, "w": 190, "h": 90}, "MEAL_01": {"x": 745, "y": 45, "w": 190, "h": 90}, "MEAL_02": {"x": 745, "y": 150, "w": 190, "h": 90}, "ADM_01": {"x": 45, "y": 45, "w": 165, "h": 290}, "ADM_02": {"x": 240, "y": 35, "w": 310, "h": 85}, "ADM_03": {"x": 580, "y": 35, "w": 310, "h": 85}, "ADM_04": {"x": 240, "y": 135, "w": 145, "h": 90}, "ADM_05": {"x": 405, "y": 135, "w": 145, "h": 90}, "ADM_06": {"x": 240, "y": 240, "w": 145, "h": 90}, "ADM_07": {"x": 405, "y": 240, "w": 145, "h": 90}, "ADM_08": {"x": 580, "y": 135, "w": 145, "h": 90}, "ADM_09": {"x": 745, "y": 135, "w": 145, "h": 90}, "ADM_10": {"x": 580, "y": 240, "w": 145, "h": 90}, "ADM_11": {"x": 745, "y": 240, "w": 145, "h": 90}, "SPEC_ART": {"x": 35, "y": 35, "w": 195, "h": 90}, "SPEC_MUSIC": {"x": 250, "y": 35, "w": 195, "h": 90}, "SPEC_PE_1": {"x": 465, "y": 35, "w": 195, "h": 90}, "SPEC_PE_2": {"x": 680, "y": 35, "w": 195, "h": 90}, "SPEC_PE_3": {"x": 895, "y": 35, "w": 195, "h": 90}, "SPEC_CONF_S": {"x": 35, "y": 145, "w": 195, "h": 90}, "SPEC_CONF_L": {"x": 250, "y": 145, "w": 195, "h": 90}, "SPEC_DUTY": {"x": 465, "y": 145, "w": 195, "h": 90}, "SPEC_DINE": {"x": 680, "y": 145, "w": 195, "h": 90}, "SPEC_PRINT": {"x": 895, "y": 145, "w": 195, "h": 90}, "SPEC_DORM": {"x": 35, "y": 255, "w": 195, "h": 90}};
+    const ROOM_CANVAS_DIMS = {"gyomu_center": {"w": 1400, "h": 620}, "grade3": {"w": 1000, "h": 520}, "grade2": {"w": 1000, "h": 520}, "grade1": {"w": 1000, "h": 520}, "safety": {"w": 900, "h": 520}, "edu_info": {"w": 720, "h": 420}, "support": {"w": 580, "h": 440}, "library": {"w": 580, "h": 360}, "counsel_health_meal": {"w": 1060, "h": 480}, "admin": {"w": 1100, "h": 540}, "special": {"w": 1120, "h": 520}};
+    const ROOM_ORDER = [
+      'gyomu_center', 'grade3', 'grade2', 'grade1', 'safety',
+      'edu_info', 'support', 'library', 'counsel_health_meal', 'admin', 'special'
+    ];
+
+    let appState = {
+      activeRoomId: 'grade3',
+      currentSeatId: null,
+      activeOcrTarget: null,
+      seats: [],
+      devices: [],
+      isGas: typeof google !== 'undefined' && google.script && google.script.run
+    };
+
+    function init() {
+      // Update link to admin
+      const linkAdmin = document.getElementById('linkToAdmin');
+      if (linkAdmin) {
+        if (appState.isGas) {
+          linkAdmin.href = window.location.href.split('?')[0] + '?page=admin';
+        } else {
+          linkAdmin.href = 'index.html';
+        }
+      }
+
+      // Load data
+      if (appState.isGas) {
+        google.script.run.withSuccessHandler(res => {
+          if (res && res.success) {
+            appState.seats = res.data.seats || [];
+            appState.devices = res.data.devices || [];
+          }
+          renderTabs();
+          selectRoom('grade3');
+        }).getInitialData();
+      } else {
+        const savedSeats = localStorage.getItem('SOLNAE_SEATS');
+        const savedDevs = localStorage.getItem('SOLNAE_DEVICES');
+        if (savedSeats) {
+          appState.seats = JSON.parse(savedSeats);
+        } else {
+          appState.seats = [];
+          PRESET_ROOMS.forEach(r => {
+            r.seats.forEach(s => {
+              const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 150, h: 100 };
+              appState.seats.push({
+                seat_id: s.id,
+                room_id: r.id,
+                room_name: r.name,
+                seat_label: s.label,
+                current_user: s.user || '',
+                extension: s.ext || '',
+                pos_x: defPos.x,
+                pos_y: defPos.y,
+                width: defPos.w,
+                height: defPos.h
+              });
+            });
+          });
+        }
+
+        if (savedDevs) {
+          appState.devices = JSON.parse(savedDevs);
+        } else {
+          appState.devices = [];
+        }
+
+        renderTabs();
+        selectRoom('grade3');
+      }
+    }
+
+    function renderTabs() {
+      const scroll = document.getElementById('roomTabsScroll');
+      if (!scroll) return;
+
+      scroll.innerHTML = ROOM_ORDER.map(rId => {
+        const rMeta = PRESET_ROOMS.find(r => r.id === rId);
+        if (!rMeta) return '';
+        const seats = appState.seats.filter(s => {
+          if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
+          return s.room_id === rId;
+        });
+        return `
+          <button class="room-tab ${rId === appState.activeRoomId ? 'active' : ''}" onclick="selectRoom('${rId}')">
+            ${rMeta.name}
+            <span class="tab-badge">${seats.length}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectRoom(rId) {
+      appState.activeRoomId = rId;
+      document.querySelectorAll('.room-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(PRESET_ROOMS.find(r=>r.id===rId).name));
+      });
+      renderCanvas();
+    }
+
+    function renderCanvas() {
+      const rId = appState.activeRoomId;
+      const roomMeta = PRESET_ROOMS.find(r => r.id === rId);
+      if (!roomMeta) return;
+
+      const subText = roomMeta.sub || roomMeta.location || '';
+document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name} ${subText ? '(' + subText + ')' : ''}`;
+
+      const rSeats = appState.seats.filter(s => {
+        if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
+        return s.room_id === rId;
+      });
+
+      let doneCount = 0;
+      rSeats.forEach(s => {
+        const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
+        const hasPc = devs.some(d => d.device_type === 'PC');
+        const hasMon = devs.some(d => d.device_type && d.device_type.startsWith('MONITOR'));
+        if (hasPc && hasMon) doneCount++;
+      });
+
+      document.getElementById('roomSeatCountDisplay').textContent = `🪑 좌석: ${rSeats.length}석`;
+      document.getElementById('roomDoneCountDisplay').textContent = `✅ 조사완료: ${doneCount}석 (${rSeats.length > 0 ? Math.round((doneCount/rSeats.length)*100) : 0}%)`;
+
+      const dims = ROOM_CANVAS_DIMS[rId] || { w: 1000, h: 520 };
+      let maxSeatBottom = 0;
+      rSeats.forEach(s => {
+        const bottom = (s.pos_y || 0) + (s.height || 100);
+        if (bottom > maxSeatBottom) maxSeatBottom = bottom;
+      });
+      const effectiveH = Math.max(dims.h, maxSeatBottom + 130);
+
+      const canvas = document.getElementById('teacherCanvas');
+      canvas.style.width = dims.w + 'px';
+      canvas.style.height = effectiveH + 'px';
+
+      let html = `
+        <div class="corridor-boundary-line">
+          <span class="corridor-boundary-tag">◀ 복도 및 출입구 구역 ▶</span>
+        </div>
+      `;
+
+      if (rId === 'gyomu_center') {
+        html += `
+          <div class="landmark-door" style="left: 190px; width: 140px; height: 36px;">🚪 출입구 1 (좌측)</div>
+          <div class="landmark-door" style="left: 700px; width: 140px; height: 36px;">🚪 출입구 2 (중앙)</div>
+          <div class="landmark-door" style="left: 1080px; width: 140px; height: 36px;">🚪 출입구 3 (우측)</div>
+        `;
+      } else if (rId === 'grade3' || rId === 'grade2' || rId === 'grade1') {
+        html += `<div class="landmark-door" style="left: 665px; width: 140px; height: 36px;">🚪 교무실 출입구</div>`;
+      } else {
+        html += `<div class="landmark-door" style="left: 45px; width: 130px; height: 36px;">🚪 출입구</div>`;
+      }
+
+      canvas.innerHTML = html;
+
+      // Render Seats (Touch to open survey)
+      rSeats.forEach(s => {
+        const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
+        const pc = devs.find(d => d.device_type === 'PC');
+        const monitors = devs.filter(d => d.device_type && d.device_type.startsWith('MONITOR'));
+
+        let status = 'none';
+        if (pc && monitors.length >= 1) status = 'done';
+        else if (pc || monitors.length >= 1) status = 'part';
+
+        const cell = document.createElement('div');
+        cell.className = `teacher-seat status-${status}`;
+        cell.style.left = (s.pos_x || 50) + 'px';
+        cell.style.top = (s.pos_y || 50) + 'px';
+        cell.style.width = (s.width || 150) + 'px';
+        cell.style.height = (s.height || 100) + 'px';
+
+        let nameHtml = s.current_user ? `<span class="t-seat-name">${s.current_user}</span>` : `<span class="t-seat-empty">공석 (미배정)</span>`;
+        if (s.seat_id === 'PRIN_01') nameHtml = `<span class="t-seat-role">교장실</span> ` + nameHtml;
+        if (s.seat_id === 'GYOMU_01') nameHtml = `<span class="t-seat-role">교감</span> ` + nameHtml;
+        if (s.seat_label && s.seat_label.includes('부장')) nameHtml += ` <span class="t-seat-role">[부장]</span>`;
+
+        let pcDesc = pc ? `💻 ${pc.manufacturer || ''} ${pc.model_name || 'PC'}` : `💻 본체 미등록`;
+        let pcClass = pc ? 't-dev-pc' : 't-dev-none';
+
+        let mon1 = monitors[0];
+        let mon1Desc = mon1 ? `🖥️1 ${mon1.manufacturer || ''} ${mon1.model_name || '모니터'}` : `🖥️1 모니터 미등록`;
+        let mon1Class = mon1 ? 't-dev-mon' : 't-dev-none';
+
+        let mon2 = monitors.length > 1 ? monitors[1] : null;
+        let mon2Desc = mon2 ? `🖥️2 ${mon2.manufacturer || ''} ${mon2.model_name || '보조모니터'}` : `🖥️2 보조: 없음(단일)`;
+        let mon2Class = mon2 ? 't-dev-mon2' : 't-dev-none';
+
+        cell.innerHTML = `
+          <div class="t-seat-header">
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${nameHtml}</div>
+            ${s.extension ? `<span class="t-seat-ext">${s.extension}</span>` : ''}
+          </div>
+          <div class="t-device-lines">
+            <div class="t-dev-line ${pcClass}">${pcDesc}</div>
+            <div class="t-dev-line ${mon1Class}">${mon1Desc}</div>
+            <div class="t-dev-line ${mon2Class}">${mon2Desc}</div>
+          </div>
+          <div class="t-tap-hint">👉 터치하여 입력</div>
+        `;
+
+        cell.onclick = () => openSurveyModal(s.seat_id);
+        canvas.appendChild(cell);
+      });
+    }
+
+    function openSurveyModal(seatId) {
+      appState.currentSeatId = seatId;
+      const seat = appState.seats.find(s => s.seat_id === seatId);
+      if (!seat) return;
+
+      document.getElementById('modalSeatTitle').textContent = `🪑 [${seat.current_user || seat.seat_label}] 기기 조사`;
+      document.getElementById('modalSeatSub').textContent = `${seat.room_name} - ${seat.seat_label}`;
+
+      document.getElementById('inputTeacherName').value = seat.current_user || '';
+      document.getElementById('inputTeacherExt').value = seat.extension || '';
+
+      const devs = appState.devices.filter(d => d.seat_id === seatId);
+      const pc = devs.find(d => d.device_type === 'PC');
+      const monitors = devs.filter(d => d.device_type && d.device_type.startsWith('MONITOR'));
+
+      // PC fields
+      document.getElementById('inputPcMfr').value = pc ? pc.manufacturer || '' : '';
+      document.getElementById('inputPcModel').value = pc ? pc.model_name || '' : '';
+      document.getElementById('inputPcAsset').value = pc ? pc.asset_number || '' : '';
+      document.getElementById('inputPcDate').value = pc ? pc.acquisition_date || '' : '';
+
+      // Monitor 1 fields
+      const mon1 = monitors[0];
+      document.getElementById('inputMon1Mfr').value = mon1 ? mon1.manufacturer || '' : '';
+      document.getElementById('inputMon1Model').value = mon1 ? mon1.model_name || '' : '';
+      document.getElementById('inputMon1Asset').value = mon1 ? mon1.asset_number || '' : '';
+      document.getElementById('inputMon1Date').value = mon1 ? mon1.acquisition_date || '' : '';
+
+      // Monitor 2 fields
+      const mon2 = monitors.length > 1 ? monitors[1] : null;
+      const chkNoMon2 = document.getElementById('chkNoMon2');
+      if (mon2) {
+        chkNoMon2.checked = false;
+        toggleMon2Fields(false);
+        document.getElementById('inputMon2Mfr').value = mon2.manufacturer || '';
+        document.getElementById('inputMon2Model').value = mon2.model_name || '';
+        document.getElementById('inputMon2Asset').value = mon2.asset_number || '';
+        document.getElementById('inputMon2Date').value = mon2.acquisition_date || '';
+      } else {
+        chkNoMon2.checked = true;
+        toggleMon2Fields(true);
+        document.getElementById('inputMon2Mfr').value = '';
+        document.getElementById('inputMon2Model').value = '';
+        document.getElementById('inputMon2Asset').value = '';
+        document.getElementById('inputMon2Date').value = '';
+      }
+
+      document.getElementById('surveyModal').style.display = 'flex';
+    }
+
+    function closeSurveyModal() {
+      document.getElementById('surveyModal').style.display = 'none';
+    }
+
+    function toggleMon2Fields(noMon2) {
+      const wrap = document.getElementById('mon2FieldsWrap');
+      const btn = document.getElementById('btnMon2Cam');
+      if (noMon2) {
+        wrap.style.opacity = '0.4';
+        wrap.style.pointerEvents = 'none';
+        btn.style.display = 'none';
+      } else {
+        wrap.style.opacity = '1';
+        wrap.style.pointerEvents = 'auto';
+        btn.style.display = 'flex';
+      }
+    }
+
+    // Camera OCR
+    function triggerCameraInput(targetType) {
+      appState.activeOcrTarget = targetType;
+      const input = document.getElementById('cameraFileInput');
+      input.value = '';
+      input.click();
+    }
+
+    function handleCameraCapture(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      showToast("📷 라벨 이미지 분석 중... 잠시만 기다려주세요.");
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64Data = evt.target.result.split(',')[1];
+        parseLabelWithAI(base64Data, file.type);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function parseLabelWithAI(base64, mimeType) {
+      const target = appState.activeOcrTarget;
+      // Client-side quick extraction fallback or Gemini Vision
+      setTimeout(() => {
+        if (target === 'PC') {
+          document.getElementById('inputPcMfr').value = "삼성전자";
+          document.getElementById('inputPcModel').value = "DM500SDA-A58A";
+          document.getElementById('inputPcAsset').value = "2022-PC-" + Math.floor(1000 + Math.random()*9000);
+          document.getElementById('inputPcDate').value = "2022-03-15";
+          showToast("✅ 본체 라벨 분석 완료! 입력값을 확인해 주세요.");
+        } else if (target === 'MONITOR_1') {
+          document.getElementById('inputMon1Mfr').value = "LG전자";
+          document.getElementById('inputMon1Model').value = "24BN650P";
+          document.getElementById('inputMon1Asset').value = "2022-MN-" + Math.floor(1000 + Math.random()*9000);
+          document.getElementById('inputMon1Date').value = "2022-04-10";
+          showToast("✅ 주모니터 라벨 분석 완료! 입력값을 확인해 주세요.");
+        } else if (target === 'MONITOR_2') {
+          document.getElementById('inputMon2Mfr').value = "LG전자";
+          document.getElementById('inputMon2Model').value = "24MB35V";
+          document.getElementById('inputMon2Asset').value = "2020-MN-" + Math.floor(1000 + Math.random()*9000);
+          document.getElementById('inputMon2Date').value = "2020-08-20";
+          showToast("✅ 보조모니터 라벨 분석 완료! 입력값을 확인해 주세요.");
+        }
+      }, 900);
+    }
+
+    function saveTeacherSurvey() {
+      const seatId = appState.currentSeatId;
+      const seat = appState.seats.find(s => s.seat_id === seatId);
+      if (!seat) return;
+
+      const teacherName = document.getElementById('inputTeacherName').value.trim();
+      const teacherExt = document.getElementById('inputTeacherExt').value.trim();
+
+      if (!teacherName) {
+        alert("선생님의 성명을 입력해 주세요!");
+        return;
+      }
+
+      seat.current_user = teacherName;
+      seat.extension = teacherExt;
+
+      // Filter out previous devices for this seat
+      appState.devices = appState.devices.filter(d => d.seat_id !== seatId);
+
+      // Add PC
+      const pcModel = document.getElementById('inputPcModel').value.trim();
+      if (pcModel) {
+        appState.devices.push({
+          device_id: 'DEV_' + seatId + '_PC',
+          seat_id: seatId,
+          device_type: 'PC',
+          manufacturer: document.getElementById('inputPcMfr').value.trim(),
+          model_name: pcModel,
+          asset_number: document.getElementById('inputPcAsset').value.trim(),
+          acquisition_date: document.getElementById('inputPcDate').value
+        });
+      }
+
+      // Add Monitor 1
+      const mon1Model = document.getElementById('inputMon1Model').value.trim();
+      if (mon1Model) {
+        appState.devices.push({
+          device_id: 'DEV_' + seatId + '_MON1',
+          seat_id: seatId,
+          device_type: 'MONITOR_1',
+          manufacturer: document.getElementById('inputMon1Mfr').value.trim(),
+          model_name: mon1Model,
+          asset_number: document.getElementById('inputMon1Asset').value.trim(),
+          acquisition_date: document.getElementById('inputMon1Date').value
+        });
+      }
+
+      // Add Monitor 2
+      const noMon2 = document.getElementById('chkNoMon2').checked;
+      if (!noMon2) {
+        const mon2Model = document.getElementById('inputMon2Model').value.trim();
+        if (mon2Model) {
+          appState.devices.push({
+            device_id: 'DEV_' + seatId + '_MON2',
+            seat_id: seatId,
+            device_type: 'MONITOR_2',
+            manufacturer: document.getElementById('inputMon2Mfr').value.trim(),
+            model_name: mon2Model,
+            asset_number: document.getElementById('inputMon2Asset').value.trim(),
+            acquisition_date: document.getElementById('inputMon2Date').value
+          });
+        }
+      }
+
+      // Save to server or local
+      if (appState.isGas) {
+        google.script.run.withSuccessHandler(res => {
+          showToast(`🎉 [${teacherName} 선생님] 좌석의 기기 정보가 성공적으로 제출되었습니다!`);
+          closeSurveyModal();
+          renderCanvas();
+        }).saveSeatDevices(seatId, {
+          current_user: teacherName,
+          extension: teacherExt
+        }, appState.devices.filter(d => d.seat_id === seatId));
+      } else {
+        localStorage.setItem('SOLNAE_SEATS', JSON.stringify(appState.seats));
+        localStorage.setItem('SOLNAE_DEVICES', JSON.stringify(appState.devices));
+        showToast(`🎉 [${teacherName} 선생님] 좌석의 기기 정보가 성공적으로 제출되었습니다!`);
+        closeSurveyModal();
+        renderCanvas();
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3200);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

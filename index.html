@@ -899,6 +899,8 @@
     </div>
     <div class="topbar-actions">
       <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
+      <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800; border:none;" onclick="openTeacherLinkModal()">🔗 교사용 조사 링크</button>
+      <button class="btn btn-outline" id="btnModeAll" onclick="selectRoom('all')">🏛️ 전체 교무실</button>
       <button class="btn btn-outline" id="btnModeRoom" onclick="switchViewMode('room')">🏫 교무실별 뷰</button>
       <button class="btn btn-outline" id="btnModeReassign" onclick="switchViewMode('reassign')">👥 인사이동 모드</button>
       <button class="btn btn-outline" onclick="openSettingsModal()">⚙️ 설정</button>
@@ -909,6 +911,9 @@
   <!-- ROOM SELECTOR TAB BAR -->
   <nav class="room-nav-bar" id="roomNavBar">
     <div class="room-tabs-scroll" id="roomTabsScroll">
+      <button class="room-tab-btn" data-room="all" id="tab_room_all" onclick="selectRoom('all')">
+        🏛️ 전체 교무실 <span class="room-badge-count" id="badge_count_all">98</span>
+      </button>
       <button class="room-tab-btn active" data-room="gyomu_center" onclick="selectRoom('gyomu_center')">
         교무센터·교장실 <span class="room-badge-count" id="badge_count_gyomu_center">22</span>
       </button>
@@ -1516,7 +1521,7 @@
             s.pos_x = 60;
             s.pos_y = 60;
             s.width = 150;
-            s.height = 90;
+            s.height = 100;
           }
         } else if (defPos && (!s.width || s.width < 135 || !s.height || s.height < 80)) {
           // Automatically upgrade old stored data to the new spacious baseline dimensions
@@ -1567,11 +1572,147 @@
       document.querySelectorAll('.room-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-room') === roomId);
       });
-      if (appState.viewMode !== 'room') {
-        switchViewMode('room');
-      } else {
-        renderActiveRoomView();
+
+      const btnToggle = document.getElementById('btnToggleAllRooms');
+      if (btnToggle) {
+        btnToggle.textContent = (roomId === 'all') ? '🏫 개별 교무실 뷰' : '🏛️ 전체 한눈에 보기';
       }
+
+      const subControls = document.querySelector('.sub-controls-bar');
+      if (roomId === 'all') {
+        if (subControls) subControls.style.display = 'none';
+        document.getElementById('singleRoomContainer').style.display = 'block';
+        document.getElementById('reassignPanel').style.display = 'none';
+        renderAllRoomsView();
+      } else {
+        if (subControls) subControls.style.display = 'flex';
+        if (appState.viewMode !== 'room') {
+          switchViewMode('room');
+        } else {
+          renderActiveRoomView();
+        }
+      }
+    }
+
+    function toggleAllRoomsView() {
+      if (appState.activeRoomId === 'all') {
+        selectRoom('gyomu_center');
+      } else {
+        selectRoom('all');
+      }
+    }
+
+    // =========================================================================
+    // ALL ROOMS PANORAMA VIEW (전체 교무실 한번에 보기)
+    // =========================================================================
+    function renderAllRoomsView() {
+      const container = document.getElementById('singleRoomContainer');
+      if (!container) return;
+
+      const totalSeats = appState.seats.length;
+      let totalDone = 0;
+      appState.seats.forEach(s => {
+        const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
+        const hasPc = devs.some(d => d.device_type === 'PC');
+        const hasMon = devs.some(d => d.device_type && d.device_type.startsWith('MONITOR'));
+        if (hasPc && hasMon) totalDone++;
+      });
+
+      let allHtml = `
+        <div style="background: #fff; padding: 18px 24px; border-radius: 12px; border: 1.5px solid var(--border-color); margin-bottom: 20px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="margin: 0 0 6px 0; font-size: 1.4rem; color: var(--primary); font-weight: 800;">
+              🏛️ 전주솔내고 전체 교무실 배치도 총괄 뷰
+            </h2>
+            <div style="font-size: 0.9rem; color: #555; display: flex; gap: 16px; flex-wrap: wrap;">
+              <span>총 <strong>11개 교무실</strong></span>
+              <span>총 좌석: <strong>${totalSeats}석</strong></span>
+              <span>조사 완료: <strong style="color: #2e7d32;">${totalDone}석 (${Math.round((totalDone/totalSeats)*100)}%)</strong></span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800;" onclick="openTeacherLinkModal()">🔗 교사용 조사 화면 링크 공유</button>
+            <button class="btn btn-primary" onclick="selectRoom('gyomu_center')">🏫 교무센터로 이동</button>
+          </div>
+        </div>
+
+        <div class="all-rooms-container">
+      `;
+
+      ROOM_ORDER.forEach(rId => {
+        const roomMeta = PRESET_ROOMS.find(r => r.id === rId);
+        if (!roomMeta) return;
+
+        const rTitle = roomMeta.name;
+        const rSub = roomMeta.sub || roomMeta.location || '';
+        const rSeats = appState.seats.filter(s => {
+          if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
+          return s.room_id === rId;
+        });
+
+        let rDone = 0;
+        rSeats.forEach(s => {
+          const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
+          const hasPc = devs.some(d => d.device_type === 'PC');
+          const hasMon = devs.some(d => d.device_type && d.device_type.startsWith('MONITOR'));
+          if (hasPc && hasMon) rDone++;
+        });
+
+        const dims = ROOM_CANVAS_DIMS[rId] || { w: 900, h: 480 };
+        let maxSeatBottom = 0;
+        rSeats.forEach(s => {
+          const bottom = (s.pos_y || 0) + (s.height || 100);
+          if (bottom > maxSeatBottom) maxSeatBottom = bottom;
+        });
+        const effectiveH = Math.max(dims.h, maxSeatBottom + 130);
+
+        allHtml += `
+          <div class="all-rooms-card" id="room_section_${rId}">
+            <div class="all-rooms-header">
+              <div class="all-rooms-title">
+                🏫 ${rTitle} <span style="font-size: 0.85rem; font-weight: 600; color: #555;">${rSub ? '(' + rSub + ')' : ''}</span>
+                <span style="font-size: 0.8rem; background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 12px; border: 1px solid #c8e6c9;">
+                  좌석: ${rSeats.length}석 (완료: ${rDone}석)
+                </span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-zoom-into-room" onclick="selectRoom('${rId}')">🔍 이 교무실 집중 보기 & 이동</button>
+              </div>
+            </div>
+            <div class="room-canvas-wrapper" style="background: #f8faf9;">
+              <div class="room-canvas" id="canvas_${rId}" style="width: ${dims.w}px; height: ${effectiveH}px;">
+                <div class="corridor-boundary-line">
+                  <span class="corridor-boundary-tag">◀ 복도 및 출입구 구역 ▶</span>
+                </div>
+                <div class="room-landmark landmark-door" style="left: 45px; bottom: 16px; width: 130px; height: 36px;">🚪 출입구</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      allHtml += `</div>`;
+      container.innerHTML = allHtml;
+
+      // Mount all seats into their respective canvas
+      ROOM_ORDER.forEach(rId => {
+        const canvas = document.getElementById(`canvas_${rId}`);
+        if (!canvas) return;
+
+        const rSeats = appState.seats.filter(s => {
+          if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
+          return s.room_id === rId;
+        });
+
+        rSeats.forEach(s => {
+          const cell = createSeatCellElement(s.seat_id);
+          if (cell) canvas.appendChild(cell);
+        });
+      });
+
+      updateTabBadges();
+      const badgeAll = document.getElementById('badge_count_all');
+      if (badgeAll) badgeAll.textContent = totalSeats;
     }
 
     // Prev / Next Navigation
@@ -2010,24 +2151,31 @@
         pcLineHtml = `<div class="card-device-line device-empty">💻 본체 미등록</div>`;
       }
 
-      // 3. MONITOR INFO LINE
-      let monLineHtml = '';
-      if (monitors.length > 0) {
-        let monDesc = '';
-        if (monitors.length === 1) {
-          monDesc = (monitors[0].manufacturer ? monitors[0].manufacturer + ' ' : '') + (monitors[0].model_name || '모니터');
-        } else {
-          monDesc = monitors.map(m => m.model_name || m.manufacturer || '모니터').join(' + ');
-        }
-        monLineHtml = `<div class="card-device-line device-active-mon" title="모니터: ${monDesc}">🖥️ ${monDesc}</div>`;
+      // 3. MONITOR 1 (주모니터) & MONITOR 2 (보조모니터) INDIVIDUAL DISPLAY
+      const mon1 = monitors[0];
+      const mon2 = monitors.length > 1 ? monitors[1] : null;
+
+      let mon1Html = '';
+      if (mon1) {
+        let m1Desc = (mon1.manufacturer ? mon1.manufacturer + ' ' : '') + (mon1.model_name || '모니터1');
+        mon1Html = `<div class="card-device-line device-active-mon" title="주모니터: ${m1Desc}">🖥️1 ${m1Desc}</div>`;
       } else {
-        monLineHtml = `<div class="card-device-line device-empty">🖥️ 모니터 미등록</div>`;
+        mon1Html = `<div class="card-device-line device-empty">🖥️1 모니터1 미등록</div>`;
       }
+
+      let mon2Html = '';
+      if (mon2) {
+        let m2Desc = (mon2.manufacturer ? mon2.manufacturer + ' ' : '') + (mon2.model_name || '보조모니터');
+        mon2Html = `<div class="card-device-line device-active-mon2" title="보조모니터: ${m2Desc}">🖥️2 ${m2Desc}</div>`;
+      } else {
+        mon2Html = `<div class="card-device-line device-empty" style="opacity: 0.65;">🖥️2 보조: 없음 (단일)</div>`;
+      }
+      const monLineHtml = mon1Html + mon2Html;
 
       const posX = seat.pos_x !== undefined ? seat.pos_x : 50;
       const posY = seat.pos_y !== undefined ? seat.pos_y : 50;
       const w = seat.width || 135;
-      const h = seat.height || 78;
+      const h = seat.height || 100;
 
       const cell = document.createElement('div');
       cell.id = `seat_${seatId}`;
