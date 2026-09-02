@@ -2144,18 +2144,20 @@
       if (appState.isGas) {
         showToast("서버에 기기 정보를 제출하는 중...");
         google.script.run
-          .withSuccessHandler(() => {
-            showToast(`🎉 [${userName} 선생님] 기기 정보가 성공적으로 제출되었습니다!`);
+          .withSuccessHandler(function() {
+            showToast("🎉 [" + userName + " 선생님] 기기 정보가 성공적으로 제출되었습니다!");
             closeSeatModal();
             refreshCurrentView();
           })
-          .withFailureHandler(err => alert("제출 실패: " + err.message))
+          .withFailureHandler(function(err) {
+            alert("제출 실패: " + (err ? err.message : ""));
+          })
           .saveSeatDevices(seatId, { current_user: userName, extension: ext }, devices);
       } else {
         saveLocalData();
         closeSeatModal();
         refreshCurrentView();
-        showToast(`🎉 [${userName} 선생님] 기기 정보가 성공적으로 저장되었습니다!`);
+        showToast("🎉 [" + userName + " 선생님] 기기 정보가 성공적으로 저장되었습니다!");
       }
     }
 
@@ -3215,7 +3217,6 @@
         const others = allSpecs.filter(r => !['spec_art', 'spec_music', 'spec_pe'].includes(r.id));
 
         contentHtml = `
-          <!-- Row 1: 미술실 (슬림) + 음악실 (슬림) + 체육과실 (3좌석 나란히 수평 배치) -->
           <div style="display: flex; gap: 14px; align-items: stretch; margin-bottom: 14px;">
             <div style="width: 260px; flex-shrink: 0;">
               ${generateRoomBoxHtml(art, false)}
@@ -3228,7 +3229,6 @@
             </div>
           </div>
 
-          <!-- Row 2: 나머지 특별실들 (소회의실, 대회의실, 당직실, 식생활관, 인쇄실, 기숙사) -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
             ${others.map(r => generateRoomBoxHtml(r, false)).join('')}
           </div>

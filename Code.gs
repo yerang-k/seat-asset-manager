@@ -20,8 +20,7 @@ function doGet(e) {
     ? '전주솔내고 교직원 컴퓨터·모니터 현황 조사 (교사용)'
     : '전주솔내고 좌석별 PC·모니터 관리 시스템 (관리자)';
 
-  const template = HtmlService.createTemplateFromFile(file);
-  return template.evaluate()
+  return HtmlService.createHtmlOutputFromFile(file)
     .setTitle(title)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
