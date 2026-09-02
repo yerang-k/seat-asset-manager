@@ -1355,16 +1355,16 @@
         <div class="form-group">
           <label><strong>소속 교무실</strong></label>
           <select id="newSeatRoomId" onchange="handleNewSeatRoomChange(this.value)">
-            <option value="gyomu_center">교무센터(본관 후관 1층)</option>
-            <option value="grade3">3학년 교무실(본관 후관 4층)</option>
-            <option value="grade2">2학년 교무실(본관 후관 2층)</option>
-            <option value="grade1">1학년 교무실(본관 후관 3층)</option>
-            <option value="safety">학생안전부(본관 후관 1층)</option>
-            <option value="edu_info">교육정보부(본관 전관 4층)</option>
-            <option value="support">통합지원반(본관 후관 1층)</option>
-            <option value="library">도서실(본관 후관 3층)</option>
+            <option value="gyomu_center">교무센터</option>
+            <option value="grade3">3학년 교무실</option>
+            <option value="grade2">2학년 교무실</option>
+            <option value="grade1">1학년 교무실</option>
+            <option value="safety">학생안전부</option>
+            <option value="edu_info">교육정보부</option>
+            <option value="support">통합지원반</option>
+            <option value="library">도서실</option>
             <option value="counsel_health_meal">상담·보건·급식실</option>
-            <option value="admin">행정실(본관 1층)</option>
+            <option value="admin">행정실</option>
             <option value="special">특별실</option>
           </select>
         </div>
@@ -1645,15 +1645,15 @@
     
     // 9개 개별 특별실 독립 정의 (각 실별 전용 확대 뷰 제공)
     const SPECIAL_ROOM_DEFINITIONS = [
-      { id: 'spec_art', name: '미술실', floor: '별관', icon: '🎨', seat_ids: ['SPEC_ART'] },
-      { id: 'spec_music', name: '음악실', floor: '별관', icon: '🎵', seat_ids: ['SPEC_MUSIC'] },
-      { id: 'spec_pe', name: '체육과실', floor: '본관 전관 1층', icon: '⚽', seat_ids: ['SPEC_PE_1', 'SPEC_PE_2', 'SPEC_PE_3'] },
-      { id: 'spec_conf_s', name: '소회의실', floor: '교무센터옆', icon: '🤝', seat_ids: ['SPEC_CONF_S'] },
-      { id: 'spec_conf_l', name: '대회의실', floor: '본관 3층', icon: '🏛️', seat_ids: ['SPEC_CONF_L'] },
-      { id: 'spec_duty', name: '당직실', floor: '본관 1층', icon: '🌙', seat_ids: ['SPEC_DUTY'] },
-      { id: 'spec_dine', name: '식생활관', floor: '식생활관', icon: '🍽️', seat_ids: ['SPEC_DINE'] },
-      { id: 'spec_print', name: '인쇄실', floor: '본관 전관 1층', icon: '🖨️', seat_ids: ['SPEC_PRINT'] },
-      { id: 'spec_dorm', name: '기숙사', floor: '기숙사', icon: '🏢', seat_ids: ['SPEC_DORM'] }
+      { id: 'spec_art', name: '미술실', floor: '', icon: '🎨', seat_ids: ['SPEC_ART'] },
+      { id: 'spec_music', name: '음악실', floor: '', icon: '🎵', seat_ids: ['SPEC_MUSIC'] },
+      { id: 'spec_pe', name: '체육과실', floor: '', icon: '⚽', seat_ids: ['SPEC_PE_1', 'SPEC_PE_2', 'SPEC_PE_3'] },
+      { id: 'spec_conf_s', name: '소회의실', floor: '', icon: '🤝', seat_ids: ['SPEC_CONF_S'] },
+      { id: 'spec_conf_l', name: '대회의실', floor: '', icon: '🏛️', seat_ids: ['SPEC_CONF_L'] },
+      { id: 'spec_duty', name: '당직실', floor: '', icon: '🌙', seat_ids: ['SPEC_DUTY'] },
+      { id: 'spec_dine', name: '식생활관', floor: '', icon: '🍽️', seat_ids: ['SPEC_DINE'] },
+      { id: 'spec_print', name: '인쇄실', floor: '', icon: '🖨️', seat_ids: ['SPEC_PRINT'] },
+      { id: 'spec_dorm', name: '기숙사', floor: '', icon: '🏢', seat_ids: ['SPEC_DORM'] }
     ];
 
     let specialSubroomFilter = 'all';
@@ -1664,27 +1664,27 @@
     }
 
     const SPECIAL_FACILITY_INFO = {
-      'SPEC_ART': { name: '미술실', loc: '별관', icon: '🎨' },
-      'SPEC_MUSIC': { name: '음악실', loc: '별관', icon: '🎵' },
-      'SPEC_PE_1': { name: '체육과실-1', loc: '본관 전관1층', icon: '⚽' },
-      'SPEC_PE_2': { name: '체육과실-2', loc: '본관 전관1층', icon: '⚽' },
-      'SPEC_PE_3': { name: '체육과실-3', loc: '본관 전관1층', icon: '⚽' },
-      'SPEC_CONF_S': { name: '소회의실', loc: '교무센터옆', icon: '🤝' },
-      'SPEC_CONF_L': { name: '대회의실', loc: '본관3층', icon: '🏛️' },
-      'SPEC_PRINT': { name: '인쇄실', loc: '본관전관1층', icon: '🖨️' },
-      'SPEC_DUTY': { name: '당직실', loc: '본관1층', icon: '🌙' },
-      'SPEC_DINE': { name: '식생활관', loc: '식생활관', icon: '🍽️' },
-      'SPEC_DORM': { name: '기숙사', loc: '기숙사', icon: '🏢' },
-      'WEE_01': { name: '위클래스', loc: '본관 전관3층', icon: '🌱' },
-      'CAREER_01': { name: '진로상담실', loc: '본관 후관2층', icon: '🧭' },
-      'HEALTH_01': { name: '보건실-1', loc: '본관 전관1층', icon: '🩺' },
-      'HEALTH_02': { name: '보건실-2', loc: '본관 전관1층', icon: '🩺' },
-      'MEAL_01': { name: '급식실-1', loc: '급식실', icon: '🍳' },
-      'MEAL_02': { name: '급식실-2', loc: '급식실', icon: '🍳' },
-      'LIB_01': { name: '도서실', loc: '본관 후관3층', icon: '📚' }
+      'SPEC_ART': { name: '미술실', loc: '', icon: '🎨' },
+      'SPEC_MUSIC': { name: '음악실', loc: '', icon: '🎵' },
+      'SPEC_PE_1': { name: '체육과실-1', loc: '', icon: '⚽' },
+      'SPEC_PE_2': { name: '체육과실-2', loc: '', icon: '⚽' },
+      'SPEC_PE_3': { name: '체육과실-3', loc: '', icon: '⚽' },
+      'SPEC_CONF_S': { name: '소회의실', loc: '', icon: '🤝' },
+      'SPEC_CONF_L': { name: '대회의실', loc: '', icon: '🏛️' },
+      'SPEC_PRINT': { name: '인쇄실', loc: '', icon: '🖨️' },
+      'SPEC_DUTY': { name: '당직실', loc: '', icon: '🌙' },
+      'SPEC_DINE': { name: '식생활관', loc: '', icon: '🍽️' },
+      'SPEC_DORM': { name: '기숙사', loc: '', icon: '🏢' },
+      'WEE_01': { name: '위클래스', loc: '', icon: '🌱' },
+      'CAREER_01': { name: '진로상담실', loc: '', icon: '🧭' },
+      'HEALTH_01': { name: '보건실-1', loc: '', icon: '🩺' },
+      'HEALTH_02': { name: '보건실-2', loc: '', icon: '🩺' },
+      'MEAL_01': { name: '급식실-1', loc: '', icon: '🍳' },
+      'MEAL_02': { name: '급식실-2', loc: '', icon: '🍳' },
+      'LIB_01': { name: '도서실', loc: '', icon: '📚' }
     };
 
-    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
+    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "", "user": "", "ext": ""}]}];
     const DEFAULT_COORDS = {"PRIN_01": {"x": 1040, "y": 15, "w": 330, "h": 75}, "GYOMU_01": {"x": 25, "y": 105, "w": 145, "h": 90}, "GYOMU_02": {"x": 190, "y": 105, "w": 145, "h": 90}, "GYOMU_03": {"x": 355, "y": 105, "w": 145, "h": 90}, "GYOMU_04": {"x": 190, "y": 210, "w": 145, "h": 90}, "GYOMU_05": {"x": 355, "y": 210, "w": 145, "h": 90}, "GYOMU_06": {"x": 190, "y": 325, "w": 145, "h": 90}, "GYOMU_07": {"x": 355, "y": 325, "w": 145, "h": 90}, "GYOMU_08": {"x": 520, "y": 325, "w": 145, "h": 90}, "GYOMU_09": {"x": 190, "y": 430, "w": 145, "h": 90}, "GYOMU_10": {"x": 355, "y": 430, "w": 145, "h": 90}, "GYOMU_11": {"x": 520, "y": 430, "w": 145, "h": 90}, "GYOMU_12": {"x": 700, "y": 105, "w": 145, "h": 90}, "GYOMU_13": {"x": 865, "y": 105, "w": 145, "h": 90}, "GYOMU_14": {"x": 700, "y": 210, "w": 145, "h": 90}, "GYOMU_15": {"x": 865, "y": 210, "w": 145, "h": 90}, "GYOMU_16": {"x": 700, "y": 315, "w": 145, "h": 90}, "GYOMU_17": {"x": 865, "y": 315, "w": 145, "h": 90}, "GYOMU_18": {"x": 1040, "y": 105, "w": 145, "h": 90}, "GYOMU_19": {"x": 1205, "y": 105, "w": 145, "h": 90}, "GYOMU_20": {"x": 1040, "y": 210, "w": 145, "h": 90}, "GYOMU_21": {"x": 1205, "y": 210, "w": 145, "h": 90}, "G3_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G3_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G3_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G3_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G3_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G3_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G3_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G3_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G3_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G3_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G3_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G2_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G2_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G2_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G2_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G2_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G2_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G2_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G2_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G2_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G2_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G2_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "G1_01": {"x": 45, "y": 30, "w": 345, "h": 90}, "G1_02": {"x": 45, "y": 135, "w": 165, "h": 90}, "G1_03": {"x": 225, "y": 135, "w": 165, "h": 90}, "G1_04": {"x": 45, "y": 240, "w": 165, "h": 90}, "G1_05": {"x": 225, "y": 240, "w": 165, "h": 90}, "G1_06": {"x": 480, "y": 30, "w": 165, "h": 90}, "G1_07": {"x": 665, "y": 30, "w": 165, "h": 90}, "G1_08": {"x": 480, "y": 135, "w": 165, "h": 90}, "G1_09": {"x": 665, "y": 135, "w": 165, "h": 90}, "G1_10": {"x": 480, "y": 240, "w": 165, "h": 90}, "G1_11": {"x": 665, "y": 240, "w": 165, "h": 90}, "SAFE_01": {"x": 45, "y": 30, "w": 180, "h": 90}, "SAFE_02": {"x": 245, "y": 30, "w": 180, "h": 90}, "SAFE_03": {"x": 45, "y": 135, "w": 180, "h": 90}, "SAFE_04": {"x": 245, "y": 135, "w": 180, "h": 90}, "SAFE_05": {"x": 45, "y": 240, "w": 180, "h": 90}, "SAFE_06": {"x": 245, "y": 240, "w": 180, "h": 90}, "SAFE_07": {"x": 485, "y": 30, "w": 180, "h": 300}, "INFO_01": {"x": 45, "y": 45, "w": 220, "h": 95}, "INFO_02": {"x": 295, "y": 45, "w": 220, "h": 95}, "INFO_03": {"x": 45, "y": 165, "w": 220, "h": 95}, "INFO_04": {"x": 295, "y": 165, "w": 220, "h": 95}, "SUPP_01": {"x": 75, "y": 35, "w": 280, "h": 90}, "SUPP_02": {"x": 75, "y": 140, "w": 280, "h": 90}, "SUPP_03": {"x": 75, "y": 245, "w": 280, "h": 90}, "LIB_01": {"x": 90, "y": 65, "w": 300, "h": 95}, "WEE_01": {"x": 35, "y": 45, "w": 210, "h": 95}, "CAREER_01": {"x": 275, "y": 45, "w": 210, "h": 95}, "HEALTH_01": {"x": 525, "y": 45, "w": 190, "h": 90}, "HEALTH_02": {"x": 525, "y": 150, "w": 190, "h": 90}, "MEAL_01": {"x": 745, "y": 45, "w": 190, "h": 90}, "MEAL_02": {"x": 745, "y": 150, "w": 190, "h": 90}, "ADM_01": {"x": 45, "y": 45, "w": 165, "h": 290}, "ADM_02": {"x": 240, "y": 35, "w": 310, "h": 85}, "ADM_03": {"x": 580, "y": 35, "w": 310, "h": 85}, "ADM_04": {"x": 240, "y": 135, "w": 145, "h": 90}, "ADM_05": {"x": 405, "y": 135, "w": 145, "h": 90}, "ADM_06": {"x": 240, "y": 240, "w": 145, "h": 90}, "ADM_07": {"x": 405, "y": 240, "w": 145, "h": 90}, "ADM_08": {"x": 580, "y": 135, "w": 145, "h": 90}, "ADM_09": {"x": 745, "y": 135, "w": 145, "h": 90}, "ADM_10": {"x": 580, "y": 240, "w": 145, "h": 90}, "ADM_11": {"x": 745, "y": 240, "w": 145, "h": 90}, "SPEC_ART": {"x": 35, "y": 60, "w": 205, "h": 105}, "SPEC_MUSIC": {"x": 260, "y": 60, "w": 205, "h": 105}, "SPEC_PE_1": {"x": 485, "y": 60, "w": 205, "h": 105}, "SPEC_PE_2": {"x": 710, "y": 60, "w": 205, "h": 105}, "SPEC_PE_3": {"x": 935, "y": 60, "w": 205, "h": 105}, "SPEC_CONF_S": {"x": 35, "y": 235, "w": 205, "h": 105}, "SPEC_CONF_L": {"x": 260, "y": 235, "w": 205, "h": 105}, "SPEC_PRINT": {"x": 485, "y": 235, "w": 205, "h": 105}, "SPEC_DUTY": {"x": 35, "y": 410, "w": 205, "h": 105}, "SPEC_DINE": {"x": 260, "y": 410, "w": 205, "h": 105}, "SPEC_DORM": {"x": 485, "y": 410, "w": 205, "h": 105}};
 
     const SAMPLE_DEVICES = [
@@ -2657,9 +2657,7 @@
               <span style="font-size: 0.88rem; font-weight: 800; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 ${fac.icon} ${fac.name}
               </span>
-              <span style="font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">
-                ${fac.loc}
-              </span>
+              ${fac.loc ? `<span style="font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 4px; font-weight: 700; white-space: nowrap;">${fac.loc}</span>` : ''}
             </div>
             <div style="padding-top: 1px; display: flex; align-items: center; justify-content: space-between;">
               <span style="font-size: 0.76rem; color: #64748b; font-weight: 600;">담당</span>
@@ -3286,7 +3284,7 @@ function renderActiveRoomView() {
         <div class="single-room-card">
           <div class="single-room-header">
             <div class="single-room-title-area">
-              <h2>🏫 ${roomTitle} <span style="font-size: 0.95rem; font-weight: 600; color: #444;">(${roomSub})</span></h2>
+              <h2>🏫 ${roomTitle}</h2>
               <div class="single-room-meta">
                 ${roomPhone ? `<span>📞 ${roomPhone}</span>` : ''}
                 <span>🪑 좌석 현황: <strong>${roomSeatsCount}석</strong></span>
@@ -3891,7 +3889,7 @@ function renderActiveRoomView() {
           <!-- Top Gyojangsil sub-strip -->
           <div style="background: #fff; border-bottom: 1px solid var(--border-dark); padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;">
             <div>
-              <strong>교장실(본관 전관 1층)</strong> 정진복 8623-2914 [교장실 200] (전화 270-8200)
+              <strong>교장실</strong> 정진복 8623-2914 [교장실 200] (전화 270-8200)
             </div>
             <div id="bp_seat_PRIN_01" class="bp-seat-cell" style="min-height: 32px; padding: 2px 10px; flex-direction: row; gap: 8px;" onclick="openSeatModal('PRIN_01')">
               <span class="seat-id-tag">교장실</span>
@@ -3901,7 +3899,7 @@ function renderActiveRoomView() {
           </div>
 
           <div class="room-header">
-            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('gyomu_center')" title="교무센터 확대 편집으로 이동">🏫 교무센터(본관 후관 1층) <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('gyomu_center')" title="교무센터 확대 편집으로 이동">🏫 교무센터 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
             <div class="room-sub">( 전화 270-8208, FAX 276-3015 )</div>
           </div>
           
@@ -3969,7 +3967,7 @@ function renderActiveRoomView() {
         <div class="room-box" id="room_grade3">
           <div class="room-header">
             <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade3')">🏫 3학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
-            <div class="room-sub">(본관 후관 4층)</div>
+            
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <!-- Left Wing (부장석 1 + 2x2 = 5 seats) -->
@@ -4006,7 +4004,7 @@ function renderActiveRoomView() {
         <div class="room-box" id="room_grade2">
           <div class="room-header">
             <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade2')">🏫 2학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
-            <div class="room-sub">(본관 후관 2층)</div>
+            
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <!-- Left Wing -->
@@ -4048,7 +4046,7 @@ function renderActiveRoomView() {
         <div class="room-box" id="room_grade1">
           <div class="room-header">
             <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade1')">🏫 1학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
-            <div class="room-sub">(본관 후관 3층)</div>
+            
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
             <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -4082,7 +4080,7 @@ function renderActiveRoomView() {
         <div class="room-box" id="room_safety">
           <div class="room-header">
             <div class="room-title" style="cursor: pointer;" onclick="selectRoom('safety')">🏫 학생안전부 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
-            <div class="room-sub">(본관 후관 1층)</div>
+            
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr 28px; gap: 4px;">
             <div id="bp_seat_SAFE_01" class="bp-seat-cell" onclick="openSeatModal('SAFE_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_SAFE_01">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_01"></div></div>
@@ -4108,7 +4106,7 @@ function renderActiveRoomView() {
             <div style="border-right: 1px solid var(--border-dark); display: flex; flex-direction: column;">
               <div class="room-header" style="cursor: pointer;" onclick="selectRoom('special_edu')" title="통합지원반 확대 편집">
                 <div class="room-title" style="font-size: 0.82rem;">통합지원반 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div>
-                <div class="room-sub">(본관후관1층)</div>
+                
               </div>
               <div style="padding: 6px; display: flex; flex-direction: column; gap: 4px; flex: 1;">
                 <div id="bp_seat_SUPP_01" class="bp-seat-cell" onclick="openSeatModal('SUPP_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_SUPP_01">-</span><div class="seat-devices-pills" id="bp_pills_SUPP_01"></div></div>
@@ -4121,7 +4119,7 @@ function renderActiveRoomView() {
             <div style="display: flex; flex-direction: column;">
               <div class="room-header" style="cursor: pointer;" onclick="selectRoom('edu_info')" title="교육정보부 확대 편집">
                 <div class="room-title" style="font-size: 0.85rem;">교육정보부 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold;">[🔍 확대 편집]</span></div>
-                <div class="room-sub">(본관 전관 4층)</div>
+                
               </div>
               <div style="padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
                 <div id="bp_seat_INFO_01" class="bp-seat-cell" onclick="openSeatModal('INFO_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_INFO_01">-</span><div class="seat-devices-pills" id="bp_pills_INFO_01"></div></div>
@@ -4131,7 +4129,7 @@ function renderActiveRoomView() {
               </div>
               <div class="room-header" style="border-top: 1px solid var(--border-dark); cursor: pointer;" onclick="selectRoom('library')" title="도서실 확대 편집">
                 <div class="room-title" style="font-size: 0.85rem;">도서실 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold;">[🔍 확대 편집]</span></div>
-                <div class="room-sub">(본관 후관 3층)</div>
+                
               </div>
               <div style="padding: 6px; flex: 1;">
                 <div id="bp_seat_LIB_01" class="bp-seat-cell" onclick="openSeatModal('LIB_01')"><span class="seat-user-name" id="bp_user_LIB_01">-</span><div class="seat-devices-pills" id="bp_pills_LIB_01"></div></div>
@@ -4143,15 +4141,15 @@ function renderActiveRoomView() {
         <!-- ROOM: Counsel, Health, Meals -->
         <div class="room-box" id="room_support_services">
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">위클래스 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 전관 3층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">위클래스 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div></div>
             <div style="padding: 4px;"><div id="bp_seat_WEE_01" class="bp-seat-cell" onclick="openSeatModal('WEE_01')"><span class="seat-user-name" id="bp_user_WEE_01">-</span><div class="seat-devices-pills" id="bp_pills_WEE_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">진로상담실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 후관 2층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">진로상담실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div></div>
             <div style="padding: 4px;"><div id="bp_seat_CAREER_01" class="bp-seat-cell" onclick="openSeatModal('CAREER_01')"><span class="seat-user-name" id="bp_user_CAREER_01">-</span><div class="seat-devices-pills" id="bp_pills_CAREER_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">보건실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 전관 1층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">보건실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div></div>
             <div style="padding: 4px; display: flex; flex-direction: column; gap: 4px;">
               <div id="bp_seat_HEALTH_01" class="bp-seat-cell" onclick="openSeatModal('HEALTH_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_HEALTH_01">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_01"></div></div>
               <div id="bp_seat_HEALTH_02" class="bp-seat-cell" onclick="openSeatModal('HEALTH_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_HEALTH_02">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_02"></div></div>
@@ -4169,7 +4167,7 @@ function renderActiveRoomView() {
         <!-- ROOM: Administration Office (행정실) -->
         <div class="room-box" id="room_admin">
           <div class="room-header">
-            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('admin')" title="행정실 확대 편집으로 이동">🏫 행정실(본관 1층) <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('admin')" title="행정실 확대 편집으로 이동">🏫 행정실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
             <div class="room-sub">(전화 270-8209 FAX 276-3014)</div>
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px;">
