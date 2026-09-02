@@ -1818,7 +1818,7 @@
       initSeatPositions();
       updateTopStats();
       updateTabBadges();
-      if (typeof renderActiveRoomView === 'function') renderActiveRoomView();
+      selectRoom(appState.activeRoomId);
 
       // 2. 서버에서 최신 데이터 비동기 동기화
       loadData();
