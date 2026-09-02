@@ -626,12 +626,16 @@
               <input type="text" id="inputPcModel" placeholder="예: DM500SDA-A58A">
             </div>
             <div class="form-group">
-              <label>물품고유번호 / 자산번호</label>
-              <input type="text" id="inputPcAsset" placeholder="예: 2022-PC-0123">
+              <label>취득일자 또는 제조연월</label>
+              <input type="text" id="inputPcDate" placeholder="예: 2022-05-18 또는 2022.05">
             </div>
             <div class="form-group">
-              <label>취득일자</label>
-              <input type="date" id="inputPcDate">
+              <label>물품관리번호</label>
+              <input type="text" id="inputPcAsset" placeholder="예: 2022-1234-567890">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>특이사항</label>
+              <input type="text" id="inputPcNotes" placeholder="예: 슬림형 데스크톱, 팬 소음 등">
             </div>
           </div>
         </div>
@@ -652,12 +656,16 @@
               <input type="text" id="inputMon1Model" placeholder="예: 24BN650P (24인치)">
             </div>
             <div class="form-group">
-              <label>물품고유번호 / 자산번호</label>
-              <input type="text" id="inputMon1Asset" placeholder="예: 2021-MN-0045">
+              <label>취득일자 또는 제조연월</label>
+              <input type="text" id="inputMon1Date" placeholder="예: 2021-11-20 또는 2021.11">
             </div>
             <div class="form-group">
-              <label>취득일자</label>
-              <input type="date" id="inputMon1Date">
+              <label>물품관리번호</label>
+              <input type="text" id="inputMon1Asset" placeholder="예: 2021-9876-543210">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>특이사항</label>
+              <input type="text" id="inputMon1Notes" placeholder="예: 24인치 IPS 피벗, 화면 정상 등">
             </div>
           </div>
         </div>
@@ -684,12 +692,16 @@
               <input type="text" id="inputMon2Model" placeholder="예: S24R350">
             </div>
             <div class="form-group">
-              <label>물품고유번호 / 자산번호</label>
-              <input type="text" id="inputMon2Asset" placeholder="예: 2020-MN-0112">
+              <label>취득일자 또는 제조연월</label>
+              <input type="text" id="inputMon2Date" placeholder="예: 2020-08-15 또는 2020.08">
             </div>
             <div class="form-group">
-              <label>취득일자</label>
-              <input type="date" id="inputMon2Date">
+              <label>물품관리번호</label>
+              <input type="text" id="inputMon2Asset" placeholder="예: 2020-MN-0112">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>특이사항</label>
+              <input type="text" id="inputMon2Notes" placeholder="예: 서브용 모니터, HDMI 연결 등">
             </div>
           </div>
         </div>
@@ -995,15 +1007,17 @@ document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name}
       // PC fields
       document.getElementById('inputPcMfr').value = pc ? pc.manufacturer || '' : '';
       document.getElementById('inputPcModel').value = pc ? pc.model_name || '' : '';
+      document.getElementById('inputPcDate').value = pc ? (pc.acquired_date || pc.acquisition_date || '') : '';
       document.getElementById('inputPcAsset').value = pc ? pc.asset_number || '' : '';
-      document.getElementById('inputPcDate').value = pc ? pc.acquisition_date || '' : '';
+      if (document.getElementById('inputPcNotes')) document.getElementById('inputPcNotes').value = pc ? pc.notes || '' : '';
 
       // Monitor 1 fields
       const mon1 = monitors[0];
       document.getElementById('inputMon1Mfr').value = mon1 ? mon1.manufacturer || '' : '';
       document.getElementById('inputMon1Model').value = mon1 ? mon1.model_name || '' : '';
+      document.getElementById('inputMon1Date').value = mon1 ? (mon1.acquired_date || mon1.acquisition_date || '') : '';
       document.getElementById('inputMon1Asset').value = mon1 ? mon1.asset_number || '' : '';
-      document.getElementById('inputMon1Date').value = mon1 ? mon1.acquisition_date || '' : '';
+      if (document.getElementById('inputMon1Notes')) document.getElementById('inputMon1Notes').value = mon1 ? mon1.notes || '' : '';
 
       // Monitor 2 fields
       const mon2 = monitors.length > 1 ? monitors[1] : null;
@@ -1013,15 +1027,17 @@ document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name}
         toggleMon2Fields(false);
         document.getElementById('inputMon2Mfr').value = mon2.manufacturer || '';
         document.getElementById('inputMon2Model').value = mon2.model_name || '';
+        document.getElementById('inputMon2Date').value = mon2 ? (mon2.acquired_date || mon2.acquisition_date || '') : '';
         document.getElementById('inputMon2Asset').value = mon2.asset_number || '';
-        document.getElementById('inputMon2Date').value = mon2.acquisition_date || '';
+        if (document.getElementById('inputMon2Notes')) document.getElementById('inputMon2Notes').value = mon2 ? mon2.notes || '' : '';
       } else {
         chkNoMon2.checked = true;
         toggleMon2Fields(true);
         document.getElementById('inputMon2Mfr').value = '';
         document.getElementById('inputMon2Model').value = '';
-        document.getElementById('inputMon2Asset').value = '';
         document.getElementById('inputMon2Date').value = '';
+        document.getElementById('inputMon2Asset').value = '';
+        if (document.getElementById('inputMon2Notes')) document.getElementById('inputMon2Notes').value = '';
       }
 
       document.getElementById('surveyModal').style.display = 'flex';
@@ -1120,8 +1136,10 @@ document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name}
           device_type: 'PC',
           manufacturer: document.getElementById('inputPcMfr').value.trim(),
           model_name: pcModel,
+          acquired_date: document.getElementById('inputPcDate').value.trim(),
+          acquisition_date: document.getElementById('inputPcDate').value.trim(),
           asset_number: document.getElementById('inputPcAsset').value.trim(),
-          acquisition_date: document.getElementById('inputPcDate').value
+          notes: document.getElementById('inputPcNotes') ? document.getElementById('inputPcNotes').value.trim() : ''
         });
       }
 
@@ -1134,8 +1152,10 @@ document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name}
           device_type: 'MONITOR_1',
           manufacturer: document.getElementById('inputMon1Mfr').value.trim(),
           model_name: mon1Model,
+          acquired_date: document.getElementById('inputMon1Date').value.trim(),
+          acquisition_date: document.getElementById('inputMon1Date').value.trim(),
           asset_number: document.getElementById('inputMon1Asset').value.trim(),
-          acquisition_date: document.getElementById('inputMon1Date').value
+          notes: document.getElementById('inputMon1Notes') ? document.getElementById('inputMon1Notes').value.trim() : ''
         });
       }
 
@@ -1150,8 +1170,10 @@ document.getElementById('roomTitleDisplay').textContent = `🏫 ${roomMeta.name}
             device_type: 'MONITOR_2',
             manufacturer: document.getElementById('inputMon2Mfr').value.trim(),
             model_name: mon2Model,
+            acquired_date: document.getElementById('inputMon2Date').value.trim(),
+            acquisition_date: document.getElementById('inputMon2Date').value.trim(),
             asset_number: document.getElementById('inputMon2Asset').value.trim(),
-            acquisition_date: document.getElementById('inputMon2Date').value
+            notes: document.getElementById('inputMon2Notes') ? document.getElementById('inputMon2Notes').value.trim() : ''
           });
         }
       }

@@ -1308,24 +1308,16 @@
               <input type="text" id="pc_model_name" placeholder="예: DM500SDA-A58A">
             </div>
             <div class="form-group">
-              <label>취득일자 / 제조연월</label>
+              <label>취득일자 또는 제조연월</label>
               <input type="text" id="pc_acquired_date" placeholder="예: 2022-05-18 또는 2022.05">
             </div>
             <div class="form-group">
-              <label>물품관리번호 (K-에듀파인)</label>
+              <label>물품관리번호</label>
               <input type="text" id="pc_asset_number" placeholder="예: 2022-1234-567890">
             </div>
-            <div class="form-group">
-              <label>물품목록번호 (조달청 식별번호)</label>
-              <input type="text" id="pc_item_code" placeholder="예: 43211501-12345678">
-            </div>
-            <div class="form-group">
-              <label>제조번호 / S/N</label>
-              <input type="text" id="pc_serial_number" placeholder="시리얼 번호">
-            </div>
             <div class="form-group full">
-              <label>비고 / 특이사항</label>
-              <input type="text" id="pc_notes" placeholder="예: 본체 팬 소음 약간 있음, 슬림형 PC">
+              <label>특이사항</label>
+              <input type="text" id="pc_notes" placeholder="예: 슬림형 데스크톱, 팬 소음 점검 필요 등">
             </div>
           </div>
 
@@ -1366,20 +1358,16 @@
               <input type="text" id="mon1_model_name" placeholder="예: 24BN650P">
             </div>
             <div class="form-group">
-              <label>취득일자 / 제조연월</label>
+              <label>취득일자 또는 제조연월</label>
               <input type="text" id="mon1_acquired_date" placeholder="예: 2021-11-20 또는 2021.11">
             </div>
             <div class="form-group">
-              <label>물품관리번호 (K-에듀파인)</label>
+              <label>물품관리번호</label>
               <input type="text" id="mon1_asset_number" placeholder="예: 2021-9876-543210">
             </div>
-            <div class="form-group">
-              <label>제조번호 / S/N</label>
-              <input type="text" id="mon1_serial_number" placeholder="시리얼 번호">
-            </div>
-            <div class="form-group">
-              <label>비고</label>
-              <input type="text" id="mon1_notes" placeholder="예: 24인치 IPS 피벗">
+            <div class="form-group full">
+              <label>특이사항</label>
+              <input type="text" id="mon1_notes" placeholder="예: 24인치 IPS 피벗, 화면 정상 등">
             </div>
           </div>
 
@@ -1420,12 +1408,16 @@
               <input type="text" id="mon2_model_name" placeholder="예: 24MB35V">
             </div>
             <div class="form-group">
+              <label>취득일자 또는 제조연월</label>
+              <input type="text" id="mon2_acquired_date" placeholder="예: 2020-08-15 또는 2020.08">
+            </div>
+            <div class="form-group">
               <label>물품관리번호</label>
               <input type="text" id="mon2_asset_number" placeholder="예: 2019-1122-334455">
             </div>
-            <div class="form-group">
-              <label>제조번호 / S/N</label>
-              <input type="text" id="mon2_serial_number" placeholder="시리얼 번호">
+            <div class="form-group full">
+              <label>특이사항</label>
+              <input type="text" id="mon2_notes" placeholder="예: 서브 모니터, HDMI 케이블 연결 등">
             </div>
           </div>
 
@@ -3122,8 +3114,9 @@ function renderActiveRoomView() {
         document.getElementById('mon2_device_id').value = mon2.device_id || '';
         document.getElementById('mon2_manufacturer').value = mon2.manufacturer || '';
         document.getElementById('mon2_model_name').value = mon2.model_name || '';
+        if (document.getElementById('mon2_acquired_date')) document.getElementById('mon2_acquired_date').value = mon2.acquired_date || '';
         document.getElementById('mon2_asset_number').value = mon2.asset_number || '';
-        document.getElementById('mon2_serial_number').value = mon2.serial_number || '';
+        if (document.getElementById('mon2_notes')) document.getElementById('mon2_notes').value = mon2.notes || '';
         document.getElementById('badge_monitor2').className = 'device-pill pill-monitor';
         document.getElementById('badge_monitor2').textContent = '등록완료';
         document.getElementById('btn_delete_mon2').style.display = 'inline-block';
@@ -3374,7 +3367,7 @@ function renderActiveRoomView() {
         }
 
         const rawBase64 = base64Data.split(',')[1];
-        const prompt = "Analyze this school computer/monitor inventory label sticker. Extract manufacturer, model_name, acquired_date (YYYY-MM-DD or YYYY.MM), asset_number, item_code, serial_number, notes. Output ONLY JSON.";
+        const prompt = "Analyze this school computer/monitor inventory label sticker. Extract manufacturer (제조사), model_name (모델명), acquired_date (취득일자 또는 제조연월: YYYY-MM-DD or YYYY.MM), asset_number (물품관리번호), notes (특이사항). Output ONLY JSON with keys: manufacturer, model_name, acquired_date, asset_number, notes.";
         
         fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
           method: 'POST',
@@ -3411,8 +3404,6 @@ function renderActiveRoomView() {
         { key: 'model_name', id: `${prefix}_model_name` },
         { key: 'acquired_date', id: `${prefix}_acquired_date` },
         { key: 'asset_number', id: `${prefix}_asset_number` },
-        { key: 'item_code', id: `${prefix}_item_code` },
-        { key: 'serial_number', id: `${prefix}_serial_number` },
         { key: 'notes', id: `${prefix}_notes` }
       ];
 

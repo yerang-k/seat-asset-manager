@@ -232,9 +232,7 @@ function analyzeLabelImage(base64Data) {
   "model_name": "모델명 (예: DM500SDA, 24MB35V 등)",
   "acquired_date": "취득일자 또는 제조연월 (YYYY-MM-DD 또는 YYYY.MM)",
   "asset_number": "물품관리번호 (K-에듀파인 물품관리번호 등)",
-  "item_code": "물품목록번호 (조달청 물품목록/식별번호 등)",
-  "serial_number": "제조번호/S/N",
-  "notes": "특이사항 (기재된 전압, 소비전력, 기타 참고사항)"
+  "notes": "특이사항 (기타 참고사항, 상태, 규격 등)"
 }
 읽을 수 없는 필드는 빈 문자열("")로 채우십시오.`;
 
