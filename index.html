@@ -3316,27 +3316,29 @@
             <div class="room-sub">( 전화 270-8208, FAX 276-3015 )</div>
           </div>
           
-          <div class="room-body" style="display: grid; grid-template-columns: 1.45fr 1fr 1fr; gap: 8px;">
-            <!-- Column 1 (Left Block): Top (1 교감 + 2~5), Bottom (6~11) -->
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <!-- Top row: 1 (교감) + 2~5 (2x2) -->
-              <div style="display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 4px;">
-                <!-- 1 교감 -->
-                <div id="bp_seat_GYOMU_01" class="bp-seat-cell" style="justify-content: center; min-height: 56px;" onclick="openSeatModal('GYOMU_01')">
-                  <span class="seat-id-tag">1</span>
-                  <span class="seat-user-name" id="bp_user_GYOMU_01" style="font-weight: 800; color: #1b5e20;">교감</span>
-                  <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
-                </div>
-                <!-- 2, 3, 4, 5 (2x2) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                  <div id="bp_seat_GYOMU_02" class="bp-seat-cell" onclick="openSeatModal('GYOMU_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_GYOMU_02">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_02"></div></div>
-                  <div id="bp_seat_GYOMU_03" class="bp-seat-cell" onclick="openSeatModal('GYOMU_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_GYOMU_03">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_03"></div></div>
-                  <div id="bp_seat_GYOMU_04" class="bp-seat-cell" onclick="openSeatModal('GYOMU_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_GYOMU_04">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_04"></div></div>
-                  <div id="bp_seat_GYOMU_05" class="bp-seat-cell" onclick="openSeatModal('GYOMU_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_GYOMU_05">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_05"></div></div>
-                </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 0.62fr 1.88fr 1.1fr 1.1fr; gap: 8px;">
+            <!-- Column 1: Seat 1 (교감) at Top, Empty Below (1번 자리 밑에는 빈 공간) -->
+            <div style="display: flex; flex-direction: column; justify-content: flex-start;">
+              <div id="bp_seat_GYOMU_01" class="bp-seat-cell" style="min-height: 54px; justify-content: center;" onclick="openSeatModal('GYOMU_01')">
+                <span class="seat-id-tag">1</span>
+                <span class="seat-user-name" id="bp_user_GYOMU_01" style="font-weight: 800; color: #1b5e20;">교감</span>
+                <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
+              </div>
+              <!-- 1번 자리 밑 빈 공간 -->
+              <div style="flex: 1;"></div>
+            </div>
+
+            <!-- Column 2: Top 2~5 (2x2), and directly below 6~11 (3x2) -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- 2~5번 (2x2) -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <div id="bp_seat_GYOMU_02" class="bp-seat-cell" onclick="openSeatModal('GYOMU_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_GYOMU_02">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_02"></div></div>
+                <div id="bp_seat_GYOMU_03" class="bp-seat-cell" onclick="openSeatModal('GYOMU_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_GYOMU_03">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_03"></div></div>
+                <div id="bp_seat_GYOMU_04" class="bp-seat-cell" onclick="openSeatModal('GYOMU_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_GYOMU_04">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_04"></div></div>
+                <div id="bp_seat_GYOMU_05" class="bp-seat-cell" onclick="openSeatModal('GYOMU_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_GYOMU_05">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_05"></div></div>
               </div>
 
-              <!-- Bottom row: 6~11 (3x2) -->
+              <!-- 2~5번 아래쪽에 위치하는 6~11번 (3x2) -->
               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; flex: 1;">
                 <div id="bp_seat_GYOMU_06" class="bp-seat-cell" onclick="openSeatModal('GYOMU_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_GYOMU_06">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_06"></div></div>
                 <div id="bp_seat_GYOMU_07" class="bp-seat-cell" onclick="openSeatModal('GYOMU_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_GYOMU_07">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_07"></div></div>
@@ -3347,7 +3349,7 @@
               </div>
             </div>
 
-            <!-- Column 2 (Middle Block): 12~17 (2x3) -->
+            <!-- Column 3: 12~17번 (2x3, 너비 균등 맞춤) -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
               <div id="bp_seat_GYOMU_12" class="bp-seat-cell" onclick="openSeatModal('GYOMU_12')"><span class="seat-id-tag">12</span><span class="seat-user-name" id="bp_user_GYOMU_12">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_12"></div></div>
               <div id="bp_seat_GYOMU_13" class="bp-seat-cell" onclick="openSeatModal('GYOMU_13')"><span class="seat-id-tag">13</span><span class="seat-user-name" id="bp_user_GYOMU_13">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_13"></div></div>
@@ -3357,7 +3359,7 @@
               <div id="bp_seat_GYOMU_17" class="bp-seat-cell" onclick="openSeatModal('GYOMU_17')"><span class="seat-id-tag">17</span><span class="seat-user-name" id="bp_user_GYOMU_17">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_17"></div></div>
             </div>
 
-            <!-- Column 3 (Right Block): 18~21 (2x2) -->
+            <!-- Column 4: 18~21번 (2x2, 12~17번과 동일한 너비로 나란히 가로 배치) -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
               <div id="bp_seat_GYOMU_18" class="bp-seat-cell" onclick="openSeatModal('GYOMU_18')"><span class="seat-id-tag">18</span><span class="seat-user-name" id="bp_user_GYOMU_18">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_18"></div></div>
               <div id="bp_seat_GYOMU_19" class="bp-seat-cell" onclick="openSeatModal('GYOMU_19')"><span class="seat-id-tag">19</span><span class="seat-user-name" id="bp_user_GYOMU_19">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_19"></div></div>
