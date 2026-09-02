@@ -2977,7 +2977,7 @@
                 <div style="color: ${m1 ? '#0277bd' : '#94a3b8'}; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m1Desc}</div>
                 <div style="color: ${m2 ? '#00838f' : '#94a3b8'}; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m2Desc}</div>
               </div>
-              <div style="margin-top: 6px; text-align: right; font-size: 0.72rem; color: #2e7d32; font-weight: 700;">👉 클릭하여 기기 입력</div>
+              
             </div>
           `;
         });
@@ -3186,9 +3186,7 @@ function renderActiveRoomView() {
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
               <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="resetCurrentRoomPositions()">🔄 기본 배치 복원</button>
-              <button class="btn btn-primary" onclick="openSeatModal('${roomSeats[0] ? roomSeats[0].seat_id : ''}')">
-                ✏️ 기기 정보 입력
-              </button>
+
             </div>
           </div>
 
