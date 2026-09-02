@@ -3795,8 +3795,8 @@ function renderActiveRoomView() {
           <div style="display: grid; grid-template-columns: 0.8fr 1.2fr; height: 100%;">
             <!-- Left: Support Team -->
             <div style="border-right: 1px solid var(--border-dark); display: flex; flex-direction: column;">
-              <div class="room-header">
-                <div class="room-title" style="font-size: 0.82rem;">통합지원반</div>
+              <div class="room-header" style="cursor: pointer;" onclick="selectRoom('special_edu')" title="통합지원반 확대 편집">
+                <div class="room-title" style="font-size: 0.82rem;">통합지원반 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div>
                 <div class="room-sub">(본관후관1층)</div>
               </div>
               <div style="padding: 6px; display: flex; flex-direction: column; gap: 4px; flex: 1;">
@@ -3808,8 +3808,8 @@ function renderActiveRoomView() {
 
             <!-- Right: Edu Info (Top) & Library (Bottom) -->
             <div style="display: flex; flex-direction: column;">
-              <div class="room-header">
-                <div class="room-title" style="font-size: 0.85rem;">교육정보부</div>
+              <div class="room-header" style="cursor: pointer;" onclick="selectRoom('edu_info')" title="교육정보부 확대 편집">
+                <div class="room-title" style="font-size: 0.85rem;">교육정보부 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold;">[🔍 확대 편집]</span></div>
                 <div class="room-sub">(본관 전관 4층)</div>
               </div>
               <div style="padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
@@ -3818,8 +3818,8 @@ function renderActiveRoomView() {
                 <div id="bp_seat_INFO_03" class="bp-seat-cell" onclick="openSeatModal('INFO_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_INFO_03">-</span><div class="seat-devices-pills" id="bp_pills_INFO_03"></div></div>
                 <div id="bp_seat_INFO_04" class="bp-seat-cell" onclick="openSeatModal('INFO_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_INFO_04">-</span><div class="seat-devices-pills" id="bp_pills_INFO_04"></div></div>
               </div>
-              <div class="room-header" style="border-top: 1px solid var(--border-dark);">
-                <div class="room-title" style="font-size: 0.85rem;">도서실</div>
+              <div class="room-header" style="border-top: 1px solid var(--border-dark); cursor: pointer;" onclick="selectRoom('library')" title="도서실 확대 편집">
+                <div class="room-title" style="font-size: 0.85rem;">도서실 <span style="font-size:0.68rem; color:#1b5e20; font-weight:bold;">[🔍 확대 편집]</span></div>
                 <div class="room-sub">(본관 후관 3층)</div>
               </div>
               <div style="padding: 6px; flex: 1;">
@@ -3832,22 +3832,22 @@ function renderActiveRoomView() {
         <!-- ROOM: Counsel, Health, Meals -->
         <div class="room-box" id="room_support_services">
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">위클래스<br><span class="room-sub">(본관 전관 3층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">위클래스 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 전관 3층)</span></div></div>
             <div style="padding: 4px;"><div id="bp_seat_WEE_01" class="bp-seat-cell" onclick="openSeatModal('WEE_01')"><span class="seat-user-name" id="bp_user_WEE_01">-</span><div class="seat-devices-pills" id="bp_pills_WEE_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">진로상담실<br><span class="room-sub">(본관 후관 2층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">진로상담실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 후관 2층)</span></div></div>
             <div style="padding: 4px;"><div id="bp_seat_CAREER_01" class="bp-seat-cell" onclick="openSeatModal('CAREER_01')"><span class="seat-user-name" id="bp_user_CAREER_01">-</span><div class="seat-devices-pills" id="bp_pills_CAREER_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
-            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">보건실<br><span class="room-sub">(본관 전관 1층)</span></div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">보건실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span><span class="room-sub">(본관 전관 1층)</span></div></div>
             <div style="padding: 4px; display: flex; flex-direction: column; gap: 4px;">
               <div id="bp_seat_HEALTH_01" class="bp-seat-cell" onclick="openSeatModal('HEALTH_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_HEALTH_01">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_01"></div></div>
               <div id="bp_seat_HEALTH_02" class="bp-seat-cell" onclick="openSeatModal('HEALTH_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_HEALTH_02">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_02"></div></div>
             </div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; flex: 1;">
-            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">급식실</div></div>
+            <div class="room-header" style="cursor: pointer;" onclick="selectRoom('counsel_health_meal')" title="상담·보건·급식실 확대 편집"><div class="room-title" style="font-size: 0.78rem;">급식실 <span style="font-size:0.65rem; color:#1b5e20; font-weight:bold; display:block;">[🔍 확대 편집]</span></div></div>
             <div style="padding: 4px; display: flex; flex-direction: column; gap: 4px;">
               <div id="bp_seat_MEAL_01" class="bp-seat-cell" onclick="openSeatModal('MEAL_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_MEAL_01">-</span><div class="seat-devices-pills" id="bp_pills_MEAL_01"></div></div>
               <div id="bp_seat_MEAL_02" class="bp-seat-cell" onclick="openSeatModal('MEAL_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_MEAL_02">-</span><div class="seat-devices-pills" id="bp_pills_MEAL_02"></div></div>
