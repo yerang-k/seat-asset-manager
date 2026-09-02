@@ -2362,7 +2362,7 @@
           nameHtml = `<span class="seat-role-title">교감</span> <span class="seat-empty-badge">(공석)</span>`;
         } else if (seat.seat_label && seat.seat_label.includes('부장')) {
           nameHtml = `<span class="seat-role-title">${seat.seat_label}</span> <span class="seat-empty-badge">(공석)</span>`;
-        } else if (seat.seat_label && (seat.seat_label.includes('행정실장') || seat.seat_label.includes('사서'))) {
+        } else if (seat.seat_label && (seat.seat_label.includes('행정실장'))) {
           nameHtml = `<span class="seat-role-title">${seat.seat_label}</span> <span class="seat-empty-badge">(공석)</span>`;
         } else {
           nameHtml = `<span class="seat-user-empty">공석 (미배정)</span>`;
@@ -2735,9 +2735,6 @@
     function renderSpecialRoomsView() {
       const container = document.getElementById('singleRoomContainer');
       const allSpecs = SPECIAL_ROOM_DEFINITIONS;
-      const visibleSpecs = (specialSubroomFilter === 'all') 
-        ? allSpecs 
-        : allSpecs.filter(r => r.id === specialSubroomFilter);
 
       let filterButtonsHtml = `
         <button class="btn btn-sm ${specialSubroomFilter === 'all' ? 'btn-primary' : 'btn-light'}" style="font-weight: 700;" onclick="selectSpecialRoom('all')">전체 실 모아보기</button>
@@ -2751,8 +2748,8 @@
         `;
       });
 
-      let roomsCardsHtml = '';
-      visibleSpecs.forEach(r => {
+      // Helper to generate a room box HTML
+      function generateRoomBoxHtml(r, isPeWide = false) {
         let seatCardsHtml = '';
         r.seat_ids.forEach(sId => {
           const seat = appState.seats.find(s => s.seat_id === sId);
@@ -2775,8 +2772,10 @@
             ? `<strong style="color: #0f172a; font-size: 0.95rem;">${seat.current_user}</strong>` 
             : `<span style="color: #64748b; font-size: 0.82rem;">(담당자 미배정)</span>`;
 
+          const cardWidth = isPeWide ? '220px' : '100%';
+
           seatCardsHtml += `
-            <div class="special-seat-card status-${status}" onclick="openSeatModal('${seat.seat_id}')" style="background: #fff; border: 1.5px solid var(--border-dark); border-radius: 6px; padding: 10px 12px; width: 230px; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.15s ease; text-align: left;">
+            <div class="special-seat-card status-${status}" onclick="openSeatModal('${seat.seat_id}')" style="background: #fff; border: 1.5px solid var(--border-dark); border-radius: 6px; padding: 10px 12px; width: ${cardWidth}; min-width: 200px; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.15s ease; text-align: left; box-sizing: border-box;">
               <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 6px;">
                 <span style="font-weight: 800; font-size: 0.9rem; color: #1e3a8a;">${seat.seat_label || r.name}</span>
                 <span style="font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 4px; font-weight: 700;">${r.floor}</span>
@@ -2795,25 +2794,64 @@
           `;
         });
 
-        roomsCardsHtml += `
-          <div class="special-room-box" style="background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column;">
+        const flexStyle = isPeWide ? 'display: flex; gap: 10px; flex-wrap: nowrap;' : 'display: flex; gap: 10px; flex-direction: column;';
+
+        return `
+          <div class="special-room-box" style="background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; height: 100%;">
             <div style="background: #f1f5f9; border-bottom: 1.5px solid #cbd5e1; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <span style="font-weight: 800; font-size: 1.05rem; color: #0f172a;">${r.icon} ${r.name}</span>
-                <span style="font-size: 0.78rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 700; margin-left: 8px;">${r.floor}</span>
+                <span style="font-weight: 800; font-size: 1rem; color: #0f172a;">${r.icon} ${r.name}</span>
+                <span style="font-size: 0.76rem; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; margin-left: 6px;">${r.floor}</span>
               </div>
-              <span style="font-size: 0.78rem; color: #475569; font-weight: 600;">좌석 ${r.seat_ids.length}석</span>
+              <span style="font-size: 0.76rem; color: #475569; font-weight: 600;">${r.seat_ids.length}석</span>
             </div>
-            <div style="padding: 14px; display: flex; gap: 14px; flex-wrap: wrap; background: #fafafa; flex: 1; align-items: center;">
+            <div style="padding: 12px; background: #fafafa; flex: 1; align-items: stretch; ${flexStyle}">
               ${seatCardsHtml}
             </div>
           </div>
         `;
-      });
+      }
 
+      let contentHtml = '';
+      if (specialSubroomFilter === 'all') {
+        const art = allSpecs.find(r => r.id === 'spec_art');
+        const music = allSpecs.find(r => r.id === 'spec_music');
+        const pe = allSpecs.find(r => r.id === 'spec_pe');
+        const others = allSpecs.filter(r => !['spec_art', 'spec_music', 'spec_pe'].includes(r.id));
+
+        contentHtml = `
+          <!-- Row 1: 미술실 (슬림) + 음악실 (슬림) + 체육과실 (3좌석 나란히 수평 배치) -->
+          <div style="display: flex; gap: 14px; align-items: stretch; margin-bottom: 14px;">
+            <div style="width: 260px; flex-shrink: 0;">
+              ${generateRoomBoxHtml(art, false)}
+            </div>
+            <div style="width: 260px; flex-shrink: 0;">
+              ${generateRoomBoxHtml(music, false)}
+            </div>
+            <div style="flex: 1; min-width: 720px;">
+              ${generateRoomBoxHtml(pe, true)}
+            </div>
+          </div>
+
+          <!-- Row 2: 나머지 특별실들 (소회의실, 대회의실, 당직실, 식생활관, 인쇄실, 기숙사) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+            ${others.map(r => generateRoomBoxHtml(r, false)).join('')}
+          </div>
+        `;
+      } else {
+        const selectedRoom = allSpecs.find(r => r.id === specialSubroomFilter);
+        const isPe = selectedRoom.id === 'spec_pe';
+        contentHtml = `
+          <div style="max-width: ${isPe ? '820px' : '400px'}; margin: 10px auto;">
+            ${generateRoomBoxHtml(selectedRoom, isPe)}
+          </div>
+        `;
+      }
+
+      const activeObj = allSpecs.find(r => r.id === specialSubroomFilter);
       const currentRoomTitle = (specialSubroomFilter === 'all') 
         ? '특별실 전체 (교내 각 층)' 
-        : `${allSpecs.find(r => r.id === specialSubroomFilter).icon} ${allSpecs.find(r => r.id === specialSubroomFilter).name} (${allSpecs.find(r => r.id === specialSubroomFilter).floor})`;
+        : `${activeObj.icon} ${activeObj.name} (${activeObj.floor})`;
 
       container.innerHTML = `
         <div class="single-room-card">
@@ -2829,18 +2867,15 @@
             </div>
           </div>
 
-          <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 16px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
-              ${roomsCardsHtml}
-            </div>
+          <div style="padding: 16px 20px;">
+            ${contentHtml}
           </div>
         </div>
       `;
 
       updateTabBadges();
     }
-
-    function renderActiveRoomView() {
+function renderActiveRoomView() {
       const container = document.getElementById('singleRoomContainer');
       const rId = appState.activeRoomId;
       if (rId === 'special') {
@@ -3788,7 +3823,7 @@
                 <div class="room-sub">(본관 후관 3층)</div>
               </div>
               <div style="padding: 6px; flex: 1;">
-                <div id="bp_seat_LIB_01" class="bp-seat-cell" onclick="openSeatModal('LIB_01')"><span class="seat-id-tag">사서</span><span class="seat-user-name" id="bp_user_LIB_01">-</span><div class="seat-devices-pills" id="bp_pills_LIB_01"></div></div>
+                <div id="bp_seat_LIB_01" class="bp-seat-cell" onclick="openSeatModal('LIB_01')"><span class="seat-user-name" id="bp_user_LIB_01">-</span><div class="seat-devices-pills" id="bp_pills_LIB_01"></div></div>
               </div>
             </div>
           </div>
@@ -3798,11 +3833,11 @@
         <div class="room-box" id="room_support_services">
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
             <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">위클래스<br><span class="room-sub">(본관 전관 3층)</span></div></div>
-            <div style="padding: 4px;"><div id="bp_seat_WEE_01" class="bp-seat-cell" onclick="openSeatModal('WEE_01')"><span class="seat-id-tag">상담</span><span class="seat-user-name" id="bp_user_WEE_01">-</span><div class="seat-devices-pills" id="bp_pills_WEE_01"></div></div></div>
+            <div style="padding: 4px;"><div id="bp_seat_WEE_01" class="bp-seat-cell" onclick="openSeatModal('WEE_01')"><span class="seat-user-name" id="bp_user_WEE_01">-</span><div class="seat-devices-pills" id="bp_pills_WEE_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
             <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">진로상담실<br><span class="room-sub">(본관 후관 2층)</span></div></div>
-            <div style="padding: 4px;"><div id="bp_seat_CAREER_01" class="bp-seat-cell" onclick="openSeatModal('CAREER_01')"><span class="seat-id-tag">진로</span><span class="seat-user-name" id="bp_user_CAREER_01">-</span><div class="seat-devices-pills" id="bp_pills_CAREER_01"></div></div></div>
+            <div style="padding: 4px;"><div id="bp_seat_CAREER_01" class="bp-seat-cell" onclick="openSeatModal('CAREER_01')"><span class="seat-user-name" id="bp_user_CAREER_01">-</span><div class="seat-devices-pills" id="bp_pills_CAREER_01"></div></div></div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
             <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">보건실<br><span class="room-sub">(본관 전관 1층)</span></div></div>
@@ -3838,7 +3873,7 @@
 
             <!-- Middle Columns -->
             <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div id="bp_seat_ADM_02" class="bp-seat-cell" onclick="openSeatModal('ADM_02')"><span class="seat-id-tag">상단 중앙</span><span class="seat-user-name" id="bp_user_ADM_02">-</span><div class="seat-devices-pills" id="bp_pills_ADM_02"></div></div>
+              <div id="bp_seat_ADM_02" class="bp-seat-cell" onclick="openSeatModal('ADM_02')"><span class="seat-user-name" id="bp_user_ADM_02">-</span><div class="seat-devices-pills" id="bp_pills_ADM_02"></div></div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
                 <div id="bp_seat_ADM_04" class="bp-seat-cell" onclick="openSeatModal('ADM_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_ADM_04">-</span><div class="seat-devices-pills" id="bp_pills_ADM_04"></div></div>
                 <div id="bp_seat_ADM_05" class="bp-seat-cell" onclick="openSeatModal('ADM_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_ADM_05">-</span><div class="seat-devices-pills" id="bp_pills_ADM_05"></div></div>
@@ -3849,7 +3884,7 @@
 
             <!-- Right Columns -->
             <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div id="bp_seat_ADM_03" class="bp-seat-cell" onclick="openSeatModal('ADM_03')"><span class="seat-id-tag">상단 우측</span><span class="seat-user-name" id="bp_user_ADM_03">-</span><div class="seat-devices-pills" id="bp_pills_ADM_03"></div></div>
+              <div id="bp_seat_ADM_03" class="bp-seat-cell" onclick="openSeatModal('ADM_03')"><span class="seat-user-name" id="bp_user_ADM_03">-</span><div class="seat-devices-pills" id="bp_pills_ADM_03"></div></div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
                 <div id="bp_seat_ADM_08" class="bp-seat-cell" onclick="openSeatModal('ADM_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_ADM_08">-</span><div class="seat-devices-pills" id="bp_pills_ADM_08"></div></div>
                 <div id="bp_seat_ADM_09" class="bp-seat-cell" onclick="openSeatModal('ADM_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_ADM_09">-</span><div class="seat-devices-pills" id="bp_pills_ADM_09"></div></div>
