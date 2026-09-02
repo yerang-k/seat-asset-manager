@@ -39,13 +39,31 @@ function getInitialData() {
     ensureSheetsInitialized_(ss);
 
     let seatSheet = ss.getSheetByName(SHEET_SEATS);
-    let seats = getSheetObjects_(seatSheet);
+    let seats = seatSheet ? getSheetObjects_(seatSheet) : [];
 
-    // 혹시라도 좌석이 0개라면 즉시 초기데이터생성 실행 후 다시 조회
     if (!seats || seats.length === 0) {
       초기데이터생성();
       seatSheet = ss.getSheetByName(SHEET_SEATS);
-      seats = getSheetObjects_(seatSheet);
+      seats = seatSheet ? getSheetObjects_(seatSheet) : [];
+    }
+
+    // 최후의 안전장치: 시트가 여전히 비어있다면 메모리 프리셋 98석 즉시 반환
+    if (!seats || seats.length === 0) {
+      const presetRooms = getPresetRooms_();
+      seats = [];
+      presetRooms.forEach(room => {
+        room.seats.forEach(s => {
+          seats.push({
+            seat_id: s.id,
+            room_id: room.id,
+            room_name: room.name,
+            seat_label: s.label,
+            current_user: s.user || '',
+            extension: s.ext || '',
+            updated_at: ''
+          });
+        });
+      });
     }
 
     const devSheet = ss.getSheetByName(SHEET_DEVICES);
@@ -602,7 +620,7 @@ function syncAllRoomSheets() {
   const allRows = seats.map(s => buildSeatViewRow_(s, devMap[s.seat_id] || []));
   let allViewSheet = ss.getSheetByName(SHEET_ALL_VIEW);
   if (!allViewSheet) {
-    allViewSheet = ss.insertSheet(SHEET_ALL_VIEW, 0);
+    allViewSheet = ss.insertSheet(SHEET_ALL_VIEW);
   }
   setupSheet_(allViewSheet, VIEW_HEADERS, allRows, '#1b4332');
   formatViewSheet_(allViewSheet);
@@ -614,7 +632,7 @@ function syncAllRoomSheets() {
 
     let roomTab = ss.getSheetByName(rDef.tabName);
     if (!roomTab) {
-      roomTab = ss.insertSheet(rDef.tabName, idx + 1);
+      roomTab = ss.insertSheet(rDef.tabName);
     }
     setupSheet_(roomTab, VIEW_HEADERS, roomRows, '#1e3a8a');
     formatViewSheet_(roomTab);
@@ -786,9 +804,6 @@ function setupSheet_(sheet, headers, rows, headerColor) {
     .setHorizontalAlignment('center');
   
   sheet.setFrozenRows(1);
-  for (let c = 1; c <= headers.length; c++) {
-    sheet.autoResizeColumn(c);
-  }
 }
 
 /** 2026학년도 전주솔내고 교직원 좌석배치도 기준 프리셋 */

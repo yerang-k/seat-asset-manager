@@ -1776,12 +1776,48 @@
       canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0
     };
 
+    function initDefaultSeats() {
+      let initSeats = [];
+      PRESET_ROOMS.forEach(r => {
+        r.seats.forEach(s => {
+          const defPos = DEFAULT_COORDS[s.id] || { x: 60, y: 60, w: 140, h: 70 };
+          initSeats.push({
+            seat_id: s.id,
+            room_id: r.id,
+            room_name: r.name,
+            seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
+            current_user: s.user || '',
+            extension: s.ext || '',
+            pos_x: defPos.x,
+            pos_y: defPos.y,
+            width: defPos.w,
+            height: defPos.h
+          });
+        });
+      });
+      appState.seats = initSeats;
+      if (!appState.devices || appState.devices.length === 0) {
+        appState.devices = SAMPLE_DEVICES;
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       appState.isGas = typeof google !== 'undefined' && google.script && google.script.run;
-      document.getElementById('modeStatusText').textContent = appState.isGas 
-        ? "✅ Google Apps Script (Google Sheets 연동 모드)" 
-        : "💻 로컬 브라우저 모드 (LocalStorage 저장소 사용)";
+      const modeText = document.getElementById('modeStatusText');
+      if (modeText) {
+        modeText.textContent = appState.isGas 
+          ? "✅ Google Apps Script (Google Sheets 연동 모드)" 
+          : "💻 로컬 브라우저 모드 (LocalStorage 저장소 사용)";
+      }
 
+      // 1. 화면 즉시 렌더링: 기본 98석을 즉시 로드하여 어떤 경우에도 0석이 되지 않도록 보장
+      initDefaultSeats();
+      initSeatPositions();
+      updateTopStats();
+      updateTabBadges();
+      if (typeof renderActiveRoomView === 'function') renderActiveRoomView();
+
+      // 2. 서버에서 최신 데이터 비동기 동기화
       loadData();
     });
 
@@ -1825,6 +1861,7 @@
               initSeatPositions();
               renderActiveRoomView();
               updateTopStats();
+              updateTabBadges();
               selectRoom(appState.activeRoomId);
               showToast("데이터를 성공적으로 동기화했습니다.");
             } else {
