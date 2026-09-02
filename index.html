@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>전주솔내고 교직원 좌석·기기 관리 (교무실별 조회)</title>
+  <title>전주솔내고 교직원 좌석·기기 관리 (좌석 추가 기능 탑재)</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
@@ -107,6 +107,14 @@
     .btn-primary:hover {
       background: #1b4332;
     }
+    .btn-accent {
+      background: #1b5e20;
+      color: #fff;
+      border: 1px solid #81c784;
+    }
+    .btn-accent:hover {
+      background: #2e7d32;
+    }
     .btn-outline {
       background: transparent;
       border-color: rgba(255,255,255,0.6);
@@ -176,7 +184,7 @@
       color: #fff;
     }
 
-    /* Top Sub-Bar (Controls & Search) */
+    /* Sub Controls Bar */
     .sub-controls-bar {
       max-width: 1400px;
       margin: 10px auto 0;
@@ -222,7 +230,7 @@
       color: #777;
     }
 
-    /* Overall Stat Bar */
+    /* Stat Bar */
     .stat-container {
       max-width: 1400px;
       margin: 10px auto 0;
@@ -284,7 +292,7 @@
       padding: 0 16px;
     }
 
-    /* SINGLE ROOM VIEW CONTAINER (Prominent, High-Resolution, Room-by-Room) */
+    /* SINGLE ROOM VIEW CONTAINER */
     .single-room-card {
       background: #fff;
       border: 2px solid var(--border-dark);
@@ -319,6 +327,7 @@
       margin-top: 3px;
       display: flex;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .single-room-body {
@@ -330,7 +339,7 @@
       justify-content: center;
     }
 
-    /* Desk (Seat) Styling in Single Room View (Comfortable Size) */
+    /* Desk (Seat) Cell Styling */
     .seat-cell {
       border: 1.8px solid var(--border-dark);
       background: #fff;
@@ -444,7 +453,7 @@
       border-radius: 4px;
     }
 
-    /* Special Rooms Table */
+    /* Special Rooms Grid */
     .special-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -472,7 +481,7 @@
       font-weight: 600;
     }
 
-    /* OVERVIEW (전체 조망) CONTAINER */
+    /* Overview Container */
     .overview-container {
       display: none;
       background: #fff;
@@ -489,32 +498,6 @@
       padding: 12px 0 8px;
       letter-spacing: 2px;
       border-bottom: 2px solid var(--border-dark);
-    }
-    .overview-grid-top {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      border-bottom: 2px solid var(--border-dark);
-    }
-    .overview-grid-bottom {
-      display: grid;
-      grid-template-columns: 1fr 0.6fr 0.8fr 0.6fr 1.1fr;
-      border-bottom: 2px solid var(--border-dark);
-    }
-    .overview-room-box {
-      border: 1px solid var(--border-dark);
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-    }
-    .overview-room-header {
-      background: var(--bg-header);
-      border-bottom: 1.5px solid var(--border-dark);
-      text-align: center;
-      padding: 5px 4px;
-      cursor: pointer;
-    }
-    .overview-room-header:hover {
-      background: #d8ebd4;
     }
 
     /* Modal Styling */
@@ -595,7 +578,7 @@
       font-weight: 600;
       margin-bottom: 2px;
     }
-    .meta-group input {
+    .meta-group input, .meta-group select {
       width: 100%;
       padding: 6px 8px;
       border-radius: 4px;
@@ -665,7 +648,7 @@
       font-weight: 600;
       color: #444;
     }
-    .form-group input {
+    .form-group input, .form-group select {
       padding: 7px 9px;
       border-radius: 5px;
       border: 1px solid #ccc;
@@ -725,6 +708,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     /* Reassignment Panel */
@@ -788,6 +773,7 @@
       <span class="app-badge">2026학년도</span>
     </div>
     <div class="topbar-actions">
+      <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
       <button class="btn btn-outline" id="btnModeRoom" onclick="switchViewMode('room')">🏫 교무실별 뷰</button>
       <button class="btn btn-outline" id="btnModeOverview" onclick="switchViewMode('overview')">🗺️ 전체 조망 뷰</button>
       <button class="btn btn-outline" id="btnModeReassign" onclick="switchViewMode('reassign')">👥 인사이동 모드</button>
@@ -796,7 +782,7 @@
     </div>
   </header>
 
-  <!-- ROOM SELECTOR TAB BAR (Visible on top for instant 1-click room switching) -->
+  <!-- ROOM SELECTOR TAB BAR -->
   <nav class="room-nav-bar" id="roomNavBar">
     <div class="room-tabs-scroll" id="roomTabsScroll">
       <button class="room-tab-btn active" data-room="gyomu_center" onclick="selectRoom('gyomu_center')">
@@ -840,6 +826,7 @@
     <div class="room-nav-arrows">
       <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="navigateRoom(-1)">◀ 이전 교무실</button>
       <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="navigateRoom(1)">다음 교무실 ▶</button>
+      <button class="btn btn-primary" onclick="openAddSeatModal()">➕ 이 교무실에 좌석 추가</button>
     </div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
@@ -879,21 +866,20 @@
   <!-- MAIN VIEW AREA -->
   <main class="board-container" id="boardContainer">
 
-    <!-- 1. SINGLE ROOM VIEW (Shown by default: shows ONLY the selected room!) -->
+    <!-- 1. SINGLE ROOM VIEW -->
     <div id="singleRoomContainer">
-      <!-- Dynamically rendered by renderActiveRoomView() -->
+      <!-- Rendered by renderActiveRoomView() -->
     </div>
 
-    <!-- 2. OVERVIEW (전체 조망) VIEW (Optional full poster view) -->
+    <!-- 2. OVERVIEW VIEW -->
     <div class="overview-container" id="overviewContainer">
       <div class="chart-main-title">
         2026학년도 전주솔내고 교직원 좌석 배치도(핸드폰, 내선)
       </div>
-      <!-- Overview Grid will be cloned or displayed here -->
       <div id="overviewGridContent" style="padding: 10px;"></div>
     </div>
 
-    <!-- 3. ANNUAL TEACHER REASSIGNMENT VIEW -->
+    <!-- 3. REASSIGNMENT VIEW -->
     <div class="reassign-panel" id="reassignPanel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
         <div>
@@ -922,6 +908,60 @@
     </div>
 
   </main>
+
+  <!-- ADD SEAT MODAL (좌석 추가 대화상자) -->
+  <div class="modal-backdrop" id="addSeatModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>➕ 새로운 좌석(자리) 추가</h2>
+        <button class="modal-close" onclick="closeAddSeatModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label><strong>소속 교무실</strong></label>
+          <select id="newSeatRoomId" onchange="handleNewSeatRoomChange(this.value)">
+            <option value="gyomu_center">교무센터(본관 후관 1층)</option>
+            <option value="grade3">3학년 교무실(본관 후관 4층)</option>
+            <option value="grade2">2학년 교무실(본관 후관 2층)</option>
+            <option value="grade1">1학년 교무실(본관 후관 3층)</option>
+            <option value="safety">학생안전부(본관 후관 1층)</option>
+            <option value="edu_info">교육정보부(본관 전관 4층)</option>
+            <option value="support">통합지원반(본관 후관 1층)</option>
+            <option value="library">도서실(본관 후관 3층)</option>
+            <option value="counsel_health_meal">상담·보건·급식실</option>
+            <option value="admin">행정실(본관 1층)</option>
+            <option value="special">특별실</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>좌석 명칭 / 라벨</strong></label>
+          <input type="text" id="newSeatLabel" placeholder="예: 12번, 교무실 앞쪽 보조석, 실습교사석">
+          <small style="color: #666;">배치도 및 목록에 표시될 자리 이름입니다.</small>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>담당 선생님 성명 (선택)</strong></label>
+          <input type="text" id="newSeatUser" placeholder="예: 김선생">
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>내선번호 (선택)</strong></label>
+          <input type="text" id="newSeatExt" placeholder="예: 215">
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>좌석 고유 ID</strong></label>
+          <input type="text" id="newSeatId" placeholder="자동 생성 (예: G3_12, GYOMU_22 등)">
+          <small style="color: #666;">시스템 내부 식별용 ID입니다 (필요시 직접 수정 가능).</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeAddSeatModal()">취소</button>
+        <button class="btn btn-primary" onclick="submitAddSeat()">💾 좌석 생성 완료</button>
+      </div>
+    </div>
+  </div>
 
   <!-- SEAT DETAIL & DEVICE SURVEY MODAL -->
   <div class="modal-backdrop" id="seatModal" onclick="closeModalOnBackdrop(event)">
@@ -1118,8 +1158,15 @@
       </div>
 
       <div class="modal-footer">
-        <span style="font-size: 0.8rem; color: #666;">💡 라벨 사진을 찍으면 AI가 자동으로 필드를 채워줍니다.</span>
-        <button class="btn btn-light" onclick="closeSeatModal()">닫기</button>
+        <div>
+          <button class="btn" style="color: #c62828; background: #ffebee; border: 1px solid #ffcdd2;" onclick="deleteCurrentSeat()">
+            🗑️ 이 좌석 전체 삭제
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.8rem; color: #666;">💡 라벨 사진을 찍으면 AI가 자동으로 필드를 채워줍니다.</span>
+          <button class="btn btn-light" onclick="closeSeatModal()">닫기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1173,6 +1220,10 @@
     // PRESET DATA FOR SOLNAE HIGH SCHOOL
     const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "소회의실측 1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
 
+    // Set of standard template seat IDs
+    const PRESET_SEAT_IDS = new Set();
+    PRESET_ROOMS.forEach(r => r.seats.forEach(s => PRESET_SEAT_IDS.add(s.id)));
+
     const ROOM_ORDER = [
       'gyomu_center', 'grade3', 'grade2', 'grade1', 'safety',
       'edu_info', 'support', 'library', 'counsel_health_meal', 'admin', 'special'
@@ -1209,6 +1260,7 @@
               appState.rooms = res.rooms || [];
               renderActiveRoomView();
               updateTopStats();
+              selectRoom(appState.activeRoomId);
               showToast("데이터를 성공적으로 동기화했습니다.");
             } else {
               alert("데이터 로딩 오류: " + res.error);
@@ -1289,7 +1341,7 @@
       }
     }
 
-    // Select Room (Tab click)
+    // Select Room
     function selectRoom(roomId) {
       appState.activeRoomId = roomId;
       document.querySelectorAll('.room-tab-btn').forEach(btn => {
@@ -1302,7 +1354,7 @@
       }
     }
 
-    // Prev / Next Room Navigation
+    // Prev / Next Navigation
     function navigateRoom(dir) {
       let idx = ROOM_ORDER.indexOf(appState.activeRoomId);
       if (idx === -1) idx = 0;
@@ -1310,12 +1362,11 @@
       if (nextIdx < 0) nextIdx = ROOM_ORDER.length - 1;
       if (nextIdx >= ROOM_ORDER.length) nextIdx = 0;
       selectRoom(ROOM_ORDER[nextIdx]);
-      // Scroll active tab into view
       const activeBtn = document.querySelector(`.room-tab-btn[data-room="${ROOM_ORDER[nextIdx]}"]`);
       if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
 
-    // Helper: generate single desk HTML
+    // Helper: generate single desk cell HTML
     function createSeatHtml(seatId, labelOverride) {
       const seat = appState.seats.find(s => s.seat_id === seatId);
       const devs = appState.devices.filter(d => d.seat_id === seatId);
@@ -1347,7 +1398,155 @@
       `;
     }
 
-    // RENDER ACTIVE ROOM VIEW (Shows ONLY the selected room!)
+    // ==========================================
+    // SEAT ADDITION (좌석 추가 기능)
+    // ==========================================
+    function openAddSeatModal() {
+      const rId = appState.activeRoomId;
+      document.getElementById('newSeatRoomId').value = rId;
+      handleNewSeatRoomChange(rId);
+      document.getElementById('newSeatUser').value = '';
+      document.getElementById('newSeatExt').value = '';
+      document.getElementById('addSeatModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('newSeatLabel').focus(), 100);
+    }
+
+    function closeAddSeatModal() {
+      document.getElementById('addSeatModal').style.display = 'none';
+    }
+
+    function handleNewSeatRoomChange(roomId) {
+      const roomSeats = appState.seats.filter(s => s.room_id === roomId);
+      const nextNum = roomSeats.length + 1;
+      
+      let prefix = roomId.toUpperCase().substring(0, 5);
+      if (roomId === 'gyomu_center') prefix = 'GYOMU';
+      else if (roomId === 'grade3') prefix = 'G3';
+      else if (roomId === 'grade2') prefix = 'G2';
+      else if (roomId === 'grade1') prefix = 'G1';
+      else if (roomId === 'safety') prefix = 'SAFE';
+      else if (roomId === 'admin') prefix = 'ADM';
+      else if (roomId === 'edu_info') prefix = 'INFO';
+      else if (roomId === 'support') prefix = 'SUPP';
+      else if (roomId === 'library') prefix = 'LIB';
+
+      document.getElementById('newSeatLabel').value = `${nextNum}번 좌석`;
+      document.getElementById('newSeatId').value = `${prefix}_${nextNum < 10 ? '0' + nextNum : nextNum}`;
+    }
+
+    function submitAddSeat() {
+      const roomId = document.getElementById('newSeatRoomId').value;
+      const label = document.getElementById('newSeatLabel').value.trim();
+      const user = document.getElementById('newSeatUser').value.trim();
+      const ext = document.getElementById('newSeatExt').value.trim();
+      let seatId = document.getElementById('newSeatId').value.trim();
+
+      if (!label) {
+        alert("좌석 명칭(라벨)을 입력해 주세요. (예: 12번 좌석)");
+        return;
+      }
+
+      if (!seatId) {
+        seatId = (roomId.substring(0, 4).toUpperCase()) + '_' + Date.now().toString(36).toUpperCase();
+      }
+
+      // Check for duplicate seat ID
+      if (appState.seats.some(s => s.seat_id === seatId)) {
+        alert("이미 존재하는 좌석 ID입니다. 다른 ID를 입력해 주세요.");
+        return;
+      }
+
+      // Find room name
+      const preset = PRESET_ROOMS.find(r => r.id === roomId);
+      const roomName = preset ? (preset.name + (preset.floor ? ` (${preset.floor})` : '')) : roomId;
+
+      const newSeat = {
+        seat_id: seatId,
+        room_id: roomId,
+        room_name: roomName,
+        seat_label: label,
+        current_user: user,
+        extension: ext,
+        is_custom: true
+      };
+
+      if (appState.isGas) {
+        showToast("신규 좌석을 등록 중...");
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.success) {
+              appState.seats.push(res.seat || newSeat);
+              closeAddSeatModal();
+              selectRoom(roomId);
+              renderActiveRoomView();
+              updateTopStats();
+              showToast(`좌석 [${label}]이(가) 추가되었습니다!`);
+              // Automatically open the seat detail modal so the user can add devices immediately!
+              openSeatModal(seatId);
+            } else {
+              alert("좌석 추가 실패: " + res.error);
+            }
+          })
+          .withFailureHandler(err => {
+            alert("서버 통신 실패: " + err.message);
+          })
+          .addSeat(newSeat);
+      } else {
+        // Local mode
+        appState.seats.push(newSeat);
+        saveLocalData();
+        closeAddSeatModal();
+        selectRoom(roomId);
+        renderActiveRoomView();
+        updateTopStats();
+        showToast(`좌석 [${label}]이(가) 추가되었습니다!`);
+        openSeatModal(seatId);
+      }
+    }
+
+    // Delete current seat
+    function deleteCurrentSeat() {
+      const seatId = appState.currentSeatId;
+      if (!seatId) return;
+
+      const seat = appState.seats.find(s => s.seat_id === seatId);
+      const label = seat ? seat.seat_label : seatId;
+
+      if (!confirm(`정말로 좌석 [${label}] (ID: ${seatId})을(를) 완전히 삭제하시겠습니까?\n귀속된 PC와 모니터 정보도 함께 삭제됩니다.`)) {
+        return;
+      }
+
+      if (appState.isGas) {
+        showToast("좌석을 삭제하는 중...");
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.success) {
+              appState.seats = appState.seats.filter(s => s.seat_id !== seatId);
+              appState.devices = appState.devices.filter(d => d.seat_id !== seatId);
+              closeSeatModal();
+              renderActiveRoomView();
+              updateTopStats();
+              showToast(`좌석 [${label}]이(가) 삭제되었습니다.`);
+            } else {
+              alert("좌석 삭제 실패: " + res.error);
+            }
+          })
+          .withFailureHandler(err => {
+            alert("서버 통신 오류: " + err.message);
+          })
+          .deleteSeat(seatId);
+      } else {
+        appState.seats = appState.seats.filter(s => s.seat_id !== seatId);
+        appState.devices = appState.devices.filter(d => d.seat_id !== seatId);
+        saveLocalData();
+        closeSeatModal();
+        renderActiveRoomView();
+        updateTopStats();
+        showToast(`좌석 [${label}]이(가) 삭제되었습니다.`);
+      }
+    }
+
+    // RENDER ACTIVE ROOM VIEW (With Extra Seats Section)
     function renderActiveRoomView() {
       const container = document.getElementById('singleRoomContainer');
       const rId = appState.activeRoomId;
@@ -1358,7 +1557,6 @@
       let roomSeatsCount = 0;
       let roomDoneCount = 0;
 
-      // Find room meta from preset
       const preset = PRESET_ROOMS.find(r => r.id === rId);
       if (preset) {
         roomTitle = preset.name;
@@ -1366,12 +1564,12 @@
         roomPhone = preset.phone || '';
       }
 
-      // Calculate room stats
       const roomSeats = appState.seats.filter(s => {
         if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
         return s.room_id === rId;
       });
       roomSeatsCount = roomSeats.length;
+
       roomSeats.forEach(s => {
         const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
         if (devs.some(d => d.device_type === 'PC') && devs.some(d => d.device_type && d.device_type.startsWith('MONITOR'))) {
@@ -1379,12 +1577,30 @@
         }
       });
 
+      // Find any newly added/custom seats for this room that are not in the standard template
+      const extraSeats = roomSeats.filter(s => !PRESET_SEAT_IDS.has(s.seat_id));
+
+      let extraSeatsHtml = '';
+      if (extraSeats.length > 0) {
+        extraSeatsHtml = `
+          <div style="margin-top: 24px; border-top: 2px dashed #40916c; padding-top: 16px; background: #f6fcf8; border-radius: 8px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 1rem; font-weight: 800; color: #1e392a; display: flex; align-items: center; gap: 6px;">
+                ✨ 신규 추가된 좌석 (${extraSeats.length}석)
+              </span>
+              <button class="btn btn-primary" style="font-size: 0.8rem; padding: 4px 10px;" onclick="openAddSeatModal()">➕ 추가 좌석 더 만들기</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+              ${extraSeats.map(s => createSeatHtml(s.seat_id, s.seat_label)).join('')}
+            </div>
+          </div>
+        `;
+      }
+
       let roomBodyHtml = '';
 
-      // Render custom room layout based on rId
       if (rId === 'gyomu_center') {
         roomBodyHtml = `
-          <!-- Top Gyojangsil sub-strip -->
           <div style="background: #eaf3e6; border: 1.5px solid var(--border-dark); border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div>
               <strong style="font-size: 1rem;">교장실 (본관 전관 1층)</strong>
@@ -1396,7 +1612,6 @@
           </div>
 
           <div style="display: grid; grid-template-columns: 80px 1.4fr 1fr 1fr; gap: 14px; min-height: 380px;">
-            <!-- Far Left Vertical: Single seat & Small Conference Room label -->
             <div style="display: flex; flex-direction: column; justify-content: space-between;">
               <div style="margin-bottom: 8px;">${createSeatHtml('GYOMU_01', '1번 (소회의실앞)')}</div>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: #e3f2fd; border: 1.5px solid #90caf9; border-radius: 6px; writing-mode: vertical-rl; text-orientation: upright; font-size: 1rem; font-weight: 800; color: #0d47a1; letter-spacing: 6px; padding: 20px 0;">
@@ -1404,7 +1619,6 @@
               </div>
             </div>
 
-            <!-- Left Islands: Top 2x2, Bottom 3x2 -->
             <div style="display: flex; flex-direction: column; gap: 14px;">
               <div>
                 <div style="font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 4px;">상단 분대 (2x2)</div>
@@ -1428,7 +1642,6 @@
               </div>
             </div>
 
-            <!-- Middle Island: 2x3 Desks -->
             <div>
               <div style="font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 4px;">중앙 분대 (2x3)</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1441,7 +1654,6 @@
               </div>
             </div>
 
-            <!-- Right Island: 2x2 Desks -->
             <div>
               <div style="font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 4px;">우측 분대 (2x2)</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1453,7 +1665,6 @@
             </div>
           </div>
 
-          <!-- Bottom Entrances -->
           <div style="margin-top: 16px; padding: 10px 14px; border-top: 1.5px dashed #ccc; display: flex; justify-content: space-around; background: #fafafa; border-radius: 4px;">
             <div class="door-badge">🚪 출입구 1 (좌측)</div>
             <div class="door-badge">🚪 출입구 2 (중앙)</div>
@@ -1466,7 +1677,6 @@
 
         roomBodyHtml = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 900px; margin: 0 auto; width: 100%;">
-            <!-- Left Wing -->
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <div style="font-size: 0.85rem; font-weight: 800; color: #2d6a4f; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 4px;">좌측 분대 (부장석 & 4석)</div>
               <div>${createSeatHtml(`${prefix}_01`, bujangTitle)}</div>
@@ -1478,7 +1688,6 @@
               </div>
             </div>
 
-            <!-- Right Wing -->
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <div style="font-size: 0.85rem; font-weight: 800; color: #2d6a4f; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 4px;">우측 분대 (6석)</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1585,7 +1794,6 @@
       } else if (rId === 'admin') {
         roomBodyHtml = `
           <div style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 14px; max-width: 1000px; margin: 0 auto; width: 100%;">
-            <!-- Left Tall: Head of Admin -->
             <div style="display: flex; flex-direction: column;">
               <div style="font-size: 0.85rem; font-weight: 800; color: #2d6a4f; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 4px; margin-bottom: 10px;">실장석</div>
               <div style="flex: 1;">
@@ -1593,7 +1801,6 @@
               </div>
             </div>
 
-            <!-- Middle Columns -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div style="font-size: 0.85rem; font-weight: 800; color: #2d6a4f; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 4px;">중앙 분대 (상단 1석 + 2x2)</div>
               <div>${createSeatHtml('ADM_02', '상단 중앙')}</div>
@@ -1605,7 +1812,6 @@
               </div>
             </div>
 
-            <!-- Right Columns -->
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div style="font-size: 0.85rem; font-weight: 800; color: #2d6a4f; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 4px;">우측 분대 (상단 1석 + 2x2)</div>
               <div>${createSeatHtml('ADM_03', '상단 우측')}</div>
@@ -1618,7 +1824,6 @@
             </div>
           </div>
 
-          <!-- Bottom Entrances -->
           <div style="margin-top: 20px; padding: 10px 14px; border-top: 1.5px dashed #ccc; display: flex; justify-content: space-around;">
             <div class="door-badge">🚪 출입구 1 (중앙)</div>
             <div class="door-badge">🚪 출입구 2 (우측)</div>
@@ -1627,55 +1832,22 @@
       } else if (rId === 'special') {
         roomBodyHtml = `
           <div class="special-grid">
-            <div class="special-card">
-              <div class="special-card-title">미술실 <span class="special-card-loc">별관</span></div>
-              <div>${createSeatHtml('SPEC_ART', '미술실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">음악실 <span class="special-card-loc">별관</span></div>
-              <div>${createSeatHtml('SPEC_MUSIC', '음악실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">체육과실-1 <span class="special-card-loc">본관 전관1층</span></div>
-              <div>${createSeatHtml('SPEC_PE_1', '체육과-1')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">체육과실-2 <span class="special-card-loc">본관 전관1층</span></div>
-              <div>${createSeatHtml('SPEC_PE_2', '체육과-2')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">체육과실-3 <span class="special-card-loc">본관 전관1층</span></div>
-              <div>${createSeatHtml('SPEC_PE_3', '체육과-3')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">소회의실 <span class="special-card-loc">교무센터옆</span></div>
-              <div>${createSeatHtml('SPEC_CONF_S', '소회의실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">대회의실 <span class="special-card-loc">본관3층</span></div>
-              <div>${createSeatHtml('SPEC_CONF_L', '대회의실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">당직실 <span class="special-card-loc">본관1층</span></div>
-              <div>${createSeatHtml('SPEC_DUTY', '당직실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">식생활관 <span class="special-card-loc">식생활관</span></div>
-              <div>${createSeatHtml('SPEC_DINE', '식생활관')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">인쇄실 <span class="special-card-loc">본관전관1층</span></div>
-              <div>${createSeatHtml('SPEC_PRINT', '인쇄실')}</div>
-            </div>
-            <div class="special-card">
-              <div class="special-card-title">기숙사 <span class="special-card-loc">기숙사</span></div>
-              <div>${createSeatHtml('SPEC_DORM', '기숙사')}</div>
-            </div>
+            <div class="special-card"><div class="special-card-title">미술실 <span class="special-card-loc">별관</span></div><div>${createSeatHtml('SPEC_ART', '미술실')}</div></div>
+            <div class="special-card"><div class="special-card-title">음악실 <span class="special-card-loc">별관</span></div><div>${createSeatHtml('SPEC_MUSIC', '음악실')}</div></div>
+            <div class="special-card"><div class="special-card-title">체육과실-1 <span class="special-card-loc">본관 전관1층</span></div><div>${createSeatHtml('SPEC_PE_1', '체육과-1')}</div></div>
+            <div class="special-card"><div class="special-card-title">체육과실-2 <span class="special-card-loc">본관 전관1층</span></div><div>${createSeatHtml('SPEC_PE_2', '체육과-2')}</div></div>
+            <div class="special-card"><div class="special-card-title">체육과실-3 <span class="special-card-loc">본관 전관1층</span></div><div>${createSeatHtml('SPEC_PE_3', '체육과-3')}</div></div>
+            <div class="special-card"><div class="special-card-title">소회의실 <span class="special-card-loc">교무센터옆</span></div><div>${createSeatHtml('SPEC_CONF_S', '소회의실')}</div></div>
+            <div class="special-card"><div class="special-card-title">대회의실 <span class="special-card-loc">본관3층</span></div><div>${createSeatHtml('SPEC_CONF_L', '대회의실')}</div></div>
+            <div class="special-card"><div class="special-card-title">당직실 <span class="special-card-loc">본관1층</span></div><div>${createSeatHtml('SPEC_DUTY', '당직실')}</div></div>
+            <div class="special-card"><div class="special-card-title">식생활관 <span class="special-card-loc">식생활관</span></div><div>${createSeatHtml('SPEC_DINE', '식생활관')}</div></div>
+            <div class="special-card"><div class="special-card-title">인쇄실 <span class="special-card-loc">본관전관1층</span></div><div>${createSeatHtml('SPEC_PRINT', '인쇄실')}</div></div>
+            <div class="special-card"><div class="special-card-title">기숙사 <span class="special-card-loc">기숙사</span></div><div>${createSeatHtml('SPEC_DORM', '기숙사')}</div></div>
           </div>
         `;
       }
 
-      // Put together the Single Room Card HTML
+      // Combine standard template + any extra added seats
       container.innerHTML = `
         <div class="single-room-card">
           <div class="single-room-header">
@@ -1683,11 +1855,12 @@
               <h2>🏫 ${roomTitle} <span style="font-size: 0.95rem; font-weight: 600; color: #444;">(${roomSub})</span></h2>
               <div class="single-room-meta">
                 ${roomPhone ? `<span>📞 ${roomPhone}</span>` : ''}
-                <span>🪑 좌석 현황: <strong>${roomSeatsCount}석</strong></span>
+                <span>🪑 현재 좌석: <strong>${roomSeatsCount}석</strong></span>
                 <span>✅ 조사완료: <strong style="color: #2e7d32;">${roomDoneCount}석</strong> (${roomSeatsCount > 0 ? Math.round((roomDoneCount/roomSeatsCount)*100) : 0}%)</span>
               </div>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
               <button class="btn btn-primary" onclick="openSeatModal('${roomSeats[0] ? roomSeats[0].seat_id : ''}')">
                 ✏️ 좌석 기기 입력
               </button>
@@ -1696,11 +1869,11 @@
 
           <div class="single-room-body">
             ${roomBodyHtml}
+            ${extraSeatsHtml}
           </div>
         </div>
       `;
 
-      // Update badge counts in tabs
       updateTabBadges();
     }
 
@@ -1739,7 +1912,7 @@
       document.getElementById('statProgressBar').style.width = pct + '%';
     }
 
-    // Render Overview View (Full poster grid)
+    // Render Overview View
     function renderOverviewView() {
       const container = document.getElementById('overviewGridContent');
       let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">';
@@ -2224,7 +2397,6 @@
         return;
       }
 
-      // Find which room has the matched seat
       const matchedSeat = appState.seats.find(s => {
         const u = s.current_user ? s.current_user.toLowerCase() : '';
         const l = s.seat_label ? s.seat_label.toLowerCase() : '';

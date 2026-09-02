@@ -652,3 +652,109 @@ function getPresetRooms_() {
     }
   ];
 }
+
+/** 신규 좌석 추가 */
+function addSeat(seatPayload) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const headers = seatSheet.getRange(1, 1, 1, seatSheet.getLastColumn()).getValues()[0];
+
+    let seatId = seatPayload.seat_id;
+    if (!seatId) {
+      const prefix = (seatPayload.room_id || 'SEAT').toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+      seatId = prefix + '_' + Utilities.getUuid().substring(0, 6).toUpperCase();
+      seatPayload.seat_id = seatId;
+    }
+    seatPayload.updated_at = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+
+    const rowValues = headers.map(h => seatPayload[h] !== undefined ? seatPayload[h] : '');
+    seatSheet.appendRow(rowValues);
+
+    // 교무실 좌석 수 갱신
+    updateRoomSeatCount_(ss, seatPayload.room_id);
+
+    return {
+      success: true,
+      seat: seatPayload
+    };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/** 좌석 삭제 (해당 좌석 및 귀속 기기 일괄 삭제) */
+function deleteSeat(seatId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const data = seatSheet.getDataRange().getValues();
+    const headers = data[0];
+    const idCol = headers.indexOf('seat_id');
+    const roomCol = headers.indexOf('room_id');
+
+    let roomId = '';
+    let found = false;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idCol]) === String(seatId)) {
+        roomId = data[i][roomCol];
+        seatSheet.deleteRow(i + 1);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      return { success: false, error: '해당 좌석을 찾을 수 없습니다.' };
+    }
+
+    // 귀속된 기기도 함께 삭제
+    const devSheet = ss.getSheetByName(SHEET_DEVICES);
+    if (devSheet) {
+      const devData = devSheet.getDataRange().getValues();
+      const devSeatCol = devData[0].indexOf('seat_id');
+      if (devSeatCol !== -1) {
+        for (let j = devData.length - 1; j >= 1; j--) {
+          if (String(devData[j][devSeatCol]) === String(seatId)) {
+            devSheet.deleteRow(j + 1);
+          }
+        }
+      }
+    }
+
+    if (roomId) updateRoomSeatCount_(ss, roomId);
+
+    return { success: true, seatId: seatId };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/** 교무실 시트 좌석 수 자동 계산 및 갱신 헬퍼 */
+function updateRoomSeatCount_(ss, roomId) {
+  try {
+    const roomSheet = ss.getSheetByName(SHEET_ROOMS);
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    if (!roomSheet || !seatSheet) return;
+
+    const seatData = seatSheet.getDataRange().getValues();
+    const roomCol = seatData[0].indexOf('room_id');
+    let count = 0;
+    for (let i = 1; i < seatData.length; i++) {
+      if (String(seatData[i][roomCol]) === String(roomId)) count++;
+    }
+
+    const roomData = roomSheet.getDataRange().getValues();
+    const rIdCol = roomData[0].indexOf('room_id');
+    const rCountCol = roomData[0].indexOf('seat_count');
+    if (rIdCol === -1 || rCountCol === -1) return;
+
+    for (let j = 1; j < roomData.length; j++) {
+      if (String(roomData[j][rIdCol]) === String(roomId)) {
+        roomSheet.getRange(j + 1, rCountCol + 1).setValue(count);
+        break;
+      }
+    }
+  } catch (e) {}
+}
