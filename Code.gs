@@ -588,8 +588,6 @@ function syncAllRoomSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const seatSheet = ss.getSheetByName(SHEET_SEATS);
   if (!seatSheet || seatSheet.getLastRow() <= 1) return;
-
-  const seatSheet = ss.getSheetByName(SHEET_SEATS);
   const devSheet = ss.getSheetByName(SHEET_DEVICES);
   const seats = getSheetObjects_(seatSheet);
   const devices = getSheetObjects_(devSheet);
