@@ -3316,27 +3316,27 @@
             <div class="room-sub">( 전화 270-8208, FAX 276-3015 )</div>
           </div>
           
-          <div class="room-body" style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px;">
-            <!-- Far Left Vertical: Single seat & Small Conference Room label -->
-            <div style="display: flex; flex-direction: column; justify-content: space-between;">
-              <div id="bp_seat_GYOMU_01" class="bp-seat-cell" onclick="openSeatModal('GYOMU_01')">
-                <span class="seat-id-tag">1</span>
-                <span class="seat-user-name" id="bp_user_GYOMU_01">-</span>
-                <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
+          <div class="room-body" style="display: grid; grid-template-columns: 1.45fr 1fr 1fr; gap: 8px;">
+            <!-- Column 1 (Left Block): Top (1 교감 + 2~5), Bottom (6~11) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <!-- Top row: 1 (교감) + 2~5 (2x2) -->
+              <div style="display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 4px;">
+                <!-- 1 교감 -->
+                <div id="bp_seat_GYOMU_01" class="bp-seat-cell" style="justify-content: center; min-height: 56px;" onclick="openSeatModal('GYOMU_01')">
+                  <span class="seat-id-tag">1</span>
+                  <span class="seat-user-name" id="bp_user_GYOMU_01" style="font-weight: 800; color: #1b5e20;">교감</span>
+                  <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
+                </div>
+                <!-- 2, 3, 4, 5 (2x2) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                  <div id="bp_seat_GYOMU_02" class="bp-seat-cell" onclick="openSeatModal('GYOMU_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_GYOMU_02">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_02"></div></div>
+                  <div id="bp_seat_GYOMU_03" class="bp-seat-cell" onclick="openSeatModal('GYOMU_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_GYOMU_03">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_03"></div></div>
+                  <div id="bp_seat_GYOMU_04" class="bp-seat-cell" onclick="openSeatModal('GYOMU_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_GYOMU_04">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_04"></div></div>
+                  <div id="bp_seat_GYOMU_05" class="bp-seat-cell" onclick="openSeatModal('GYOMU_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_GYOMU_05">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_05"></div></div>
+                </div>
               </div>
-              
-            </div>
 
-            <!-- Left Islands: Top 2x2, Bottom 3x2 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <!-- Top 2x2 Island -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <div id="bp_seat_GYOMU_02" class="bp-seat-cell" onclick="openSeatModal('GYOMU_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_GYOMU_02">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_02"></div></div>
-                <div id="bp_seat_GYOMU_03" class="bp-seat-cell" onclick="openSeatModal('GYOMU_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_GYOMU_03">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_03"></div></div>
-                <div id="bp_seat_GYOMU_04" class="bp-seat-cell" onclick="openSeatModal('GYOMU_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_GYOMU_04">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_04"></div></div>
-                <div id="bp_seat_GYOMU_05" class="bp-seat-cell" onclick="openSeatModal('GYOMU_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_GYOMU_05">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_05"></div></div>
-              </div>
-              <!-- Bottom 3x2 Island -->
+              <!-- Bottom row: 6~11 (3x2) -->
               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; flex: 1;">
                 <div id="bp_seat_GYOMU_06" class="bp-seat-cell" onclick="openSeatModal('GYOMU_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_GYOMU_06">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_06"></div></div>
                 <div id="bp_seat_GYOMU_07" class="bp-seat-cell" onclick="openSeatModal('GYOMU_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_GYOMU_07">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_07"></div></div>
@@ -3347,7 +3347,7 @@
               </div>
             </div>
 
-            <!-- Middle Island: 2x3 Desks -->
+            <!-- Column 2 (Middle Block): 12~17 (2x3) -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
               <div id="bp_seat_GYOMU_12" class="bp-seat-cell" onclick="openSeatModal('GYOMU_12')"><span class="seat-id-tag">12</span><span class="seat-user-name" id="bp_user_GYOMU_12">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_12"></div></div>
               <div id="bp_seat_GYOMU_13" class="bp-seat-cell" onclick="openSeatModal('GYOMU_13')"><span class="seat-id-tag">13</span><span class="seat-user-name" id="bp_user_GYOMU_13">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_13"></div></div>
@@ -3357,7 +3357,7 @@
               <div id="bp_seat_GYOMU_17" class="bp-seat-cell" onclick="openSeatModal('GYOMU_17')"><span class="seat-id-tag">17</span><span class="seat-user-name" id="bp_user_GYOMU_17">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_17"></div></div>
             </div>
 
-            <!-- Right Island: 2x2 Desks -->
+            <!-- Column 3 (Right Block): 18~21 (2x2) -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
               <div id="bp_seat_GYOMU_18" class="bp-seat-cell" onclick="openSeatModal('GYOMU_18')"><span class="seat-id-tag">18</span><span class="seat-user-name" id="bp_user_GYOMU_18">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_18"></div></div>
               <div id="bp_seat_GYOMU_19" class="bp-seat-cell" onclick="openSeatModal('GYOMU_19')"><span class="seat-id-tag">19</span><span class="seat-user-name" id="bp_user_GYOMU_19">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_19"></div></div>
