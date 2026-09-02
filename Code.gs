@@ -561,14 +561,22 @@ function updateOrAppendViewRow_(ss, sheetName, seatId, viewRow, headerColor) {
 
 /** 뷰 시트 서식 맞춤 (열 정렬, 줄바꿈) */
 function formatViewSheet_(sheet) {
-  sheet.setFrozenRows(1);
-  const lastRow = sheet.getLastRow();
-  const lastCol = sheet.getLastColumn();
-  if (lastRow <= 1) return;
+  try {
+    sheet.setFrozenRows(1);
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    if (lastRow <= 1) return;
 
-  sheet.getRange(2, 1, lastRow - 1, 6).setHorizontalAlignment('center');
-  sheet.getRange(2, 21, lastRow - 1, 1).setHorizontalAlignment('center');
-  sheet.getRange(2, 19, lastRow - 1, 1).setWrap(true);
+    sheet.getRange(2, 1, lastRow - 1, Math.min(6, lastCol)).setHorizontalAlignment('center');
+    if (lastCol >= 24) {
+      sheet.getRange(2, 24, lastRow - 1, 1).setHorizontalAlignment('center');
+    }
+    if (lastCol >= 22) {
+      sheet.getRange(2, 22, lastRow - 1, 1).setWrap(true);
+    }
+  } catch (e) {
+    Logger.log('formatViewSheet_ error: ' + e.message);
+  }
 }
 
 /**
@@ -578,7 +586,8 @@ function formatViewSheet_(sheet) {
  */
 function syncAllRoomSheets() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  ensureSheetsInitialized_(ss);
+  const seatSheet = ss.getSheetByName(SHEET_SEATS);
+  if (!seatSheet || seatSheet.getLastRow() <= 1) return;
 
   const seatSheet = ss.getSheetByName(SHEET_SEATS);
   const devSheet = ss.getSheetByName(SHEET_DEVICES);
@@ -623,24 +632,28 @@ function syncAllRoomSheets() {
 
 /** 시트 탭 순서 정렬 */
 function orderSheetsOrder_(ss) {
-  const desiredOrder = [
-    SHEET_ALL_VIEW,
-    ...ROOM_TAB_DEFS.map(r => r.tabName),
-    SHEET_SEATS,
-    SHEET_DEVICES,
-    SHEET_ROOMS
-  ];
+  try {
+    const desiredOrder = [
+      SHEET_ALL_VIEW,
+      ...ROOM_TAB_DEFS.map(r => r.tabName),
+      SHEET_SEATS,
+      SHEET_DEVICES,
+      SHEET_ROOMS
+    ];
 
-  desiredOrder.forEach((name, idx) => {
-    const sh = ss.getSheetByName(name);
-    if (sh) {
-      ss.setActiveSheet(sh);
-      ss.moveActiveSheet(idx + 1);
-    }
-  });
+    desiredOrder.forEach((name, idx) => {
+      const sh = ss.getSheetByName(name);
+      if (sh) {
+        ss.setActiveSheet(sh);
+        ss.moveActiveSheet(idx + 1);
+      }
+    });
 
-  const firstSheet = ss.getSheetByName(SHEET_ALL_VIEW);
-  if (firstSheet) ss.setActiveSheet(firstSheet);
+    const firstSheet = ss.getSheetByName(SHEET_ALL_VIEW);
+    if (firstSheet) ss.setActiveSheet(firstSheet);
+  } catch (e) {
+    Logger.log('orderSheetsOrder_ error: ' + e.message);
+  }
 }
 
 /** 구글 스프레드시트 열릴 때 커스텀 관리자 메뉴 생성 */
