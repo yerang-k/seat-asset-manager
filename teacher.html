@@ -1780,6 +1780,33 @@
       } catch (e) {}
     }
 
+    // ── GitHub Pages 등 외부 정적 호스팅에서 GAS 백엔드 호출용 (index.html과 동일한 구조) ──
+    const EXEC_URL = 'https://script.google.com/macros/s/AKfycbxia3mN38ueSoZWA3Ay8AwCVfzTxV-OpGdMR-PfHK0uA4_E-d5ULVECjSKYYHczubEo/exec';
+    function gasRunner() {
+      let onSuccess = () => {};
+      let onFailure = (err) => console.error('GAS 호출 실패:', err);
+      const runner = {
+        withSuccessHandler(fn) { onSuccess = fn; return proxy; },
+        withFailureHandler(fn) { onFailure = fn; return proxy; }
+      };
+      const proxy = new Proxy(runner, {
+        get(target, prop) {
+          if (prop in target) return target[prop];
+          return (...args) => {
+            fetch(EXEC_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ fn: prop, args })
+            })
+              .then(res => res.json())
+              .then(onSuccess)
+              .catch(onFailure);
+          };
+        }
+      });
+      return proxy;
+    }
+
     let appState = {
       rooms: [],
       seats: [],
@@ -1819,7 +1846,7 @@
     }
 
     function bootstrapApp() {
-      appState.isGas = typeof google !== 'undefined' && google.script && google.script.run;
+      appState.isGas = true;
       const modeText = document.getElementById('modeStatusText');
       if (modeText) {
         modeText.textContent = appState.isGas 
@@ -1883,7 +1910,7 @@
       if (appState.isGas) {
         showToast("서버에서 최신 데이터를 불러오는 중...");
         var syncTimer = setTimeout(showSyncRetryPrompt, 8000);
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             clearTimeout(syncTimer);
             var retryBtn = document.getElementById('syncRetryBtn');
@@ -2258,7 +2285,7 @@
 
       if (appState.isGas) {
         const roomSeats = appState.seats.filter(s => (rId === 'gyomu_center') ? (s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01') : (s.room_id === rId));
-        google.script.run.batchUpdateSeatPositions(roomSeats.map(s => ({ seat_id: s.seat_id, pos_x: s.pos_x, pos_y: s.pos_y, width: s.width, height: s.height })));
+        gasRunner().batchUpdateSeatPositions(roomSeats.map(s => ({ seat_id: s.seat_id, pos_x: s.pos_x, pos_y: s.pos_y, width: s.width, height: s.height })));
       } else {
         saveLocalData();
       }
@@ -2320,7 +2347,7 @@
       if (seat) {
         seat.is_locked = isLocked;
         if (appState.isGas) {
-          google.script.run.updateSeatInfo(seatId, { is_locked: isLocked });
+          gasRunner().updateSeatInfo(seatId, { is_locked: isLocked });
         } else {
           saveLocalData();
         }
@@ -2606,7 +2633,7 @@
             seatB.pos_y = origAY;
 
             if (appState.isGas) {
-              google.script.run.batchUpdateSeatPositions([
+              gasRunner().batchUpdateSeatPositions([
                 { seat_id: seatA.seat_id, pos_x: origBX, pos_y: origBY },
                 { seat_id: seatB.seat_id, pos_x: origAX, pos_y: origAY }
               ]);
@@ -2638,7 +2665,7 @@
           seatA.pos_y = finalY;
 
           if (appState.isGas) {
-            google.script.run.updateSeatPosition(seatA.seat_id, finalX, finalY);
+            gasRunner().updateSeatPosition(seatA.seat_id, finalX, finalY);
           } else {
             saveLocalData();
           }
@@ -2843,7 +2870,7 @@
             seat.height = finalH;
 
             if (appState.isGas) {
-              google.script.run.batchUpdateSeatPositions([{
+              gasRunner().batchUpdateSeatPositions([{
                 seat_id: seatId,
                 pos_x: seat.pos_x,
                 pos_y: seat.pos_y,
@@ -2876,7 +2903,7 @@
           seat.width = defPos.w;
           seat.height = defPos.h;
           if (appState.isGas) {
-            google.script.run.batchUpdateSeatPositions([{
+            gasRunner().batchUpdateSeatPositions([{
               seat_id: seatId,
               pos_x: seat.pos_x,
               pos_y: seat.pos_y,
@@ -3019,7 +3046,7 @@
 
       if (appState.isGas) {
         showToast("신규 좌석을 등록 중...");
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) {
               appState.seats.push(res.seat || newSeat);
@@ -3063,7 +3090,7 @@
 
       if (appState.isGas) {
         showToast("좌석을 삭제하는 중...");
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) {
               appState.seats = appState.seats.filter(s => s.seat_id !== seatId);
@@ -3577,7 +3604,7 @@ function renderActiveRoomView() {
       }
 
       if (appState.isGas) {
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) showToast(`좌석 [${seatId}] 사용자 정보가 저장되었습니다.`);
           })
@@ -3640,7 +3667,7 @@ function renderActiveRoomView() {
 
       if (appState.isGas) {
         showToast("기기 정보를 저장 중...");
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) {
               const idx = appState.devices.findIndex(d => d.device_id === res.deviceId);
@@ -3682,7 +3709,7 @@ function renderActiveRoomView() {
       if (!confirm(`정말로 이 ${type} 기기 정보를 삭제하시겠습니까?`)) return;
 
       if (appState.isGas) {
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) {
               appState.devices = appState.devices.filter(d => d.device_id !== devId);
@@ -3749,7 +3776,7 @@ function renderActiveRoomView() {
       banner.style.display = 'flex';
 
       if (appState.isGas) {
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             banner.style.display = 'none';
             if (res.success && res.data) {
@@ -3895,7 +3922,7 @@ function renderActiveRoomView() {
 
       if (appState.isGas) {
         showToast("인사이동 정보를 시트에 일괄 저장 중...");
-        google.script.run
+        gasRunner()
           .withSuccessHandler(res => {
             if (res.success) {
               showToast(`총 ${res.count}개 좌석 정보가 성공적으로 갱신되었습니다!`);
@@ -3965,21 +3992,8 @@ function renderActiveRoomView() {
     // TEACHER LINK MODAL & COPY CONTROLLERS
     // =========================================================================
     function getTeacherLinkUrl() {
-      if (appState.webAppUrl) {
-        return appState.webAppUrl.split('?')[0].split('#')[0] + '?page=teacher';
-      }
-      try {
-        const topUrl = (window.top !== window && window.top.location.href) ? window.top.location.href : window.location.href;
-        if (topUrl.includes('script.google.com')) {
-          return topUrl.split('?')[0].split('#')[0] + '?page=teacher';
-        }
-      } catch (e) {}
-
-      const cur = window.location.href.split('?')[0].split('#')[0];
-      if (cur.includes('script.google.com') || appState.isGas) {
-        return cur + '?page=teacher';
-      }
-      return cur.replace(/index\.html$/i, '') + 'teacher.html';
+      // index.html과 teacher.html은 항상 같은 폴더에 나란히 배포되므로 상대경로로 충분
+      return window.location.href.split('?')[0].split('#')[0].replace(/[^/]*$/, '') + 'teacher.html';
     }
 
     function openTeacherLinkModal() {

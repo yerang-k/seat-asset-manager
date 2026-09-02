@@ -44,6 +44,26 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+/** GitHub Pages 등 외부 정적 페이지에서 오는 fetch 요청 처리 (index.html/teacher.html의 gasRunner()가 호출) */
+const ALLOWED_FUNCTIONS_ = {
+  getInitialData, saveDevice, deleteDevice, updateSeatUser, saveSeatDevices,
+  batchUpdateSeatUsers, analyzeLabelImage, addSeat, deleteSeat, updateSeatInfo,
+  updateSeatPosition, batchUpdateSeatPositions
+};
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const fn = ALLOWED_FUNCTIONS_[body.fn];
+    if (!fn) throw new Error('허용되지 않은 함수: ' + body.fn);
+    const result = fn.apply(null, body.args || []);
+    return ContentService.createTextOutput(JSON.stringify(result === undefined ? { success: true } : result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 /** HTML 파일 include 헬퍼 */
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
