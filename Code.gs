@@ -359,7 +359,7 @@ function getOrCreatePhotoFolder_() {
   return newFolder;
 }
 
-/** 좌석 수정일시 갱신 헬퍼 */
+/** 좌석 수정일시 갱신 및 교무실별 탭 실시간 동기화 헬퍼 */
 function touchSeat_(ss, seatId) {
   try {
     const seatSheet = ss.getSheetByName(SHEET_SEATS);
@@ -367,17 +367,258 @@ function touchSeat_(ss, seatId) {
     const headers = data[0];
     const idCol = headers.indexOf('seat_id');
     const updateCol = headers.indexOf('updated_at');
-    if (idCol === -1 || updateCol === -1) return;
-
-    for (let i = 1; i < data.length; i++) {
-      if (String(data[i][idCol]) === String(seatId)) {
-        const nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
-        seatSheet.getRange(i + 1, updateCol + 1).setValue(nowStr);
-        break;
+    if (idCol !== -1 && updateCol !== -1) {
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][idCol]) === String(seatId)) {
+          const nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+          seatSheet.getRange(i + 1, updateCol + 1).setValue(nowStr);
+          break;
+        }
       }
     }
-  } catch (e) {}
+
+    // 실시간으로 '전체교무실배치도' 및 '해당 교무실 개별 탭'에 즉시 반영
+    syncSeatToSpreadsheetViews_(ss, seatId);
+  } catch (e) {
+    Logger.log('touchSeat_ error: ' + e.message);
+  }
 }
+
+// =========================================================================
+// 교무실별 개별 탭 & 전체배치도 탭 자동 생성 및 실시간 동기화 시스템
+// =========================================================================
+
+const SHEET_ALL_VIEW = '전체교무실배치도';
+
+const ROOM_TAB_DEFS = [
+  { id: 'gyomu_center', tabName: '교무센터' },
+  { id: 'grade3', tabName: '3학년교무실' },
+  { id: 'grade2', tabName: '2학년교무실' },
+  { id: 'grade1', tabName: '1학년교무실' },
+  { id: 'safety', tabName: '학생안전부' },
+  { id: 'edu_info', tabName: '교육정보부' },
+  { id: 'support', tabName: '통합지원반' },
+  { id: 'library', tabName: '도서실' },
+  { id: 'counsel_health_meal', tabName: '상담·보건·급식실' },
+  { id: 'admin', tabName: '행정실' },
+  { id: 'special', tabName: '특별실' }
+];
+
+const VIEW_HEADERS = [
+  '교무실', '좌석 ID', '좌석 명칭', '선생님 성명', '내선번호', '조사상태',
+  '본체 제조사', '본체 모델명', '본체 취득일자', '본체 관리번호',
+  '모니터1 제조사', '모니터1 모델명', '모니터1 취득일자', '모니터1 관리번호',
+  '모니터2 제조사', '모니터2 모델명', '모니터2 취득일자', '모니터2 관리번호',
+  '특이사항', '라벨 사진', '최근 수정일시'
+];
+
+/** 교무실 ID를 탭 명칭으로 변환 */
+function getRoomTabName_(roomId, seatId) {
+  if (seatId === 'PRIN_01' || roomId === 'gyomu_principal' || roomId === 'gyomu_center') {
+    return '교무센터';
+  }
+  const found = ROOM_TAB_DEFS.find(r => r.id === roomId);
+  return found ? found.tabName : '기타교무실';
+}
+
+/** 좌석 및 기기 정보로부터 스프레드시트용 통합 1행 데이터 생성 */
+function buildSeatViewRow_(seat, devices) {
+  const pc = devices.find(d => d.device_type === 'PC');
+  const mon1 = devices.find(d => d.device_type === 'MONITOR_1' || d.device_type === '모니터');
+  const mon2 = devices.find(d => d.device_type === 'MONITOR_2');
+
+  let status = '⚪ 미조사';
+  if (pc && mon1) status = '✅ 조사완료';
+  else if (pc || mon1 || mon2) status = '🟡 부분등록';
+
+  const notesArr = [];
+  if (pc && pc.notes) notesArr.push('본체: ' + pc.notes);
+  if (mon1 && mon1.notes) notesArr.push('모니터1: ' + mon1.notes);
+  if (mon2 && mon2.notes) notesArr.push('모니터2: ' + mon2.notes);
+  const notesText = notesArr.join(' / ');
+
+  const photoUrls = devices.map(d => d.photo_url).filter(Boolean);
+  const photoText = photoUrls.length > 0 ? photoUrls.join('\n') : '';
+
+  const tabName = getRoomTabName_(seat.room_id, seat.seat_id);
+
+  return [
+    tabName,
+    seat.seat_id,
+    seat.seat_label,
+    seat.current_user || '',
+    seat.extension || '',
+    status,
+    pc ? (pc.manufacturer || '') : '',
+    pc ? (pc.model_name || '') : '',
+    pc ? (pc.acquired_date || '') : '',
+    pc ? (pc.asset_number || '') : '',
+    mon1 ? (mon1.manufacturer || '') : '',
+    mon1 ? (mon1.model_name || '') : '',
+    mon1 ? (mon1.acquired_date || '') : '',
+    mon1 ? (mon1.asset_number || '') : '',
+    mon2 ? (mon2.manufacturer || '') : '',
+    mon2 ? (mon2.model_name || '') : '',
+    mon2 ? (mon2.acquired_date || '') : '',
+    mon2 ? (mon2.asset_number || '') : '',
+    notesText,
+    photoText,
+    seat.updated_at || Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss')
+  ];
+}
+
+/** 단일 좌석 변경 시 '전체교무실배치도' 및 '해당 교무실 개별 탭' 실시간 동기화 */
+function syncSeatToSpreadsheetViews_(ss, seatId) {
+  try {
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const devSheet = ss.getSheetByName(SHEET_DEVICES);
+    if (!seatSheet || !devSheet) return;
+
+    const seats = getSheetObjects_(seatSheet);
+    const seat = seats.find(s => String(s.seat_id) === String(seatId));
+    if (!seat) return;
+
+    const allDevices = getSheetObjects_(devSheet);
+    const seatDevices = allDevices.filter(d => String(d.seat_id) === String(seatId));
+
+    const viewRow = buildSeatViewRow_(seat, seatDevices);
+    const targetRoomTab = getRoomTabName_(seat.room_id, seat.seat_id);
+
+    // 1. '전체교무실배치도' 시트에 갱신
+    updateOrAppendViewRow_(ss, SHEET_ALL_VIEW, seatId, viewRow, '#1b4332');
+
+    // 2. 해당 교무실 개별 탭에 갱신 (예: 3학년교무실 탭)
+    updateOrAppendViewRow_(ss, targetRoomTab, seatId, viewRow, '#1e3a8a');
+  } catch (err) {
+    Logger.log('syncSeatToSpreadsheetViews_ error: ' + err.message);
+  }
+}
+
+/** 뷰 시트에서 seat_id 찾아서 행 갱신 또는 추가 */
+function updateOrAppendViewRow_(ss, sheetName, seatId, viewRow, headerColor) {
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    setupSheet_(sheet, VIEW_HEADERS, [], headerColor);
+  }
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) {
+    sheet.appendRow(viewRow);
+    formatViewSheet_(sheet);
+    return;
+  }
+
+  const idCol = 1; // 0-indexed index 1: '좌석 ID'
+  let targetRow = -1;
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][idCol]) === String(seatId)) {
+      targetRow = i + 1;
+      break;
+    }
+  }
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 1, 1, viewRow.length).setValues([viewRow]);
+  } else {
+    sheet.appendRow(viewRow);
+  }
+  formatViewSheet_(sheet);
+}
+
+/** 뷰 시트 서식 맞춤 (열 정렬, 줄바꿈) */
+function formatViewSheet_(sheet) {
+  sheet.setFrozenRows(1);
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  if (lastRow <= 1) return;
+
+  sheet.getRange(2, 1, lastRow - 1, 6).setHorizontalAlignment('center');
+  sheet.getRange(2, 21, lastRow - 1, 1).setHorizontalAlignment('center');
+  sheet.getRange(2, 19, lastRow - 1, 1).setWrap(true);
+}
+
+/**
+ * [관리자 메뉴] 전체 교무실별 탭 및 전체배치도 탭 일괄 생성 및 동기화
+ * '전체교무실배치도' 탭 1개 + 각 교무실별 11개 탭을 생성하고
+ * 최신 좌석 및 PC/모니터 정보를 예쁜 표로 정돈하여 채웁니다.
+ */
+function syncAllRoomSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  ensureSheetsInitialized_(ss);
+
+  const seatSheet = ss.getSheetByName(SHEET_SEATS);
+  const devSheet = ss.getSheetByName(SHEET_DEVICES);
+  const seats = getSheetObjects_(seatSheet);
+  const devices = getSheetObjects_(devSheet);
+
+  const devMap = {};
+  devices.forEach(d => {
+    if (!devMap[d.seat_id]) devMap[d.seat_id] = [];
+    devMap[d.seat_id].push(d);
+  });
+
+  // 1. 전체교무실배치도 탭
+  const allRows = seats.map(s => buildSeatViewRow_(s, devMap[s.seat_id] || []));
+  let allViewSheet = ss.getSheetByName(SHEET_ALL_VIEW);
+  if (!allViewSheet) {
+    allViewSheet = ss.insertSheet(SHEET_ALL_VIEW, 0);
+  }
+  setupSheet_(allViewSheet, VIEW_HEADERS, allRows, '#1b4332');
+  formatViewSheet_(allViewSheet);
+
+  // 2. 각 교무실별 개별 탭
+  ROOM_TAB_DEFS.forEach((rDef, idx) => {
+    const roomSeats = seats.filter(s => getRoomTabName_(s.room_id, s.seat_id) === rDef.tabName);
+    const roomRows = roomSeats.map(s => buildSeatViewRow_(s, devMap[s.seat_id] || []));
+
+    let roomTab = ss.getSheetByName(rDef.tabName);
+    if (!roomTab) {
+      roomTab = ss.insertSheet(rDef.tabName, idx + 1);
+    }
+    setupSheet_(roomTab, VIEW_HEADERS, roomRows, '#1e3a8a');
+    formatViewSheet_(roomTab);
+  });
+
+  // 3. 탭 순서 정렬 (전체교무실배치도 -> 11개 교무실 탭 -> 좌석 -> 기기 -> 교무실)
+  orderSheetsOrder_(ss);
+
+  SpreadsheetApp.flush();
+  Logger.log('교무실별 개별 탭 및 전체배치도 탭 동기화 완료!');
+  return { success: true };
+}
+
+/** 시트 탭 순서 정렬 */
+function orderSheetsOrder_(ss) {
+  const desiredOrder = [
+    SHEET_ALL_VIEW,
+    ...ROOM_TAB_DEFS.map(r => r.tabName),
+    SHEET_SEATS,
+    SHEET_DEVICES,
+    SHEET_ROOMS
+  ];
+
+  desiredOrder.forEach((name, idx) => {
+    const sh = ss.getSheetByName(name);
+    if (sh) {
+      ss.setActiveSheet(sh);
+      ss.moveActiveSheet(idx + 1);
+    }
+  });
+
+  const firstSheet = ss.getSheetByName(SHEET_ALL_VIEW);
+  if (firstSheet) ss.setActiveSheet(firstSheet);
+}
+
+/** 구글 스프레드시트 열릴 때 커스텀 관리자 메뉴 생성 */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🏫 솔내고 교직원 기기관리')
+    .addItem('🔄 전체 교무실별 탭 동기화/새로고침', 'syncAllRoomSheets')
+    .addItem('⚙️ 초기 데이터 및 탭 전체 재설정', '초기데이터생성')
+    .addToUi();
+}
+
 
 /** 시트 데이터를 객체 배열로 변환 */
 function getSheetObjects_(sheet) {
@@ -478,6 +719,9 @@ function 초기데이터생성() {
   setupSheet_(roomSheet, roomHeaders, roomRows, '#5d4037');
 
   Logger.log(`초기 데이터 설정 완료: 교무실 ${roomRows.length}개, 총 좌석 ${seatRows.length}개`);
+  
+  // 전체배치도 및 각 교무실별 탭 일괄 생성 및 동기화
+  syncAllRoomSheets();
 }
 
 /** 시트 헤더 서식 및 데이터 일괄 주입 */
@@ -508,14 +752,14 @@ function getPresetRooms_() {
     {
       id: "gyomu_principal",
       name: "교장실",
-      floor: "본관 전관 1층",
+      floor: "",
       phone: "270-8200 / 8623-2914",
       seats: [{ id: "PRIN_01", label: "교장", user: "정진복", ext: "200" }]
     },
     {
       id: "gyomu_center",
       name: "교무센터",
-      floor: "본관 후관 1층",
+      floor: "",
       phone: "270-8208, FAX 276-3015",
       seats: [
         { id: "GYOMU_01", label: "교감", user: "", ext: "" },
@@ -544,7 +788,7 @@ function getPresetRooms_() {
     {
       id: "grade3",
       name: "3학년 교무실",
-      floor: "본관 후관 4층",
+      floor: "",
       phone: "",
       seats: [
         { id: "G3_01", label: "3학년부장", user: "", ext: "" },
@@ -563,7 +807,7 @@ function getPresetRooms_() {
     {
       id: "grade2",
       name: "2학년 교무실",
-      floor: "본관 후관 2층",
+      floor: "",
       phone: "",
       seats: [
         { id: "G2_01", label: "2학년부장", user: "", ext: "" },
@@ -582,7 +826,7 @@ function getPresetRooms_() {
     {
       id: "grade1",
       name: "1학년 교무실",
-      floor: "본관 후관 3층",
+      floor: "",
       phone: "",
       seats: [
         { id: "G1_01", label: "1학년부장", user: "", ext: "" },
@@ -601,7 +845,7 @@ function getPresetRooms_() {
     {
       id: "safety",
       name: "학생안전부",
-      floor: "본관 후관 1층",
+      floor: "",
       phone: "",
       seats: [
         { id: "SAFE_01", label: "학생안전 1열-1", user: "", ext: "" },
@@ -616,7 +860,7 @@ function getPresetRooms_() {
     {
       id: "support",
       name: "통합지원반",
-      floor: "본관 후관 1층",
+      floor: "",
       phone: "",
       seats: [
         { id: "SUPP_01", label: "통합지원 1", user: "", ext: "" },
@@ -627,7 +871,7 @@ function getPresetRooms_() {
     {
       id: "edu_info",
       name: "교육정보부",
-      floor: "본관 전관 4층",
+      floor: "",
       phone: "",
       seats: [
         { id: "INFO_01", label: "정보부 1열-1", user: "", ext: "" },
@@ -639,7 +883,7 @@ function getPresetRooms_() {
     {
       id: "library",
       name: "도서실",
-      floor: "본관 후관 3층",
+      floor: "",
       phone: "",
       seats: [
         { id: "LIB_01", label: "사서", user: "", ext: "" }
@@ -662,7 +906,7 @@ function getPresetRooms_() {
     {
       id: "admin",
       name: "행정실",
-      floor: "본관 1층",
+      floor: "",
       phone: "270-8209 FAX 276-3014",
       seats: [
         { id: "ADM_01", label: "행정실장", user: "", ext: "" },
