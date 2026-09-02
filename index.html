@@ -727,6 +727,46 @@
       background: #fafafa;
     }
 
+    
+    .special-table {
+      width: 100%;
+      border-collapse: collapse !important;
+      font-size: 0.8rem;
+      border-top: 2px solid var(--border-dark);
+      background: #fff;
+    }
+    .special-table th, .special-table td {
+      border: 1px solid var(--border-dark) !important;
+      padding: 5px 4px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .special-table th {
+      background: var(--bg-header);
+      font-weight: 700;
+      color: #000;
+    }
+    .special-loc {
+      color: #0d47a1;
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+    .info-right-box {
+      background: #fff;
+      text-align: left !important;
+      padding: 6px 10px !important;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      font-weight: 600;
+      color: #000;
+    }
+    .special-table .bp-seat-cell {
+      min-height: 38px;
+      padding: 2px 4px;
+      font-size: 0.75rem;
+      margin: 0 auto;
+    }
+
     /* Modal Styling */
     .modal-backdrop {
       position: fixed;
@@ -1523,7 +1563,7 @@
       rooms: [],
       seats: [],
       devices: [],
-      activeRoomId: 'gyomu_center',
+      activeRoomId: 'all',
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
@@ -1746,7 +1786,7 @@
           </div>
           <div style="display: flex; gap: 8px;">
             <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800;" onclick="openTeacherLinkModal()">🔗 교사용 링크 복사</button>
-            <button class="btn btn-primary" onclick="selectRoom('gyomu_center')">🏫 교무센터로 이동</button>
+            
           </div>
         </div>
 
@@ -3312,7 +3352,7 @@
           </div>
 
           <div class="room-header">
-            <div class="room-title">교무센터(본관 후관 1층)</div>
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('gyomu_center')" title="교무센터 확대 편집으로 이동">🏫 교무센터(본관 후관 1층) <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
             <div class="room-sub">( 전화 270-8208, FAX 276-3015 )</div>
           </div>
           
@@ -3580,7 +3620,7 @@
         <!-- ROOM: Administration Office (행정실) -->
         <div class="room-box" id="room_admin">
           <div class="room-header">
-            <div class="room-title">행정실(본관 1층)</div>
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('admin')" title="행정실 확대 편집으로 이동">🏫 행정실(본관 1층) <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
             <div class="room-sub">(전화 270-8209 FAX 276-3014)</div>
           </div>
           <div class="room-body" style="display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px;">
@@ -3626,7 +3666,7 @@
       <!-- Special Rooms Table at bottom -->
       <table class="special-table" id="specialRoomsTable">
         <tr>
-          <th style="width: 70px;">특별실</th>
+          <th style="width: 70px; cursor: pointer;" onclick="selectRoom('special')" title="특별실 확대 편집으로 이동">특별실 <span style="font-size:0.68rem; color:#1b5e20; display:block; font-weight:normal;">[🔍 확대]</span></th>
           <th>미술실</th>
           <th>음악실</th>
           <th colspan="3">체육과실</th>
