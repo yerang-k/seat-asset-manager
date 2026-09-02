@@ -1183,6 +1183,9 @@
   <!-- SUB CONTROLS (Navigation arrows & Search) -->
   <div class="sub-controls-bar">
     <div class="room-nav-arrows">
+            <button type="button" class="btn" id="btnToggleLayoutLock" onclick="toggleLayoutLock()" style="font-weight: 800; font-size: 0.85rem; padding: 7px 14px; border-radius: 6px;">
+        🔒 좌석 배치 고정
+      </button>
       <button class="btn btn-primary" onclick="openAddSeatModal()">➕ 이 교무실에 좌석 추가</button>
       <button class="btn btn-light" style="border: 1px solid #bbb;" onclick="resetCurrentRoomPositions()">🔄 기본 배치 복원</button>
       
@@ -1336,7 +1339,13 @@
 
       <div class="modal-body">
         
-        <!-- Seat User Info Bar -->
+                <!-- Seat User Info Bar -->
+        <div style="margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1.5px solid #cbd5e1; display: flex; align-items: center; justify-content: space-between;">
+          <label for="chkSeatIndividualLock" style="font-size: 0.86rem; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>🔒 이 좌석 위치 개별 고정 (마우스 드래그 금지)</span>
+          </label>
+          <input type="checkbox" id="chkSeatIndividualLock" onchange="toggleSeatIndividualLock(this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
+        </div>
         <div class="seat-meta-box">
           <div class="meta-group">
             <label>👤 현재 사용자 (선생님 성명)</label>
@@ -1691,7 +1700,8 @@
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
       geminiKey: localStorage.getItem('SOLNAE_GEMINI_KEY') || '',
-      canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0
+      canvasZoom: parseFloat(localStorage.getItem('SOLNAE_ZOOM')) || 1.0,
+      layoutLocked: localStorage.getItem('SOLNAE_LAYOUT_LOCKED') === 'true'
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -2079,8 +2089,93 @@
       el.addEventListener('pointerdown', (e) => onSeatPointerDown(e, el, seatId));
     }
 
+    
+    // Layout Lock Controller
+    function toggleLayoutLock() {
+      appState.layoutLocked = !appState.layoutLocked;
+      localStorage.setItem('SOLNAE_LAYOUT_LOCKED', appState.layoutLocked ? 'true' : 'false');
+      updateLayoutLockUI();
+      if (appState.layoutLocked) {
+        showToast("🔒 좌석 배치가 안전하게 고정되었습니다. (마우스 드래그 및 크기 조절 잠금)");
+      } else {
+        showToast("🔓 좌석 이동 모드가 활성화되었습니다. (자유 드래그 이동 및 크기 조절 가능)");
+      }
+    }
+
+    function updateLayoutLockUI() {
+      const btn = document.getElementById('btnToggleLayoutLock');
+      const isLocked = appState.layoutLocked;
+      if (btn) {
+        if (isLocked) {
+          btn.innerHTML = '🔒 좌석 배치 고정됨 <span style="font-size:0.75rem; opacity:0.9;">(클릭 시 이동모드)</span>';
+          btn.style.background = '#2e7d32';
+          btn.style.color = '#ffffff';
+          btn.style.border = '1.5px solid #1b5e20';
+          btn.title = '현재 좌석 위치가 고정되어 마우스 드래그로 이동되지 않습니다. 배치를 수정하려면 클릭하세요.';
+        } else {
+          btn.innerHTML = '🔓 좌석 이동 모드 <span style="font-size:0.75rem; opacity:0.9;">(클릭 시 고정)</span>';
+          btn.style.background = '#f59e0b';
+          btn.style.color = '#ffffff';
+          btn.style.border = '1.5px solid #d97706';
+          btn.title = '현재 좌석을 자유롭게 드래그하여 이동할 수 있습니다. 고정하려면 클릭하세요.';
+        }
+      }
+
+      // Hide/show resize handles on canvas
+      document.querySelectorAll('.seat-resize-handle').forEach(h => {
+        h.style.display = isLocked ? 'none' : 'block';
+      });
+
+      // Update cursor on seat cells
+      document.querySelectorAll('.seat-cell').forEach(cell => {
+        cell.style.cursor = isLocked ? 'pointer' : 'grab';
+      });
+
+      // Update drag hint banner
+      const banner = document.querySelector('.drag-hint-banner');
+      if (banner) {
+        if (isLocked) {
+          banner.innerHTML = `
+            <span>🔒 <strong>좌석 배치 고정 상태:</strong> 좌석 배치가 안전하게 고정되어 마우스 드래그로 이동되지 않습니다. (좌석 클릭 시 기기 정보 확인/편집)</span>
+            <button class="btn" style="padding: 2px 10px; font-size: 0.76rem; background: #fff; border: 1.5px solid #c8e6c9; color: #2e7d32; font-weight: 800; cursor: pointer;" onclick="toggleLayoutLock()">🔓 이동 모드로 전환</button>
+          `;
+          banner.style.background = '#f1f8f3';
+          banner.style.borderColor = '#c8e6c9';
+        } else {
+          banner.innerHTML = `
+            <span>💡 <strong>자유 이동 & 맞교환 안내:</strong> 좌석을 <strong>빈 공간으로 끌어놓으면 그 자리에 착 붙고</strong>, <strong>다른 좌석 위로 끌어놓으면 서로 자리가 맞교환</strong>됩니다.</span>
+            <button class="btn" style="padding: 2px 10px; font-size: 0.76rem; background: #fff; border: 1.5px solid #fde68a; color: #b45309; font-weight: 800; cursor: pointer;" onclick="toggleLayoutLock()">🔒 배치 완료 및 고정</button>
+          `;
+          banner.style.background = '#fffbeb';
+          banner.style.borderColor = '#fde68a';
+        }
+      }
+    }
+
+    function toggleSeatIndividualLock(isLocked) {
+      const seatId = appState.currentSeatId;
+      if (!seatId) return;
+      const seat = appState.seats.find(s => s.seat_id === seatId);
+      if (seat) {
+        seat.is_locked = isLocked;
+        if (appState.isGas) {
+          google.script.run.updateSeatInfo(seatId, { is_locked: isLocked });
+        } else {
+          saveLocalData();
+        }
+        refreshCurrentView();
+        showToast(isLocked ? `🔒 [${seat.seat_label}] 좌석 위치가 고정되었습니다.` : `🔓 [${seat.seat_label}] 좌석 고정이 해제되었습니다.`);
+      }
+    }
+
     function onSeatPointerDown(e, el, seatId) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (appState.layoutLocked) return;
+      const chkSeat = appState.seats.find(s => s.seat_id === seatId);
+      if (chkSeat && chkSeat.is_locked) {
+        showToast(`🔒 [${chkSeat.seat_label}] 좌석은 개별 고정되어 있습니다.`);
+        return;
+      }
 
       const canvas = document.getElementById('activeRoomCanvas');
       if (!canvas) return;
@@ -2517,7 +2612,7 @@
           <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">
             ${nameHtml}
           </div>
-          ${extHtml}
+          ${extHtml}${seat.is_locked ? '<span style="font-size:0.75rem; margin-left:4px;" title="위치 고정됨">🔒</span>' : ''}
         </div>
         <div class="seat-device-block">
           ${pcLineHtml}
@@ -3122,6 +3217,7 @@ function renderActiveRoomView() {
 
       updateTabBadges();
       setCanvasZoom(appState.canvasZoom || 1.0);
+      updateLayoutLockUI();
     }
 
     function updateTabBadges() {
@@ -3197,6 +3293,8 @@ function renderActiveRoomView() {
       document.getElementById('modalRoomName').textContent = seat.room_name || '교무실';
       document.getElementById('modalSeatUser').value = seat.current_user || '';
       document.getElementById('modalSeatExt').value = seat.extension || '';
+      const chkIndLock = document.getElementById('chkSeatIndividualLock');
+      if (chkIndLock) chkIndLock.checked = !!seat.is_locked;
 
       resetDeviceForms();
 

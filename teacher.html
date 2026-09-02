@@ -1207,6 +1207,13 @@
       }
     }
 
+  
+    /* Disable and hide all resize handles in teacher view */
+    .seat-resize-handle {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
   </style>
 </head>
 <body>
@@ -1219,7 +1226,7 @@
     </div>
     <div class="topbar-actions">
       <button class="btn-mobile-toggle" id="btnMobileFitToggle" onclick="toggleMobileFit()">📱 화면 맞춤 (Fit)</button>
-      <button class="btn btn-outline" id="btnModeAll" onclick="selectRoom('all')">🏛️ 전체 교무실</button>
+      
       <a href="index.html" class="btn btn-outline" style="text-decoration:none;">🔒 관리자 모드</a>
     </div>
   </header>
@@ -1240,13 +1247,12 @@
   <!-- ROOM SELECTOR TAB BAR -->
     <!-- ROOM SELECTOR DROPDOWN BAR -->
   <nav class="room-nav-bar" id="roomNavBar">
-    <div class="room-dropdown-container">
-      <div class="room-dropdown-left">
+    <div class="room-dropdown-container" style="justify-content: center;">
+      <div class="room-dropdown-left" style="max-width: 600px; width: 100%;">
         <label for="roomSelectDropdown" class="room-dropdown-label">
           <span style="font-size: 1.15rem;">🏫</span> <strong>교무실 선택:</strong>
         </label>
         <select id="roomSelectDropdown" class="room-select-dropdown" onchange="selectRoom(this.value)">
-          <option value="all">🏛️ 전체 교무실 배치도 (98석)</option>
           <option value="gyomu_center" selected>🏫 교무센터·교장실 (22석)</option>
           <option value="grade3">🏫 3학년 교무실 (11석)</option>
           <option value="grade2">🏫 2학년 교무실 (11석)</option>
@@ -1260,38 +1266,12 @@
           <option value="special">🎨 특별실 (11석)</option>
         </select>
       </div>
-      <div class="room-dropdown-nav-btns">
-        <button type="button" class="btn" style="background: #e0e7ff; color: #1e3a8a; border: 1.5px solid #c7d2fe; font-weight: 800; font-size: 0.85rem; padding: 7px 14px; border-radius: 6px;" onclick="selectRoom('all')">
-          🏛️ 전체 배치도
-        </button>
-        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(-1)" title="이전 교무실">
-          ◀ 이전
-        </button>
-        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(1)" title="다음 교무실">
-          다음 ▶
-        </button>
-      </div>
     </div>
   </nav>
 
-  <!-- SUB CONTROLS (Navigation arrows & Search) -->
-  <div class="sub-controls-bar">
-    <div class="room-nav-arrows">
-      <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="navigateRoom(-1)">◀ 이전 교무실</button>
-      <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="navigateRoom(1)">다음 교무실 ▶</button>
-      <button class="btn btn-secondary" onclick="selectRoom('all')">🏛️ 전체 배치도로 돌아가기</button>
-      
-      <!-- Seat Zoom & Size Controls (좌석 크기 전체 조절 바) -->
-      <div class="zoom-controls-wrap">
-        <span style="font-size: 0.78rem; font-weight: 700; color: #333;">🔍 좌석 크기:</span>
-        <button class="btn-zoom" onclick="adjustZoom(-0.1)" title="좌석 축소">➖</button>
-        <input type="range" class="zoom-slider" id="zoomRangeInput" min="70" max="150" step="5" value="100" oninput="onZoomSliderChange(this.value)" title="좌석 배율 조절">
-        <button class="btn-zoom" onclick="adjustZoom(0.1)" title="좌석 확대">➕</button>
-        <span id="zoomPercentLabel" style="font-size: 0.78rem; font-weight: 800; color: var(--primary); min-width: 38px; text-align: center;">100%</span>
-        <button class="btn btn-light" style="padding: 2px 7px; font-size: 0.72rem; border: 1px solid #ccc;" onclick="resetZoom()">초기화</button>
-      </div>
-    </div>
-    <div class="search-box">
+  <!-- SUB CONTROLS (Search only for teachers) -->
+  <div class="sub-controls-bar" style="justify-content: flex-end;">
+    <div class="search-box" style="max-width: 400px; width: 100%;">
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="선생님 성명 / 좌석 / 모델명 검색" oninput="handleSearch(this.value)">
     </div>
@@ -1776,7 +1756,7 @@
       rooms: [],
       seats: [],
       devices: [],
-      activeRoomId: 'all',
+      activeRoomId: 'gyomu_center',
       currentSeatId: null,
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
@@ -2099,6 +2079,7 @@
 
     // Select Room
     function selectRoom(roomId) {
+      if (roomId === 'all') roomId = 'gyomu_center';
       appState.activeRoomId = roomId;
       const dd = document.getElementById('roomSelectDropdown');
       if (dd && dd.value !== roomId) {
@@ -2318,7 +2299,9 @@
     };
 
     function attachSeatDragListeners(el, seatId) {
-      el.addEventListener('pointerdown', (e) => onSeatPointerDown(e, el, seatId));
+      // Disabled in teacher mode: read-only
+      el.style.cursor = "pointer";
+      el.onclick = () => openSeatModal(seatId);
     }
 
     function onSeatPointerDown(e, el, seatId) {
@@ -2868,29 +2851,7 @@
     // CANVAS ZOOM & SEAT SCALE (좌석 전체 확대/축소 슬라이더)
     // =========================================================================
     function setCanvasZoom(val) {
-      val = Math.max(0.7, Math.min(1.5, Math.round(val * 100) / 100));
-      appState.canvasZoom = val;
-      localStorage.setItem('SOLNAE_ZOOM', val);
-
-      const canvas = document.getElementById('activeRoomCanvas');
-      if (canvas) {
-        canvas.style.transform = `scale(${val})`;
-        canvas.style.transformOrigin = 'top left';
-
-        const wrapper = canvas.parentElement;
-        if (wrapper) {
-          // Adjust scrollable area to match scaled dimensions
-          const originalW = parseInt(canvas.style.width) || 1200;
-          const originalH = parseInt(canvas.style.height) || 600;
-          wrapper.style.minHeight = (originalH * val + 30) + 'px';
-        }
-      }
-
-      const pct = Math.round(val * 100);
-      const label = document.getElementById('zoomPercentLabel');
-      if (label) label.textContent = pct + '%';
-      const range = document.getElementById('zoomRangeInput');
-      if (range) range.value = pct;
+      // Disabled in teacher mode
     }
 
     function adjustZoom(delta) {
@@ -3333,20 +3294,13 @@ function renderActiveRoomView() {
               </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-accent" onclick="openAddSeatModal()">➕ 좌석 추가</button>
-              <button class="btn btn-light" style="border: 1px solid #ccc;" onclick="resetCurrentRoomPositions()">🔄 기본 배치 복원</button>
               <button class="btn btn-primary" onclick="openSeatModal('${roomSeats[0] ? roomSeats[0].seat_id : ''}')">
-                ✏️ 기기 정보 입력
+                ✏️ 본인 좌석 기기 입력
               </button>
             </div>
           </div>
 
-          <div style="padding: 12px 18px 0;">
-            <div class="drag-hint-banner">
-              <span>💡 <strong>자유 이동 & 맞교환 안내:</strong> 좌석을 <strong>빈 공간으로 끌어놓으면 그 자리에 착 붙고</strong>, <strong>다른 좌석 위로 끌어놓으면 서로 자리가 맞교환</strong>됩니다. (클릭 시 기기 등록)</span>
-              <span style="font-size: 0.78rem; font-weight: 700; color: #2e7d32;">자동 저장 됨</span>
-            </div>
-          </div>
+
 
           <div class="room-canvas-wrapper">
             <div class="room-canvas" id="activeRoomCanvas" style="width: ${dims.w}px; height: ${effectiveH}px;">
@@ -3373,9 +3327,7 @@ function renderActiveRoomView() {
         const totalSeats = appState.seats.length;
         Array.from(dd.options).forEach(opt => {
           const rId = opt.value;
-          if (rId === 'all') {
-            opt.textContent = `🏛️ 전체 교무실 배치도 (${totalSeats}석)`;
-          } else {
+          if (rId !== 'all') {
             const seats = appState.seats.filter(s => {
               if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
               return s.room_id === rId;
