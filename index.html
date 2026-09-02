@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>전주솔내고 교직원 좌석·기기 관리 (자유 드래그 이동 지원)</title>
+  <title>전주솔내고 교직원 좌석·기기 관리 (자석 스냅 & 자리 맞교환)</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
@@ -291,16 +291,17 @@
     /* Notice Tip Bar */
     .drag-hint-banner {
       background: #e8f5e9;
-      border: 1px solid #c8e6c9;
+      border: 1.5px solid #a5d6a7;
       border-radius: 6px;
-      padding: 8px 14px;
-      font-size: 0.82rem;
+      padding: 9px 14px;
+      font-size: 0.85rem;
       color: #1b5e20;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     /* Main Board Container */
@@ -348,11 +349,11 @@
       flex-wrap: wrap;
     }
 
-    /* INTERACTIVE CANVAS FOR FREE-FORM DRAGGABLE DESKS */
+    /* INTERACTIVE CANVAS FOR FIXED SLOTS & SWAPPING */
     .room-canvas-wrapper {
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 14px;
+      padding: 16px;
       background: #f0f3f1;
       -webkit-overflow-scrolling: touch;
     }
@@ -366,10 +367,10 @@
       border-radius: 8px;
       margin: 0 auto;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
-      touch-action: none; /* crucial for smooth touch dragging */
+      touch-action: none;
     }
 
-    /* Desk (Seat) Cell Styling - Absolute Positioned */
+    /* Desk (Seat) Cell Styling */
     .seat-cell {
       position: absolute;
       border: 1.8px solid var(--border-dark);
@@ -381,27 +382,65 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
       box-shadow: 0 2px 5px rgba(0,0,0,0.08);
       z-index: 10;
       box-sizing: border-box;
       touch-action: none;
+      /* Smooth transition when snapping back or swapping */
+      transition: left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                  top 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+                  transform 0.15s ease, 
+                  box-shadow 0.15s ease, 
+                  border-color 0.15s ease;
     }
     .seat-cell:hover {
       border-color: var(--primary);
       box-shadow: 0 4px 10px rgba(0,0,0,0.18);
       z-index: 20;
     }
+    
+    /* When user is dragging a seat */
     .seat-cell.is-dragging {
       cursor: grabbing !important;
-      opacity: 0.95;
-      transform: scale(1.06);
-      box-shadow: 0 14px 28px rgba(0,0,0,0.3) !important;
+      opacity: 0.92;
+      transform: scale(1.08) !important;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.35) !important;
       border-color: #ff9800 !important;
       background-color: #fffde7 !important;
       z-index: 999 !important;
-      transition: none !important;
+      transition: none !important; /* instant response while dragging */
     }
+
+    /* Magnetic Swap Target: another desk hovered over */
+    .seat-cell.is-swap-target {
+      border: 2.5px dashed #2e7d32 !important;
+      background-color: #e8f5e9 !important;
+      transform: scale(1.05) !important;
+      box-shadow: 0 0 16px rgba(46, 125, 50, 0.5) !important;
+      z-index: 50 !important;
+    }
+
+    .swap-badge-indicator {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2e7d32;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+      animation: bounceIndicator 0.4s infinite alternate ease-in-out;
+    }
+    @keyframes bounceIndicator {
+      from { transform: translate(-50%, 0); }
+      to { transform: translate(-50%, -4px); }
+    }
+
     .seat-cell.selected {
       border: 2.5px solid #1e88e5 !important;
       background: #e3f2fd !important;
@@ -494,23 +533,6 @@
       color: #000;
       font-size: 0.8rem;
       letter-spacing: 1px;
-    }
-    .landmark-hall {
-      background: #e3f2fd;
-      border: 1.5px solid #90caf9;
-      color: #0d47a1;
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 6px;
-      font-size: 0.95rem;
-    }
-    .landmark-sublabel {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #52796f;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #b7e4c7;
-      padding-bottom: 2px;
     }
 
     /* Modal Styling */
@@ -878,7 +900,7 @@
   <!-- MAIN VIEW AREA -->
   <main class="board-container" id="boardContainer">
 
-    <!-- 1. SINGLE ROOM VIEW (Canvas with free draggable desks) -->
+    <!-- 1. SINGLE ROOM VIEW -->
     <div id="singleRoomContainer">
       <!-- Rendered dynamically by renderActiveRoomView() -->
     </div>
@@ -1222,8 +1244,8 @@
 
   <script>
     // PRESET ROOM & SEAT DATA
-    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "소회의실측 1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
-    const DEFAULT_COORDS = {"PRIN_01": {"x": 780, "y": 15, "w": 220, "h": 65}, "GYOMU_01": {"x": 30, "y": 95, "w": 100, "h": 70}, "GYOMU_02": {"x": 160, "y": 95, "w": 120, "h": 70}, "GYOMU_03": {"x": 295, "y": 95, "w": 120, "h": 70}, "GYOMU_04": {"x": 160, "y": 180, "w": 120, "h": 70}, "GYOMU_05": {"x": 295, "y": 180, "w": 120, "h": 70}, "GYOMU_06": {"x": 160, "y": 275, "w": 110, "h": 70}, "GYOMU_07": {"x": 280, "y": 275, "w": 110, "h": 70}, "GYOMU_08": {"x": 400, "y": 275, "w": 110, "h": 70}, "GYOMU_09": {"x": 160, "y": 360, "w": 110, "h": 70}, "GYOMU_10": {"x": 280, "y": 360, "w": 110, "h": 70}, "GYOMU_11": {"x": 400, "y": 360, "w": 110, "h": 70}, "GYOMU_12": {"x": 540, "y": 95, "w": 110, "h": 70}, "GYOMU_13": {"x": 660, "y": 95, "w": 110, "h": 70}, "GYOMU_14": {"x": 540, "y": 180, "w": 110, "h": 70}, "GYOMU_15": {"x": 660, "y": 180, "w": 110, "h": 70}, "GYOMU_16": {"x": 540, "y": 265, "w": 110, "h": 70}, "GYOMU_17": {"x": 660, "y": 265, "w": 110, "h": 70}, "GYOMU_18": {"x": 800, "y": 95, "w": 110, "h": 70}, "GYOMU_19": {"x": 920, "y": 95, "w": 110, "h": 70}, "GYOMU_20": {"x": 800, "y": 180, "w": 110, "h": 70}, "GYOMU_21": {"x": 920, "y": 180, "w": 110, "h": 70}, "G3_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G3_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G3_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G3_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G3_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G3_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G3_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G3_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G3_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G3_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G3_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G2_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G2_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G2_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G2_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G2_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G2_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G2_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G2_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G2_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G2_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G2_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G1_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G1_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G1_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G1_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G1_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G1_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G1_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G1_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G1_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G1_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G1_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "SAFE_01": {"x": 50, "y": 40, "w": 160, "h": 75}, "SAFE_02": {"x": 230, "y": 40, "w": 160, "h": 75}, "SAFE_03": {"x": 50, "y": 135, "w": 160, "h": 75}, "SAFE_04": {"x": 230, "y": 135, "w": 160, "h": 75}, "SAFE_05": {"x": 50, "y": 230, "w": 160, "h": 75}, "SAFE_06": {"x": 230, "y": 230, "w": 160, "h": 75}, "SAFE_07": {"x": 450, "y": 40, "w": 160, "h": 265}, "INFO_01": {"x": 50, "y": 50, "w": 190, "h": 80}, "INFO_02": {"x": 270, "y": 50, "w": 190, "h": 80}, "INFO_03": {"x": 50, "y": 160, "w": 190, "h": 80}, "INFO_04": {"x": 270, "y": 160, "w": 190, "h": 80}, "SUPP_01": {"x": 80, "y": 40, "w": 240, "h": 75}, "SUPP_02": {"x": 80, "y": 135, "w": 240, "h": 75}, "SUPP_03": {"x": 80, "y": 230, "w": 240, "h": 75}, "LIB_01": {"x": 100, "y": 70, "w": 260, "h": 85}, "WEE_01": {"x": 40, "y": 50, "w": 180, "h": 80}, "CAREER_01": {"x": 250, "y": 50, "w": 180, "h": 80}, "HEALTH_01": {"x": 460, "y": 50, "w": 160, "h": 75}, "HEALTH_02": {"x": 460, "y": 145, "w": 160, "h": 75}, "MEAL_01": {"x": 650, "y": 50, "w": 160, "h": 75}, "MEAL_02": {"x": 650, "y": 145, "w": 160, "h": 75}, "ADM_01": {"x": 50, "y": 50, "w": 140, "h": 250}, "ADM_02": {"x": 230, "y": 40, "w": 260, "h": 70}, "ADM_03": {"x": 530, "y": 40, "w": 260, "h": 70}, "ADM_04": {"x": 230, "y": 130, "w": 120, "h": 70}, "ADM_05": {"x": 370, "y": 130, "w": 120, "h": 70}, "ADM_06": {"x": 230, "y": 220, "w": 120, "h": 70}, "ADM_07": {"x": 370, "y": 220, "w": 120, "h": 70}, "ADM_08": {"x": 530, "y": 130, "w": 120, "h": 70}, "ADM_09": {"x": 670, "y": 130, "w": 120, "h": 70}, "ADM_10": {"x": 530, "y": 220, "w": 120, "h": 70}, "ADM_11": {"x": 670, "y": 220, "w": 120, "h": 70}, "SPEC_ART": {"x": 40, "y": 40, "w": 160, "h": 80}, "SPEC_MUSIC": {"x": 220, "y": 40, "w": 160, "h": 80}, "SPEC_PE_1": {"x": 400, "y": 40, "w": 160, "h": 80}, "SPEC_PE_2": {"x": 580, "y": 40, "w": 160, "h": 80}, "SPEC_PE_3": {"x": 760, "y": 40, "w": 160, "h": 80}, "SPEC_CONF_S": {"x": 40, "y": 150, "w": 160, "h": 80}, "SPEC_CONF_L": {"x": 220, "y": 150, "w": 160, "h": 80}, "SPEC_DUTY": {"x": 400, "y": 150, "w": 160, "h": 80}, "SPEC_DINE": {"x": 580, "y": 150, "w": 160, "h": 80}, "SPEC_PRINT": {"x": 760, "y": 150, "w": 160, "h": 80}, "SPEC_DORM": {"x": 40, "y": 260, "w": 160, "h": 80}};
+    const PRESET_ROOMS = [{"id": "gyomu_principal", "name": "교장실", "floor": "본관 전관 1층", "phone": "270-8200 / 8623-2914", "category": "교무", "seats": [{"id": "PRIN_01", "label": "교장", "user": "정진복", "ext": "200", "x": 0, "y": 0}]}, {"id": "gyomu_center", "name": "교무센터", "floor": "본관 후관 1층", "phone": "270-8208, FAX 276-3015", "category": "교무", "note": "소회의실 연접 / 출입구 3곳", "seats": [{"id": "GYOMU_01", "label": "교감", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "GYOMU_02", "label": "상단 1열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "GYOMU_03", "label": "상단 2열-1", "user": "", "ext": "", "col": 2, "row": 0}, {"id": "GYOMU_04", "label": "상단 1열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "GYOMU_05", "label": "상단 2열-2", "user": "", "ext": "", "col": 2, "row": 1}, {"id": "GYOMU_06", "label": "하단 1열-1", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "GYOMU_07", "label": "하단 2열-1", "user": "", "ext": "", "col": 2, "row": 2}, {"id": "GYOMU_08", "label": "하단 3열-1", "user": "", "ext": "", "col": 3, "row": 2}, {"id": "GYOMU_09", "label": "하단 1열-2", "user": "", "ext": "", "col": 1, "row": 3}, {"id": "GYOMU_10", "label": "하단 2열-2", "user": "", "ext": "", "col": 2, "row": 3}, {"id": "GYOMU_11", "label": "하단 3열-2", "user": "", "ext": "", "col": 3, "row": 3}, {"id": "GYOMU_12", "label": "중앙 1열-1", "user": "", "ext": "", "col": 4, "row": 0}, {"id": "GYOMU_13", "label": "중앙 2열-1", "user": "", "ext": "", "col": 5, "row": 0}, {"id": "GYOMU_14", "label": "중앙 1열-2", "user": "", "ext": "", "col": 4, "row": 1}, {"id": "GYOMU_15", "label": "중앙 2열-2", "user": "", "ext": "", "col": 5, "row": 1}, {"id": "GYOMU_16", "label": "중앙 1열-3", "user": "", "ext": "", "col": 4, "row": 2}, {"id": "GYOMU_17", "label": "중앙 2열-3", "user": "", "ext": "", "col": 5, "row": 2}, {"id": "GYOMU_18", "label": "우측 1열-1", "user": "", "ext": "", "col": 6, "row": 0}, {"id": "GYOMU_19", "label": "우측 2열-1", "user": "", "ext": "", "col": 7, "row": 0}, {"id": "GYOMU_20", "label": "우측 1열-2", "user": "", "ext": "", "col": 6, "row": 1}, {"id": "GYOMU_21", "label": "우측 2열-2", "user": "", "ext": "", "col": 7, "row": 1}]}, {"id": "grade3", "name": "3학년 교무실", "floor": "본관 후관 4층", "phone": "", "category": "학년", "seats": [{"id": "G3_01", "label": "3학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G3_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G3_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G3_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G3_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G3_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G3_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G3_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G3_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G3_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G3_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade2", "name": "2학년 교무실", "floor": "본관 후관 2층", "phone": "", "category": "학년", "seats": [{"id": "G2_01", "label": "2학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G2_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G2_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G2_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G2_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G2_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G2_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G2_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G2_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G2_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G2_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "grade1", "name": "1학년 교무실", "floor": "본관 후관 3층", "phone": "", "category": "학년", "seats": [{"id": "G1_01", "label": "1학년부장", "user": "", "ext": "", "side": "left", "pos": "top"}, {"id": "G1_02", "label": "좌측 중단-1", "user": "", "ext": "", "side": "left", "pos": "mid-1"}, {"id": "G1_03", "label": "좌측 중단-2", "user": "", "ext": "", "side": "left", "pos": "mid-2"}, {"id": "G1_04", "label": "좌측 하단-1", "user": "", "ext": "", "side": "left", "pos": "bot-1"}, {"id": "G1_05", "label": "좌측 하단-2", "user": "", "ext": "", "side": "left", "pos": "bot-2"}, {"id": "G1_06", "label": "우측 상단-1", "user": "", "ext": "", "side": "right", "pos": "top-1"}, {"id": "G1_07", "label": "우측 상단-2", "user": "", "ext": "", "side": "right", "pos": "top-2"}, {"id": "G1_08", "label": "우측 중단-1", "user": "", "ext": "", "side": "right", "pos": "mid-1"}, {"id": "G1_09", "label": "우측 중단-2", "user": "", "ext": "", "side": "right", "pos": "mid-2"}, {"id": "G1_10", "label": "우측 하단-1", "user": "", "ext": "", "side": "right", "pos": "bot-1"}, {"id": "G1_11", "label": "우측 하단-2", "user": "", "ext": "", "side": "right", "pos": "bot-2"}]}, {"id": "safety", "name": "학생안전부", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SAFE_01", "label": "학생안전 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "SAFE_02", "label": "학생안전 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "SAFE_03", "label": "학생안전 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "SAFE_04", "label": "학생안전 2열-2", "user": "", "ext": "", "col": 1, "row": 1}, {"id": "SAFE_05", "label": "학생안전 1열-3", "user": "", "ext": "", "col": 0, "row": 2}, {"id": "SAFE_06", "label": "학생안전 2열-3", "user": "", "ext": "", "col": 1, "row": 2}, {"id": "SAFE_07", "label": "상담실", "user": "", "ext": "", "col": 2, "row": 0}]}, {"id": "support", "name": "통합지원반", "floor": "본관 후관 1층", "phone": "", "category": "부서", "seats": [{"id": "SUPP_01", "label": "통합지원 1", "user": "", "ext": "", "row": 0}, {"id": "SUPP_02", "label": "통합지원 2", "user": "", "ext": "", "row": 1}, {"id": "SUPP_03", "label": "통합지원 3", "user": "", "ext": "", "row": 2}]}, {"id": "edu_info", "name": "교육정보부", "floor": "본관 전관 4층", "phone": "", "category": "부서", "seats": [{"id": "INFO_01", "label": "정보부 1열-1", "user": "", "ext": "", "col": 0, "row": 0}, {"id": "INFO_02", "label": "정보부 2열-1", "user": "", "ext": "", "col": 1, "row": 0}, {"id": "INFO_03", "label": "정보부 1열-2", "user": "", "ext": "", "col": 0, "row": 1}, {"id": "INFO_04", "label": "정보부 2열-2", "user": "", "ext": "", "col": 1, "row": 1}]}, {"id": "library", "name": "도서실", "floor": "본관 후관 3층", "phone": "", "category": "부서", "seats": [{"id": "LIB_01", "label": "사서", "user": "", "ext": "", "row": 0}]}, {"id": "counsel_health_meal", "name": "상담·보건·급식실", "floor": "각 층", "phone": "", "category": "지원", "seats": [{"id": "WEE_01", "label": "위클래스(본관 전관 3층)", "user": "", "ext": "", "subroom": "위클래스"}, {"id": "CAREER_01", "label": "진로상담실(본관 후관 2층)", "user": "", "ext": "", "subroom": "진로상담실"}, {"id": "HEALTH_01", "label": "보건실-1(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "HEALTH_02", "label": "보건실-2(본관 전관 1층)", "user": "", "ext": "", "subroom": "보건실"}, {"id": "MEAL_01", "label": "급식실-1", "user": "", "ext": "", "subroom": "급식실"}, {"id": "MEAL_02", "label": "급식실-2", "user": "", "ext": "", "subroom": "급식실"}]}, {"id": "admin", "name": "행정실", "floor": "본관 1층", "phone": "270-8209 FAX 276-3014", "category": "행정", "seats": [{"id": "ADM_01", "label": "행정실장", "user": "", "ext": "", "pos": "chief"}, {"id": "ADM_02", "label": "상단 중앙", "user": "", "ext": "", "pos": "top-mid"}, {"id": "ADM_03", "label": "상단 우측", "user": "", "ext": "", "pos": "top-right"}, {"id": "ADM_04", "label": "하단좌 1열-1", "user": "", "ext": "", "pos": "bot-left-1"}, {"id": "ADM_05", "label": "하단좌 2열-1", "user": "", "ext": "", "pos": "bot-left-2"}, {"id": "ADM_06", "label": "하단좌 1열-2", "user": "", "ext": "", "pos": "bot-left-3"}, {"id": "ADM_07", "label": "하단좌 2열-2", "user": "", "ext": "", "pos": "bot-left-4"}, {"id": "ADM_08", "label": "하단우 1열-1", "user": "", "ext": "", "pos": "bot-right-1"}, {"id": "ADM_09", "label": "하단우 2열-1", "user": "", "ext": "", "pos": "bot-right-2"}, {"id": "ADM_10", "label": "하단우 1열-2", "user": "", "ext": "", "pos": "bot-right-3"}, {"id": "ADM_11", "label": "하단우 2열-2", "user": "", "ext": "", "pos": "bot-right-4"}]}, {"id": "special", "name": "특별실", "floor": "교내 각 층", "phone": "", "category": "특별실", "seats": [{"id": "SPEC_ART", "label": "미술실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_MUSIC", "label": "음악실", "floor": "별관", "user": "", "ext": ""}, {"id": "SPEC_PE_1", "label": "체육과실-1", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_2", "label": "체육과실-2", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_PE_3", "label": "체육과실-3", "floor": "본관 전관1층", "user": "", "ext": ""}, {"id": "SPEC_CONF_S", "label": "소회의실", "floor": "교무센터옆", "user": "", "ext": ""}, {"id": "SPEC_CONF_L", "label": "대회의실", "floor": "본관3층", "user": "", "ext": ""}, {"id": "SPEC_DUTY", "label": "당직실", "floor": "본관1층", "user": "", "ext": ""}, {"id": "SPEC_DINE", "label": "식생활관", "floor": "식생활관", "user": "", "ext": ""}, {"id": "SPEC_PRINT", "label": "인쇄실", "floor": "본관전관1층", "user": "", "ext": ""}, {"id": "SPEC_DORM", "label": "기숙사", "floor": "기숙사", "user": "", "ext": ""}]}];
+    const DEFAULT_COORDS = {"PRIN_01": {"x": 780, "y": 15, "w": 220, "h": 65}, "GYOMU_01": {"x": 30, "y": 95, "w": 110, "h": 75}, "GYOMU_02": {"x": 160, "y": 95, "w": 120, "h": 70}, "GYOMU_03": {"x": 295, "y": 95, "w": 120, "h": 70}, "GYOMU_04": {"x": 160, "y": 180, "w": 120, "h": 70}, "GYOMU_05": {"x": 295, "y": 180, "w": 120, "h": 70}, "GYOMU_06": {"x": 160, "y": 275, "w": 110, "h": 70}, "GYOMU_07": {"x": 280, "y": 275, "w": 110, "h": 70}, "GYOMU_08": {"x": 400, "y": 275, "w": 110, "h": 70}, "GYOMU_09": {"x": 160, "y": 360, "w": 110, "h": 70}, "GYOMU_10": {"x": 280, "y": 360, "w": 110, "h": 70}, "GYOMU_11": {"x": 400, "y": 360, "w": 110, "h": 70}, "GYOMU_12": {"x": 540, "y": 95, "w": 110, "h": 70}, "GYOMU_13": {"x": 660, "y": 95, "w": 110, "h": 70}, "GYOMU_14": {"x": 540, "y": 180, "w": 110, "h": 70}, "GYOMU_15": {"x": 660, "y": 180, "w": 110, "h": 70}, "GYOMU_16": {"x": 540, "y": 265, "w": 110, "h": 70}, "GYOMU_17": {"x": 660, "y": 265, "w": 110, "h": 70}, "GYOMU_18": {"x": 800, "y": 95, "w": 110, "h": 70}, "GYOMU_19": {"x": 920, "y": 95, "w": 110, "h": 70}, "GYOMU_20": {"x": 800, "y": 180, "w": 110, "h": 70}, "GYOMU_21": {"x": 920, "y": 180, "w": 110, "h": 70}, "G3_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G3_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G3_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G3_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G3_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G3_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G3_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G3_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G3_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G3_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G3_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G2_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G2_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G2_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G2_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G2_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G2_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G2_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G2_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G2_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G2_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G2_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "G1_01": {"x": 50, "y": 40, "w": 330, "h": 75}, "G1_02": {"x": 50, "y": 135, "w": 155, "h": 75}, "G1_03": {"x": 225, "y": 135, "w": 155, "h": 75}, "G1_04": {"x": 50, "y": 230, "w": 155, "h": 75}, "G1_05": {"x": 225, "y": 230, "w": 155, "h": 75}, "G1_06": {"x": 460, "y": 40, "w": 155, "h": 75}, "G1_07": {"x": 635, "y": 40, "w": 155, "h": 75}, "G1_08": {"x": 460, "y": 135, "w": 155, "h": 75}, "G1_09": {"x": 635, "y": 135, "w": 155, "h": 75}, "G1_10": {"x": 460, "y": 230, "w": 155, "h": 75}, "G1_11": {"x": 635, "y": 230, "w": 155, "h": 75}, "SAFE_01": {"x": 50, "y": 40, "w": 160, "h": 75}, "SAFE_02": {"x": 230, "y": 40, "w": 160, "h": 75}, "SAFE_03": {"x": 50, "y": 135, "w": 160, "h": 75}, "SAFE_04": {"x": 230, "y": 135, "w": 160, "h": 75}, "SAFE_05": {"x": 50, "y": 230, "w": 160, "h": 75}, "SAFE_06": {"x": 230, "y": 230, "w": 160, "h": 75}, "SAFE_07": {"x": 450, "y": 40, "w": 160, "h": 265}, "INFO_01": {"x": 50, "y": 50, "w": 190, "h": 80}, "INFO_02": {"x": 270, "y": 50, "w": 190, "h": 80}, "INFO_03": {"x": 50, "y": 160, "w": 190, "h": 80}, "INFO_04": {"x": 270, "y": 160, "w": 190, "h": 80}, "SUPP_01": {"x": 80, "y": 40, "w": 240, "h": 75}, "SUPP_02": {"x": 80, "y": 135, "w": 240, "h": 75}, "SUPP_03": {"x": 80, "y": 230, "w": 240, "h": 75}, "LIB_01": {"x": 100, "y": 70, "w": 260, "h": 85}, "WEE_01": {"x": 40, "y": 50, "w": 180, "h": 80}, "CAREER_01": {"x": 250, "y": 50, "w": 180, "h": 80}, "HEALTH_01": {"x": 460, "y": 50, "w": 160, "h": 75}, "HEALTH_02": {"x": 460, "y": 145, "w": 160, "h": 75}, "MEAL_01": {"x": 650, "y": 50, "w": 160, "h": 75}, "MEAL_02": {"x": 650, "y": 145, "w": 160, "h": 75}, "ADM_01": {"x": 50, "y": 50, "w": 140, "h": 250}, "ADM_02": {"x": 230, "y": 40, "w": 260, "h": 70}, "ADM_03": {"x": 530, "y": 40, "w": 260, "h": 70}, "ADM_04": {"x": 230, "y": 130, "w": 120, "h": 70}, "ADM_05": {"x": 370, "y": 130, "w": 120, "h": 70}, "ADM_06": {"x": 230, "y": 220, "w": 120, "h": 70}, "ADM_07": {"x": 370, "y": 220, "w": 120, "h": 70}, "ADM_08": {"x": 530, "y": 130, "w": 120, "h": 70}, "ADM_09": {"x": 670, "y": 130, "w": 120, "h": 70}, "ADM_10": {"x": 530, "y": 220, "w": 120, "h": 70}, "ADM_11": {"x": 670, "y": 220, "w": 120, "h": 70}, "SPEC_ART": {"x": 40, "y": 40, "w": 160, "h": 80}, "SPEC_MUSIC": {"x": 220, "y": 40, "w": 160, "h": 80}, "SPEC_PE_1": {"x": 400, "y": 40, "w": 160, "h": 80}, "SPEC_PE_2": {"x": 580, "y": 40, "w": 160, "h": 80}, "SPEC_PE_3": {"x": 760, "y": 40, "w": 160, "h": 80}, "SPEC_CONF_S": {"x": 40, "y": 150, "w": 160, "h": 80}, "SPEC_CONF_L": {"x": 220, "y": 150, "w": 160, "h": 80}, "SPEC_DUTY": {"x": 400, "y": 150, "w": 160, "h": 80}, "SPEC_DINE": {"x": 580, "y": 150, "w": 160, "h": 80}, "SPEC_PRINT": {"x": 760, "y": 150, "w": 160, "h": 80}, "SPEC_DORM": {"x": 40, "y": 260, "w": 160, "h": 80}};
 
     const ROOM_ORDER = [
       'gyomu_center', 'grade3', 'grade2', 'grade1', 'safety',
@@ -1232,7 +1254,7 @@
 
     // Room Canvas Dimensions (width, min-height)
     const ROOM_CANVAS_DIMS = {
-      'gyomu_center': { w: 1060, h: 540 },
+      'gyomu_center': { w: 1040, h: 520 },
       'grade3': { w: 880, h: 460 },
       'grade2': { w: 880, h: 460 },
       'grade1': { w: 880, h: 460 },
@@ -1274,6 +1296,10 @@
               appState.seats = res.seats || [];
               appState.devices = res.devices || [];
               appState.rooms = res.rooms || [];
+              // Fix GYOMU_01 label to 교감
+              const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
+              if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
+
               initSeatPositions();
               renderActiveRoomView();
               updateTopStats();
@@ -1300,7 +1326,7 @@
                 seat_id: s.id,
                 room_id: r.id,
                 room_name: r.name + (r.floor ? ` (${r.floor})` : ''),
-                seat_label: s.label,
+                seat_label: s.id === 'GYOMU_01' ? '교감' : s.label,
                 current_user: s.user || '',
                 extension: s.ext || '',
                 pos_x: defPos.x,
@@ -1316,6 +1342,12 @@
         } else {
           appState.seats = JSON.parse(savedSeats);
           appState.devices = savedDevs ? JSON.parse(savedDevs) : [];
+          // Ensure GYOMU_01 is 교감
+          const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
+          if (g1 && g1.seat_label !== '교감') {
+            g1.seat_label = '교감';
+            saveLocalData();
+          }
           initSeatPositions();
         }
         renderActiveRoomView();
@@ -1404,7 +1436,7 @@
     // Reset Current Room Positions to default
     function resetCurrentRoomPositions() {
       const rId = appState.activeRoomId;
-      if (!confirm("현재 교무실 좌석들의 위치를 공식 기본 배치도로 복원하시겠습니까?")) return;
+      if (!confirm("현재 교무실 좌석들의 배치를 기본 공식 위치로 복원하시겠습니까?")) return;
 
       appState.seats.forEach(s => {
         const belongs = (rId === 'gyomu_center') ? (s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01') : (s.room_id === rId);
@@ -1428,7 +1460,7 @@
     }
 
     // =========================================================================
-    // DRAG & DROP POSITIONING LOGIC (Pointer Events for Touch & Mouse Unified)
+    // MAGNETIC SNAP & SEAT SWAPPING LOGIC (자석 스냅 & 맞교환)
     // =========================================================================
     let dragState = {
       active: false,
@@ -1439,7 +1471,8 @@
       origLeft: 0,
       origTop: 0,
       hasMoved: false,
-      longPressTimer: null
+      longPressTimer: null,
+      currentSwapTargetId: null
     };
 
     function attachSeatDragListeners(el, seatId) {
@@ -1447,7 +1480,6 @@
     }
 
     function onSeatPointerDown(e, el, seatId) {
-      // Only left button for mouse
       if (e.pointerType === 'mouse' && e.button !== 0) return;
 
       const canvas = document.getElementById('activeRoomCanvas');
@@ -1461,11 +1493,12 @@
       dragState.origTop = parseInt(el.style.top) || 0;
       dragState.hasMoved = false;
       dragState.active = false;
+      dragState.currentSwapTargetId = null;
 
-      // Long-press timer for touch devices (300ms)
+      // Long-press timer (250ms)
       dragState.longPressTimer = setTimeout(() => {
         startSeatDrag(e, el, seatId);
-      }, 300);
+      }, 250);
 
       window.addEventListener('pointermove', onWindowPointerMove);
       window.addEventListener('pointerup', onWindowPointerUp);
@@ -1480,7 +1513,6 @@
       } catch (err) {}
 
       if (navigator.vibrate) navigator.vibrate(40);
-      showToast(`📍 [${el.querySelector('.seat-id-tag')?.textContent || '좌석'}] 이동 중 (원하는 위치에 놓으세요)`);
     }
 
     function onWindowPointerMove(e) {
@@ -1491,12 +1523,12 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (!dragState.active) {
-        // If mouse moves > 5px while pressed, start dragging immediately
+        // Desktop mouse: start drag if moved > 5px
         if (e.pointerType === 'mouse' && dist > 5) {
           clearTimeout(dragState.longPressTimer);
           startSeatDrag(e, dragState.targetEl, dragState.seatId);
         } else if (e.pointerType === 'touch' && dist > 8) {
-          // If finger scrolls before 300ms, cancel long press to allow page scroll
+          // Mobile finger scrolling: cancel long press
           clearTimeout(dragState.longPressTimer);
           return;
         }
@@ -1515,16 +1547,80 @@
         let newX = dragState.origLeft + dx;
         let newY = dragState.origTop + dy;
 
-        // Snap to 10px grid
-        newX = Math.round(newX / 10) * 10;
-        newY = Math.round(newY / 10) * 10;
-
         // Boundary constraints
         newX = Math.max(10, Math.min(canvasW - elW - 10, newX));
         newY = Math.max(10, Math.min(canvasH - elH - 10, newY));
 
         dragState.targetEl.style.left = newX + 'px';
         dragState.targetEl.style.top = newY + 'px';
+
+        // DETECT HOVER OVER OTHER SEATS FOR MAGNETIC SWAP
+        detectSwapTarget(newX, newY, elW, elH);
+      }
+    }
+
+    // Check if dragged seat center overlaps another seat
+    function detectSwapTarget(curX, curY, curW, curH) {
+      const curCenterX = curX + curW / 2;
+      const curCenterY = curY + curH / 2;
+
+      const rId = appState.activeRoomId;
+      const otherSeats = appState.seats.filter(s => {
+        const belongs = (rId === 'gyomu_center') ? (s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01') : (s.room_id === rId);
+        return belongs && s.seat_id !== dragState.seatId;
+      });
+
+      let matchedSeatId = null;
+      let minDistance = 999999;
+
+      otherSeats.forEach(s => {
+        const el = document.getElementById(`seat_${s.seat_id}`);
+        if (!el) return;
+        const targetX = parseInt(el.style.left) || s.pos_x;
+        const targetY = parseInt(el.style.top) || s.pos_y;
+        const targetW = el.offsetWidth;
+        const targetH = el.offsetHeight;
+        const targetCenterX = targetX + targetW / 2;
+        const targetCenterY = targetY + targetH / 2;
+
+        const dist = Math.hypot(curCenterX - targetCenterX, curCenterY - targetCenterY);
+        // If center is within bounding box or close distance
+        const isInside = (curCenterX >= targetX - 10 && curCenterX <= targetX + targetW + 10 &&
+                          curCenterY >= targetY - 10 && curCenterY <= targetY + targetH + 10);
+
+        if (isInside && dist < minDistance) {
+          minDistance = dist;
+          matchedSeatId = s.seat_id;
+        }
+      });
+
+      // Update visual highlight on swap target
+      if (dragState.currentSwapTargetId !== matchedSeatId) {
+        // Clear previous target
+        if (dragState.currentSwapTargetId) {
+          const prevEl = document.getElementById(`seat_${dragState.currentSwapTargetId}`);
+          if (prevEl) {
+            prevEl.classList.remove('is-swap-target');
+            const b = prevEl.querySelector('.swap-badge-indicator');
+            if (b) b.remove();
+          }
+        }
+
+        dragState.currentSwapTargetId = matchedSeatId;
+
+        // Apply to new target
+        if (matchedSeatId) {
+          const targetEl = document.getElementById(`seat_${matchedSeatId}`);
+          if (targetEl) {
+            targetEl.classList.add('is-swap-target');
+            if (!targetEl.querySelector('.swap-badge-indicator')) {
+              const badge = document.createElement('div');
+              badge.className = 'swap-badge-indicator';
+              badge.textContent = '⇄ 자리 맞교환';
+              targetEl.appendChild(badge);
+            }
+          }
+        }
       }
     }
 
@@ -1537,38 +1633,83 @@
       const el = dragState.targetEl;
       if (!el) return;
 
+      // Clear any remaining swap target badge
+      if (dragState.currentSwapTargetId) {
+        const targetEl = document.getElementById(`seat_${dragState.currentSwapTargetId}`);
+        if (targetEl) {
+          targetEl.classList.remove('is-swap-target');
+          const b = targetEl.querySelector('.swap-badge-indicator');
+          if (b) b.remove();
+        }
+      }
+
       if (dragState.active) {
         el.classList.remove('is-dragging');
         try {
           el.releasePointerCapture(e.pointerId);
         } catch (err) {}
 
-        const finalX = parseInt(el.style.left) || dragState.origLeft;
-        const finalY = parseInt(el.style.top) || dragState.origTop;
+        const seatA = appState.seats.find(s => s.seat_id === dragState.seatId);
+        const swapTargetId = dragState.currentSwapTargetId;
 
-        const seat = appState.seats.find(s => s.seat_id === dragState.seatId);
-        if (seat) {
-          seat.pos_x = finalX;
-          seat.pos_y = finalY;
+        if (swapTargetId && seatA) {
+          // ==========================================
+          // CASE 1: MAGNETIC SWAP (자리 맞교환!)
+          // ==========================================
+          const seatB = appState.seats.find(s => s.seat_id === swapTargetId);
+          const elB = document.getElementById(`seat_${swapTargetId}`);
 
-          if (appState.isGas) {
-            google.script.run.updateSeatPosition(seat.seat_id, finalX, finalY);
-          } else {
-            saveLocalData();
+          if (seatB && elB) {
+            const origAX = dragState.origLeft;
+            const origAY = dragState.origTop;
+            const origBX = seatB.pos_x;
+            const origBY = seatB.pos_y;
+
+            // Animate A into B's slot
+            el.style.left = origBX + 'px';
+            el.style.top = origBY + 'px';
+
+            // Animate B into A's slot
+            elB.style.left = origAX + 'px';
+            elB.style.top = origAY + 'px';
+
+            // Swap positions in state
+            seatA.pos_x = origBX;
+            seatA.pos_y = origBY;
+            seatB.pos_x = origAX;
+            seatB.pos_y = origAY;
+
+            if (appState.isGas) {
+              google.script.run.batchUpdateSeatPositions([
+                { seat_id: seatA.seat_id, pos_x: origBX, pos_y: origBY },
+                { seat_id: seatB.seat_id, pos_x: origAX, pos_y: origAY }
+              ]);
+            } else {
+              saveLocalData();
+            }
+
+            showToast(`🔄 [${seatA.seat_label}] ⇋ [${seatB.seat_label}] 자리가 서로 교체되었습니다!`);
           }
-          showToast(`좌석 [${seat.seat_label}]의 새 위치가 저장되었습니다!`);
+        } else {
+          // ==========================================
+          // CASE 2: MAGNETIC SNAP BACK (원래 자리로 자석 복귀)
+          // ==========================================
+          el.style.left = dragState.origLeft + 'px';
+          el.style.top = dragState.origTop + 'px';
+          showToast(`원래 자리로 복귀했습니다. 다른 좌석 위로 끌어놓으면 서로 자리가 교체됩니다.`);
         }
       } else {
-        // Regular Click (not dragged): open seat survey modal!
+        // CASE 3: Quick tap/click (open modal)
         openSeatModal(dragState.seatId);
       }
 
       dragState.active = false;
       dragState.targetEl = null;
       dragState.seatId = null;
+      dragState.currentSwapTargetId = null;
     }
 
-    // Helper: generate absolute-positioned desk cell HTML
+    // Helper: generate seat cell element
     function createSeatCellElement(seatId) {
       const seat = appState.seats.find(s => s.seat_id === seatId);
       if (!seat) return null;
@@ -1617,7 +1758,7 @@
     }
 
     // =========================================================================
-    // SEAT ADDITION (새 좌석 추가 및 자유 위치 부여)
+    // SEAT ADDITION (새 좌석 추가 - 슬롯 할당 후 어디든 맞교환 가능)
     // =========================================================================
     function openAddSeatModal() {
       const rId = appState.activeRoomId;
@@ -1676,12 +1817,12 @@
       const preset = PRESET_ROOMS.find(r => r.id === roomId);
       const roomName = preset ? (preset.name + (preset.floor ? ` (${preset.floor})` : '')) : roomId;
 
-      // Determine initial placement position for the newly added seat
+      // Position spawn point: below existing desks
       const roomSeats = appState.seats.filter(s => s.room_id === roomId);
-      let spawnX = 50, spawnY = 50;
+      let spawnX = 60, spawnY = 60;
       if (roomSeats.length > 0) {
         const maxY = Math.max(...roomSeats.map(s => s.pos_y || 50));
-        spawnY = Math.min(maxY + 90, 500);
+        spawnY = maxY + 85;
         spawnX = 60;
       }
 
@@ -1709,7 +1850,7 @@
               selectRoom(roomId);
               renderActiveRoomView();
               updateTopStats();
-              showToast(`좌석 [${label}]이(가) 추가되었습니다! 길게 눌러 원하는 위치로 이동하세요.`);
+              showToast(`좌석 [${label}]이(가) 추가되었습니다! 다른 좌석 위로 끌어다 놓으면 서로 자리를 교체할 수 있습니다.`);
               openSeatModal(seatId);
             } else {
               alert("좌석 추가 실패: " + res.error);
@@ -1726,7 +1867,7 @@
         selectRoom(roomId);
         renderActiveRoomView();
         updateTopStats();
-        showToast(`좌석 [${label}]이(가) 추가되었습니다! 길게 눌러 원하는 위치로 이동하세요.`);
+        showToast(`좌석 [${label}]이(가) 추가되었습니다! 다른 좌석 위로 끌어다 놓으면 서로 자리를 교체할 수 있습니다.`);
         openSeatModal(seatId);
       }
     }
@@ -1774,7 +1915,7 @@
     }
 
     // =========================================================================
-    // RENDER ACTIVE ROOM VIEW (Dynamic Draggable Canvas)
+    // RENDER ACTIVE ROOM VIEW
     // =========================================================================
     function renderActiveRoomView() {
       const container = document.getElementById('singleRoomContainer');
@@ -1808,21 +1949,19 @@
 
       const dims = ROOM_CANVAS_DIMS[rId] || { w: 900, h: 480 };
       
-      // Compute dynamic canvas height if any seat was dragged further down
       let maxSeatY = 0;
       roomSeats.forEach(s => {
         if (s.pos_y && s.pos_y > maxSeatY) maxSeatY = s.pos_y;
       });
       const effectiveH = Math.max(dims.h, maxSeatY + 110);
 
-      // Landmarks HTML (Doors, special room indicators)
+      // Landmarks HTML - GYOMU_CENTER: Removed 소회의실 연접 completely!
       let landmarksHtml = '';
       if (rId === 'gyomu_center') {
         landmarksHtml = `
-          <div class="room-landmark landmark-hall" style="left: 30px; top: 180px; width: 100px; height: 260px;">소회의실 연접</div>
-          <div class="room-landmark landmark-door" style="left: 170px; top: 460px; width: 130px; height: 32px;">🚪 출입구 1 (좌측)</div>
-          <div class="room-landmark landmark-door" style="left: 550px; top: 460px; width: 130px; height: 32px;">🚪 출입구 2 (중앙)</div>
-          <div class="room-landmark landmark-door" style="left: 840px; top: 460px; width: 130px; height: 32px;">🚪 출입구 3 (우측)</div>
+          <div class="room-landmark landmark-door" style="left: 170px; top: 450px; width: 130px; height: 32px;">🚪 출입구 1 (좌측)</div>
+          <div class="room-landmark landmark-door" style="left: 550px; top: 450px; width: 130px; height: 32px;">🚪 출입구 2 (중앙)</div>
+          <div class="room-landmark landmark-door" style="left: 840px; top: 450px; width: 130px; height: 32px;">🚪 출입구 3 (우측)</div>
         `;
       } else if (rId === 'grade3' || rId === 'grade2' || rId === 'grade1') {
         landmarksHtml = `
@@ -1861,8 +2000,8 @@
 
           <div style="padding: 12px 18px 0;">
             <div class="drag-hint-banner">
-              <span>💡 <strong>자유 이동 안내:</strong> 좌석을 <strong>길게 누르거나 마우스로 드래그</strong>하면 원하는 위치로 자유롭게 이동할 수 있습니다. (클릭 시 기기 등록 창이 열립니다)</span>
-              <span style="font-size: 0.75rem; color: #555;">자동 저장 됨</span>
+              <span>🧲 <strong>자석 스냅 & 맞교환 안내:</strong> 좌석을 <strong>다른 좌석 위로 끌어다 놓으면 서로 자리가 맞교환</strong>됩니다. 빈 공간에 놓으면 원래 자리로 자석처럼 착 붙습니다.</span>
+              <span style="font-size: 0.78rem; font-weight: 700; color: #2e7d32;">자동 저장 됨</span>
             </div>
           </div>
 
@@ -1874,7 +2013,7 @@
         </div>
       `;
 
-      // Mount all seat elements into activeRoomCanvas
+      // Mount seats
       const canvas = document.getElementById('activeRoomCanvas');
       roomSeats.forEach(s => {
         const cell = createSeatCellElement(s.seat_id);

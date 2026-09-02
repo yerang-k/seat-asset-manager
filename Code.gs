@@ -471,7 +471,7 @@ function getPresetRooms_() {
       floor: "본관 후관 1층",
       phone: "270-8208, FAX 276-3015",
       seats: [
-        { id: "GYOMU_01", label: "소회의실측 1", user: "", ext: "" },
+        { id: "GYOMU_01", label: "교감", user: "", ext: "" },
         { id: "GYOMU_02", label: "상단 1열-1", user: "", ext: "" },
         { id: "GYOMU_03", label: "상단 2열-1", user: "", ext: "" },
         { id: "GYOMU_04", label: "상단 1열-2", user: "", ext: "" },
