@@ -758,3 +758,82 @@ function updateRoomSeatCount_(ss, roomId) {
     }
   } catch (e) {}
 }
+
+
+/** 단일 좌석 위치(pos_x, pos_y) 저장 */
+function updateSeatPosition(seatId, posX, posY) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const data = seatSheet.getDataRange().getValues();
+    const headers = data[0];
+    const idCol = headers.indexOf('seat_id');
+    let xCol = headers.indexOf('pos_x');
+    let yCol = headers.indexOf('pos_y');
+
+    // pos_x, pos_y 열이 없으면 추가
+    if (xCol === -1 || yCol === -1) {
+      if (xCol === -1) {
+        seatSheet.getRange(1, headers.length + 1).setValue('pos_x');
+        xCol = headers.length;
+        headers.push('pos_x');
+      }
+      if (yCol === -1) {
+        seatSheet.getRange(1, headers.length + 1).setValue('pos_y');
+        yCol = headers.length;
+        headers.push('pos_y');
+      }
+    }
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idCol]) === String(seatId)) {
+        seatSheet.getRange(i + 1, xCol + 1).setValue(posX);
+        seatSheet.getRange(i + 1, yCol + 1).setValue(posY);
+        break;
+      }
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/** 다중 좌석 위치 일괄 저장 */
+function batchUpdateSeatPositions(positions) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const data = seatSheet.getDataRange().getValues();
+    const headers = data[0];
+    const idCol = headers.indexOf('seat_id');
+    let xCol = headers.indexOf('pos_x');
+    let yCol = headers.indexOf('pos_y');
+
+    if (xCol === -1) {
+      seatSheet.getRange(1, headers.length + 1).setValue('pos_x');
+      xCol = headers.length;
+      headers.push('pos_x');
+    }
+    if (yCol === -1) {
+      seatSheet.getRange(1, headers.length + 1).setValue('pos_y');
+      yCol = headers.length;
+      headers.push('pos_y');
+    }
+
+    const posMap = {};
+    positions.forEach(p => { posMap[p.seat_id] = p; });
+
+    for (let i = 1; i < data.length; i++) {
+      const sId = String(data[i][idCol]);
+      if (posMap[sId]) {
+        seatSheet.getRange(i + 1, xCol + 1).setValue(posMap[sId].pos_x);
+        seatSheet.getRange(i + 1, yCol + 1).setValue(posMap[sId].pos_y);
+      }
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
