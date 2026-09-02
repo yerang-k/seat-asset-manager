@@ -1608,6 +1608,36 @@
     </div>
   </div>
 
+  <!-- Teacher Link Modal -->
+  <div class="modal-backdrop" id="teacherLinkModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h2 style="display: flex; align-items: center; gap: 8px;">🔗 교사용 설문 조사 링크</h2>
+        <button class="modal-close" onclick="closeTeacherLinkModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: #475569; margin-bottom: 12px; line-height: 1.5;">
+          선생님들께 전달하실 전용 조사 링크입니다.<br>
+          스마트폰이나 PC에서 링크를 열면 <strong>별도 구글 로그인 없이 본인 좌석을 찾아 컴퓨터·모니터 사진을 바로 제출</strong>할 수 있습니다.
+        </p>
+
+        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+          <input type="text" id="teacherLinkInput" readonly style="flex: 1; padding: 10px 12px; font-size: 0.88rem; font-weight: 700; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 6px; color: #1e293b;" onclick="this.select()">
+          <button class="btn btn-primary" onclick="copyTeacherLink()" style="font-weight: 800; white-space: nowrap; padding: 0 16px;">📋 복사</button>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #166534; line-height: 1.5;">
+          💡 <strong>메신저 공지 팁</strong><br>
+          쿨메신저 또는 학년/교무실 카톡방에 위 링크를 복사하여 전달해 주세요.
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-outline" onclick="openTeacherLinkInNewTab()" style="font-size: 0.85rem;">↗️ 교사용 화면 새 창 열기</button>
+        <button class="btn btn-light" onclick="closeTeacherLinkModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast" id="toastMessage">알림 메시지</div>
 
@@ -1800,6 +1830,7 @@
         google.script.run
           .withSuccessHandler(res => {
             if (res.success) {
+              if (res.webAppUrl) appState.webAppUrl = res.webAppUrl;
               if (res.seats && res.seats.length > 0) {
                 appState.seats = res.seats;
                 appState.devices = res.devices || [];
@@ -3869,6 +3900,90 @@ function renderActiveRoomView() {
       localStorage.setItem('SOLNAE_GEMINI_KEY', key);
       closeSettingsModal();
       showToast("설정이 저장되었습니다.");
+    }
+
+    // =========================================================================
+    // TEACHER LINK MODAL & COPY CONTROLLERS
+    // =========================================================================
+    function getTeacherLinkUrl() {
+      if (appState.webAppUrl) {
+        return appState.webAppUrl.split('?')[0].split('#')[0] + '?page=teacher';
+      }
+      try {
+        const topUrl = (window.top !== window && window.top.location.href) ? window.top.location.href : window.location.href;
+        if (topUrl.includes('script.google.com')) {
+          return topUrl.split('?')[0].split('#')[0] + '?page=teacher';
+        }
+      } catch (e) {}
+
+      const cur = window.location.href.split('?')[0].split('#')[0];
+      if (cur.includes('script.google.com') || appState.isGas) {
+        return cur + '?page=teacher';
+      }
+      return cur.replace(/index\.html$/i, '') + 'teacher.html';
+    }
+
+    function openTeacherLinkModal() {
+      const modal = document.getElementById('teacherLinkModal');
+      const input = document.getElementById('teacherLinkInput');
+      const url = getTeacherLinkUrl();
+      if (input) input.value = url;
+      if (modal) modal.style.display = 'flex';
+      copyTextToClipboard(url);
+    }
+
+    function closeTeacherLinkModal() {
+      const modal = document.getElementById('teacherLinkModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function openTeacherLinkInNewTab() {
+      const url = getTeacherLinkUrl();
+      window.open(url, '_blank');
+    }
+
+    function copyTeacherLink() {
+      const input = document.getElementById('teacherLinkInput');
+      const url = input && input.value ? input.value : getTeacherLinkUrl();
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+      }
+      copyTextToClipboard(url);
+    }
+
+    function copyTextToClipboard(text) {
+      if (!text) return;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("📋 교사용 조사 링크가 복사되었습니다!");
+        }).catch(() => {
+          execCopyFallback(text);
+        });
+      } else {
+        execCopyFallback(text);
+      }
+    }
+
+    function execCopyFallback(text) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'fixed';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showToast("📋 교사용 조사 링크가 복사되었습니다!");
+        } else {
+          prompt("아래 교사용 링크를 복사(Ctrl+C)하세요:", text);
+        }
+      } catch (e) {
+        prompt("아래 교사용 링크를 복사(Ctrl+C)하세요:", text);
+      }
+      document.body.removeChild(el);
     }
     function resetToPresetData() {
       if (!confirm("전체 좌석 및 기기 데이터를 전주솔내고 2026 초기 상태로 초기화하시겠습니까?")) return;

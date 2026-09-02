@@ -71,11 +71,17 @@ function getInitialData() {
     const devices = getSheetObjects_(devSheet);
     const rooms = getSheetObjects_(roomSheet);
 
+    let webAppUrl = '';
+    try {
+      webAppUrl = ScriptApp.getService().getUrl();
+    } catch (e) {}
+
     return {
       success: true,
       seats: seats,
       devices: devices,
       rooms: rooms,
+      webAppUrl: webAppUrl,
       serverTime: new Date().toISOString()
     };
   } catch (err) {
