@@ -1894,7 +1894,7 @@
           let name = seat.current_user;
           if (!name) {
             if (seat.seat_id === 'PRIN_01') name = '교장실';
-            else if (seat.seat_id === 'GYOMU_01') name = '교감';
+            else if (seat.seat_id === 'GYOMU_01') name = '공석';
             else if (seat.seat_label && seat.seat_label.includes('부장')) name = seat.seat_label;
             else name = '공석';
           }
@@ -3598,8 +3598,8 @@ function renderActiveRoomView() {
             <!-- Column 1: Seat 1 (교감) at Top, Empty Below (1번 자리 밑에는 빈 공간) -->
             <div style="display: flex; flex-direction: column; justify-content: flex-start;">
               <div id="bp_seat_GYOMU_01" class="bp-seat-cell" style="min-height: 54px; justify-content: center;" onclick="openSeatModal('GYOMU_01')">
-                <span class="seat-id-tag">1</span>
-                <span class="seat-user-name" id="bp_user_GYOMU_01" style="font-weight: 800; color: #1b5e20;">교감</span>
+                <span class="seat-id-tag" style="font-size: 0.82rem; font-weight: 800; color: #1b5e20;">교감</span>
+                <span class="seat-user-name" id="bp_user_GYOMU_01">-</span>
                 <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
               </div>
               <!-- 1번 자리 밑 빈 공간 -->
