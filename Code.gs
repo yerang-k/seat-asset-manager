@@ -14,14 +14,31 @@ const PHOTO_FOLDER_NAME = '[전주솔내고] 기기관리_사진';
 
 /** 웹앱 진입점 (일반교사용: ?page=teacher, 관리자용: ?page=admin 또는 기본) */
 function doGet(e) {
+  // TEMP DEBUG: ?debug=1 로 접속하면 진단용 순수 텍스트 결과를 바로 반환 (원인 확인 후 제거 예정)
+  if (e && e.parameter && e.parameter.debug === '1') {
+    try {
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const seatSheet = ss.getSheetByName(SHEET_SEATS);
+      const seats = seatSheet ? getSheetObjects_(seatSheet) : [];
+      const g5 = seats.find(s => s.seat_id === 'GYOMU_05');
+      const lines = [
+        'ss.getName()=' + ss.getName(),
+        'seats.length=' + seats.length,
+        'GYOMU_05=' + JSON.stringify(g5)
+      ];
+      return ContentService.createTextOutput(lines.join('\n'));
+    } catch (err) {
+      return ContentService.createTextOutput('진단 오류: ' + err.message);
+    }
+  }
+
   const page = (e && e.parameter && e.parameter.page) ? e.parameter.page : 'admin';
   const file = (page === 'teacher') ? 'teacher' : 'index';
   const title = (page === 'teacher')
     ? '전주솔내고 교직원 컴퓨터·모니터 현황 조사 (교사용)'
     : '전주솔내고 좌석별 PC·모니터 관리 시스템 (관리자)';
 
-  const template = HtmlService.createTemplateFromFile(file);
-  return template.evaluate()
+  return HtmlService.createHtmlOutputFromFile(file)
     .setTitle(title)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -75,6 +92,10 @@ function getInitialData() {
     try {
       webAppUrl = ScriptApp.getService().getUrl();
     } catch (e) {}
+
+    // TEMP DEBUG: 동기화 진단용 로그 (원인 확인 후 제거 예정)
+    const g5 = seats.find(s => s.seat_id === 'GYOMU_05');
+    Logger.log('getInitialData 진단: seats.length=' + seats.length + ', GYOMU_05=' + JSON.stringify(g5));
 
     return {
       success: true,
@@ -279,7 +300,7 @@ function batchUpdateSeatUsers(seatList) {
 }
 
 /** Gemini Vision API로 라벨 사진 판독 */
-function analyzeLabelImage(base64Data) {
+function analyzeLabelImage(base64Data, seatId, deviceType) {
   try {
     const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
     if (!apiKey) {
@@ -294,8 +315,8 @@ function analyzeLabelImage(base64Data) {
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
     const rawBase64 = mimeMatch ? mimeMatch[2] : base64Data;
 
-    // 최신 고속 비전 모델 Gemini 2.0 Flash 우선 호출
-    let modelName = 'gemini-2.0-flash';
+    // 최신 고속 비전 모델 Gemini 3.7 Flash 우선 호출 (2.0 Flash는 구글이 서비스 종료함)
+    let modelName = 'gemini-3.7-flash';
     let url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     const promptText = `당신은 대한민국 공립학교의 전산장비(컴퓨터 본체, 모니터, 노트북) 라벨 및 명판 전문 판독관입니다.
@@ -348,9 +369,9 @@ function analyzeLabelImage(base64Data) {
 
     let res = UrlFetchApp.fetch(url, options);
     let code = res.getResponseCode();
-    // 만약 2.0 모델 지원 불가 시 1.5 Flash로 자동 폴백
+    // 만약 3.7 모델 지원 불가 시 2.5 Flash로 자동 폴백
     if (code !== 200 && code === 404) {
-      modelName = 'gemini-1.5-flash';
+      modelName = 'gemini-2.5-flash';
       url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
       res = UrlFetchApp.fetch(url, options);
       code = res.getResponseCode();
@@ -363,7 +384,18 @@ function analyzeLabelImage(base64Data) {
     const textOut = resJson.candidates[0].content.parts[0].text;
     const parsedData = JSON.parse(textOut.replace(/```json/g, '').replace(/```/g, '').trim());
 
-    return { success: true, data: parsedData };
+    // 촬영 즉시 관리자 드라이브에 사진 저장 (이후 "저장" 버튼을 누르지 않아도 사진은 보존됨)
+    let photoUrl = '';
+    let photoId = '';
+    if (seatId && base64Data && base64Data.startsWith('data:image')) {
+      const photoResult = uploadPhotoToDrive_(seatId, deviceType, base64Data);
+      if (photoResult.success) {
+        photoUrl = photoResult.viewUrl;
+        photoId = photoResult.fileId;
+      }
+    }
+
+    return { success: true, data: parsedData, photo_url: photoUrl, photo_id: photoId };
   } catch (err) {
     return { success: false, error: '라벨 분석 실패: ' + err.message };
   }
@@ -700,8 +732,13 @@ function getSheetObjects_(sheet) {
     const obj = {};
     let hasContent = false;
     for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]] = row[j];
-      if (row[j] !== '') hasContent = true;
+      let val = row[j];
+      // 시트가 날짜로 자동 인식한 셀은 google.script.run 전송 오류를 막기 위해 문자열로 변환
+      if (val instanceof Date) {
+        val = Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+      }
+      obj[headers[j]] = val;
+      if (val !== '') hasContent = true;
     }
     if (hasContent) results.push(obj);
   }
@@ -826,7 +863,7 @@ function getPresetRooms_() {
       id: "gyomu_center",
       name: "교무센터",
       floor: "",
-      phone: "270-8208, FAX 276-3015",
+      phone: "",
       seats: [
         { id: "GYOMU_01", label: "교감", user: "", ext: "" },
         { id: "GYOMU_02", label: "상단 1열-1", user: "", ext: "" },
@@ -973,7 +1010,7 @@ function getPresetRooms_() {
       id: "admin",
       name: "행정실",
       floor: "",
-      phone: "270-8209 FAX 276-3014",
+      phone: "",
       seats: [
         { id: "ADM_01", label: "행정실장", user: "", ext: "" },
         { id: "ADM_02", label: "상단 중앙", user: "", ext: "" },
@@ -1015,7 +1052,15 @@ function addSeat(seatPayload) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const seatSheet = ss.getSheetByName(SHEET_SEATS);
-    const headers = seatSheet.getRange(1, 1, 1, seatSheet.getLastColumn()).getValues()[0];
+    let headers = seatSheet.getRange(1, 1, 1, seatSheet.getLastColumn()).getValues()[0];
+
+    // 페이로드에 아직 없는 열(예: special_subroom_id)이 있으면 자동으로 열 추가
+    Object.keys(seatPayload).forEach(k => {
+      if (headers.indexOf(k) === -1) {
+        seatSheet.getRange(1, headers.length + 1).setValue(k);
+        headers.push(k);
+      }
+    });
 
     let seatId = seatPayload.seat_id;
     if (!seatId) {
@@ -1189,7 +1234,7 @@ function updateSeatPosition(seatId, posX, posY) {
   }
 }
 
-/** 다중 좌석 위치 일괄 저장 */
+/** 다중 좌석 위치·크기 일괄 저장 */
 function batchUpdateSeatPositions(positions) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1199,6 +1244,8 @@ function batchUpdateSeatPositions(positions) {
     const idCol = headers.indexOf('seat_id');
     let xCol = headers.indexOf('pos_x');
     let yCol = headers.indexOf('pos_y');
+    let wCol = headers.indexOf('width');
+    let hCol = headers.indexOf('height');
 
     if (xCol === -1) {
       seatSheet.getRange(1, headers.length + 1).setValue('pos_x');
@@ -1210,15 +1257,28 @@ function batchUpdateSeatPositions(positions) {
       yCol = headers.length;
       headers.push('pos_y');
     }
+    if (wCol === -1) {
+      seatSheet.getRange(1, headers.length + 1).setValue('width');
+      wCol = headers.length;
+      headers.push('width');
+    }
+    if (hCol === -1) {
+      seatSheet.getRange(1, headers.length + 1).setValue('height');
+      hCol = headers.length;
+      headers.push('height');
+    }
 
     const posMap = {};
     positions.forEach(p => { posMap[p.seat_id] = p; });
 
     for (let i = 1; i < data.length; i++) {
       const sId = String(data[i][idCol]);
-      if (posMap[sId]) {
-        seatSheet.getRange(i + 1, xCol + 1).setValue(posMap[sId].pos_x);
-        seatSheet.getRange(i + 1, yCol + 1).setValue(posMap[sId].pos_y);
+      const p = posMap[sId];
+      if (p) {
+        if (p.pos_x !== undefined) seatSheet.getRange(i + 1, xCol + 1).setValue(p.pos_x);
+        if (p.pos_y !== undefined) seatSheet.getRange(i + 1, yCol + 1).setValue(p.pos_y);
+        if (p.width !== undefined) seatSheet.getRange(i + 1, wCol + 1).setValue(p.width);
+        if (p.height !== undefined) seatSheet.getRange(i + 1, hCol + 1).setValue(p.height);
       }
     }
 
