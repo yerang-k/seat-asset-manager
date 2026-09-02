@@ -372,7 +372,7 @@
 
     /* Desk (Seat) Cell Styling */
     .seat-cell {
-      position: absolute;
+      position: absolute !important;
       border: 1.8px solid var(--border-dark);
       background: #fff;
       border-radius: 6px;
@@ -624,6 +624,107 @@
       height: 2px;
       background: #1976d2;
       box-shadow: 0 0 6px rgba(25, 118, 210, 0.75);
+    }
+
+
+
+    /* =========================================================================
+       A4 BLUEPRINT FLOOR PLAN CSS (완전 독립 네임스페이스)
+       ========================================================================= */
+    .school-floor-plan {
+      background: #fff;
+      border: 2px solid var(--border-dark);
+      box-shadow: var(--shadow-md);
+      min-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .chart-main-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      padding: 10px 0 6px;
+      letter-spacing: 2px;
+      color: #000;
+      border-bottom: 2px solid var(--border-dark);
+    }
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      border-bottom: 2px solid var(--border-dark);
+    }
+    .room-box {
+      border: 1px solid var(--border-dark);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .room-header {
+      background: var(--bg-header);
+      border-bottom: 1.5px solid var(--border-dark);
+      text-align: center;
+      padding: 6px 4px;
+    }
+    .room-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #000;
+    }
+    .room-sub {
+      font-size: 0.78rem;
+      color: #444;
+      font-weight: 500;
+      margin-top: 1px;
+    }
+    .room-body {
+      padding: 8px;
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      background: #fff;
+      position: relative;
+    }
+    .rooms-grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 0.6fr 0.8fr 0.6fr 1.1fr;
+      border-bottom: 2px solid var(--border-dark);
+    }
+
+    /* Isolated Blueprint Seat Cell Styling */
+    .bp-seat-cell {
+      border: 1.5px solid var(--border-dark);
+      background: #fff;
+      border-radius: 4px;
+      padding: 4px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 48px;
+      transition: all 0.15s ease;
+      position: relative;
+      user-select: none;
+      box-sizing: border-box;
+    }
+    .bp-seat-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      border-color: var(--primary);
+      z-index: 5;
+    }
+    .bp-seat-cell.status-done {
+      border-color: #2e7d32;
+      background: #f1f8e9;
+    }
+    .bp-seat-cell.status-part {
+      border-color: #f57f17;
+      background: #fffde7;
+    }
+    .bp-seat-cell.status-none {
+      border-color: #999;
+      background: #fafafa;
     }
 
     /* Modal Styling */
@@ -1511,7 +1612,13 @@
     function initSeatPositions() {
       appState.seats.forEach(s => {
         const defPos = DEFAULT_COORDS[s.seat_id];
-        if (s.pos_x === undefined || s.pos_y === undefined) {
+        const isInvalid = s.pos_x === undefined || s.pos_x === null || s.pos_x === '' || isNaN(Number(s.pos_x)) ||
+                          s.pos_y === undefined || s.pos_y === null || s.pos_y === '' || isNaN(Number(s.pos_y));
+        // Auto-detect corrupted diagonal or collapsed positions
+        const isCorruptedPrin = (s.seat_id === 'PRIN_01' && (s.pos_x < 200 || s.pos_y > 80));
+        const isCorruptedGyomu1 = (s.seat_id === 'GYOMU_01' && s.pos_y > 250);
+
+        if (isInvalid || isCorruptedPrin || isCorruptedGyomu1) {
           if (defPos) {
             s.pos_x = defPos.x;
             s.pos_y = defPos.y;
@@ -1523,14 +1630,17 @@
             s.width = 150;
             s.height = 100;
           }
-        } else if (defPos && (!s.width || s.width < 135 || !s.height || s.height < 80)) {
-          // Automatically upgrade old stored data to the new spacious baseline dimensions
-          s.width = defPos.w;
-          s.height = defPos.h;
-          s.pos_x = defPos.x;
-          s.pos_y = defPos.y;
+        } else {
+          s.pos_x = Number(s.pos_x);
+          s.pos_y = Number(s.pos_y);
+          if (defPos && (!s.width || s.width < 135 || !s.height || s.height < 80)) {
+            s.width = defPos.w;
+            s.height = defPos.h;
+          }
         }
       });
+      // Save healed data
+      saveLocalData();
     }
 
     function saveLocalData() {
@@ -1618,104 +1728,115 @@
         if (hasPc && hasMon) totalDone++;
       });
 
-      let allHtml = `
-        <div style="background: #fff; padding: 18px 24px; border-radius: 12px; border: 1.5px solid var(--border-color); margin-bottom: 20px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      container.innerHTML = `
+        <div style="background: #fff; padding: 14px 20px; border-radius: 10px; border: 1.5px solid var(--border-color); margin-bottom: 14px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h2 style="margin: 0 0 6px 0; font-size: 1.4rem; color: var(--primary); font-weight: 800;">
-              🏛️ 전주솔내고 전체 교무실 배치도 총괄 뷰
+            <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+              🏛️ 2026학년도 전주솔내고등학교 교직원 좌석 배치도
+              <span style="font-size: 0.78rem; background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 12px; border: 1px solid #c8e6c9;">
+                A4 단일 화면 조망 뷰
+              </span>
             </h2>
-            <div style="font-size: 0.9rem; color: #555; display: flex; gap: 16px; flex-wrap: wrap;">
+            <div style="font-size: 0.85rem; color: #555; display: flex; gap: 14px; flex-wrap: wrap;">
               <span>총 <strong>11개 교무실</strong></span>
               <span>총 좌석: <strong>${totalSeats}석</strong></span>
               <span>조사 완료: <strong style="color: #2e7d32;">${totalDone}석 (${Math.round((totalDone/totalSeats)*100)}%)</strong></span>
+              <span style="color: #1e88e5; font-weight: 600;">💡 각 교무실 제목을 누르면 해당 교무실의 <strong>대형 편집 화면</strong>으로 이동합니다.</span>
             </div>
           </div>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800;" onclick="openTeacherLinkModal()">🔗 교사용 조사 화면 링크 공유</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800;" onclick="openTeacherLinkModal()">🔗 교사용 링크 복사</button>
             <button class="btn btn-primary" onclick="selectRoom('gyomu_center')">🏫 교무센터로 이동</button>
           </div>
         </div>
 
-        <div class="all-rooms-container">
+        <div id="blueprintMountArea" style="overflow-x: auto; background: #eaeded; padding: 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);">
+        </div>
       `;
 
-      ROOM_ORDER.forEach(rId => {
-        const roomMeta = PRESET_ROOMS.find(r => r.id === rId);
-        if (!roomMeta) return;
+      const tmpl = document.getElementById('tmplSchoolFloorPlan');
+      if (tmpl) {
+        const clone = tmpl.content.cloneNode(true);
+        document.getElementById('blueprintMountArea').appendChild(clone);
+      }
 
-        const rTitle = roomMeta.name;
-        const rSub = roomMeta.sub || roomMeta.location || '';
-        const rSeats = appState.seats.filter(s => {
-          if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
-          return s.room_id === rId;
-        });
-
-        let rDone = 0;
-        rSeats.forEach(s => {
-          const devs = appState.devices.filter(d => d.seat_id === s.seat_id);
-          const hasPc = devs.some(d => d.device_type === 'PC');
-          const hasMon = devs.some(d => d.device_type && d.device_type.startsWith('MONITOR'));
-          if (hasPc && hasMon) rDone++;
-        });
-
-        const dims = ROOM_CANVAS_DIMS[rId] || { w: 900, h: 480 };
-        let maxSeatBottom = 0;
-        rSeats.forEach(s => {
-          const bottom = (s.pos_y || 0) + (s.height || 100);
-          if (bottom > maxSeatBottom) maxSeatBottom = bottom;
-        });
-        const effectiveH = Math.max(dims.h, maxSeatBottom + 130);
-
-        allHtml += `
-          <div class="all-rooms-card" id="room_section_${rId}">
-            <div class="all-rooms-header">
-              <div class="all-rooms-title">
-                🏫 ${rTitle} <span style="font-size: 0.85rem; font-weight: 600; color: #555;">${rSub ? '(' + rSub + ')' : ''}</span>
-                <span style="font-size: 0.8rem; background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 12px; border: 1px solid #c8e6c9;">
-                  좌석: ${rSeats.length}석 (완료: ${rDone}석)
-                </span>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn-zoom-into-room" onclick="selectRoom('${rId}')">🔍 이 교무실 집중 보기 & 이동</button>
-              </div>
-            </div>
-            <div class="room-canvas-wrapper" style="background: #f8faf9;">
-              <div class="room-canvas" id="canvas_${rId}" style="width: ${dims.w}px; height: ${effectiveH}px;">
-                <div class="corridor-boundary-line">
-                  <span class="corridor-boundary-tag">◀ 복도 및 출입구 구역 ▶</span>
-                </div>
-                <div class="room-landmark landmark-door" style="left: 45px; bottom: 16px; width: 130px; height: 36px;">🚪 출입구</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      allHtml += `</div>`;
-      container.innerHTML = allHtml;
-
-      // Mount all seats into their respective canvas
-      ROOM_ORDER.forEach(rId => {
-        const canvas = document.getElementById(`canvas_${rId}`);
-        if (!canvas) return;
-
-        const rSeats = appState.seats.filter(s => {
-          if (rId === 'gyomu_center') return s.room_id === 'gyomu_center' || s.seat_id === 'PRIN_01';
-          return s.room_id === rId;
-        });
-
-        rSeats.forEach(s => {
-          const cell = createSeatCellElement(s.seat_id);
-          if (cell) canvas.appendChild(cell);
-        });
-      });
-
+      populateBlueprintSeats();
       updateTabBadges();
       const badgeAll = document.getElementById('badge_count_all');
       if (badgeAll) badgeAll.textContent = totalSeats;
     }
 
-    // Prev / Next Navigation
+        function populateBlueprintSeats() {
+      const deviceMap = {};
+      appState.devices.forEach(d => {
+        if (!deviceMap[d.seat_id]) deviceMap[d.seat_id] = [];
+        deviceMap[d.seat_id].push(d);
+      });
+
+      appState.seats.forEach(seat => {
+        const seatElem = document.getElementById(`bp_seat_${seat.seat_id}`);
+        const userElem = document.getElementById(`bp_user_${seat.seat_id}`);
+        const pillsElem = document.getElementById(`bp_pills_${seat.seat_id}`);
+
+        const devs = deviceMap[seat.seat_id] || [];
+        const hasPc = devs.some(d => d.device_type === 'PC');
+        const monitors = devs.filter(d => d.device_type && d.device_type.startsWith('MONITOR'));
+
+        let status = 'none';
+        if (hasPc && monitors.length >= 1) {
+          status = 'done';
+        } else if (hasPc || monitors.length >= 1) {
+          status = 'part';
+        } else {
+          status = 'none';
+        }
+
+        if (seatElem) {
+          seatElem.className = `bp-seat-cell status-${status}`;
+          seatElem.onclick = (e) => {
+            e.stopPropagation();
+            openSeatModal(seat.seat_id);
+          };
+        }
+
+        if (userElem) {
+          let name = seat.current_user;
+          if (!name) {
+            if (seat.seat_id === 'PRIN_01') name = '교장실';
+            else if (seat.seat_id === 'GYOMU_01') name = '교감';
+            else if (seat.seat_label && seat.seat_label.includes('부장')) name = seat.seat_label;
+            else name = '공석';
+          }
+          userElem.textContent = name;
+          if (name === '공석') {
+            userElem.classList.add('seat-user-empty');
+          } else {
+            userElem.classList.remove('seat-user-empty');
+            userElem.style.fontWeight = '800';
+            userElem.style.color = '#111';
+          }
+        }
+
+        if (pillsElem) {
+          let pillsHtml = '';
+          if (hasPc) {
+            const pc = devs.find(d => d.device_type === 'PC');
+            const pcName = (pc && pc.model_name) ? pc.model_name : 'PC';
+            pillsHtml += `<span class="device-pill pill-pc" title="본체: ${pcName}">💻PC</span>`;
+          }
+          if (monitors.length > 0) {
+            const m1Name = monitors[0].model_name || '모니터1';
+            pillsHtml += `<span class="device-pill pill-monitor" title="모니터1: ${m1Name}">🖥️${monitors.length > 1 ? 'M1' : '모니터'}</span>`;
+            if (monitors.length > 1) {
+              const m2Name = monitors[1].model_name || '보조모니터';
+              pillsHtml += `<span class="device-pill pill-monitor" style="background:#e1f5fe; color:#0277bd; border-color:#0288d1;" title="보조모니터: ${m2Name}">🖥️M2</span>`;
+            }
+          }
+          pillsElem.innerHTML = pillsHtml;
+        }
+      });
+    }
+
     function navigateRoom(dir) {
       let idx = ROOM_ORDER.indexOf(appState.activeRoomId);
       if (idx === -1) idx = 0;
@@ -3163,5 +3284,393 @@
       }, 3000);
     }
   </script>
+
+  <!-- Whole School A4 Blueprint Template -->
+  <template id="tmplSchoolFloorPlan">
+<div class="school-floor-plan" id="schoolFloorPlan">
+      
+      <!-- Chart Main Title -->
+      <div class="chart-main-title">
+        2026학년도 전주솔내고 교직원 좌석 배치도(핸드폰, 내선)
+      </div>
+
+      <!-- Top Row: Gyomu Center (Left), Grade 3 (Mid), Grade 2 (Right) -->
+      <div class="rooms-grid">
+        
+        <!-- ROOM: Gyomu Center -->
+        <div class="room-box" id="room_gyomu_center">
+          <!-- Top Gyojangsil sub-strip -->
+          <div style="background: #fff; border-bottom: 1px solid var(--border-dark); padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;">
+            <div>
+              <strong>교장실(본관 전관 1층)</strong> 정진복 8623-2914 [교장실 200] (전화 270-8200)
+            </div>
+            <div id="bp_seat_PRIN_01" class="bp-seat-cell" style="min-height: 32px; padding: 2px 10px; flex-direction: row; gap: 8px;" onclick="openSeatModal('PRIN_01')">
+              <span class="seat-id-tag">교장실</span>
+              <span class="seat-user-name" style="margin: 0;">정진복</span>
+              <div class="seat-devices-pills" id="bp_pills_PRIN_01"></div>
+            </div>
+          </div>
+
+          <div class="room-header">
+            <div class="room-title">교무센터(본관 후관 1층)</div>
+            <div class="room-sub">( 전화 270-8208, FAX 276-3015 )</div>
+          </div>
+          
+          <div class="room-body" style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px;">
+            <!-- Far Left Vertical: Single seat & Small Conference Room label -->
+            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div id="bp_seat_GYOMU_01" class="bp-seat-cell" onclick="openSeatModal('GYOMU_01')">
+                <span class="seat-id-tag">1</span>
+                <span class="seat-user-name" id="bp_user_GYOMU_01">-</span>
+                <div class="seat-devices-pills" id="bp_pills_GYOMU_01"></div>
+              </div>
+              
+            </div>
+
+            <!-- Left Islands: Top 2x2, Bottom 3x2 -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Top 2x2 Island -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <div id="bp_seat_GYOMU_02" class="bp-seat-cell" onclick="openSeatModal('GYOMU_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_GYOMU_02">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_02"></div></div>
+                <div id="bp_seat_GYOMU_03" class="bp-seat-cell" onclick="openSeatModal('GYOMU_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_GYOMU_03">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_03"></div></div>
+                <div id="bp_seat_GYOMU_04" class="bp-seat-cell" onclick="openSeatModal('GYOMU_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_GYOMU_04">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_04"></div></div>
+                <div id="bp_seat_GYOMU_05" class="bp-seat-cell" onclick="openSeatModal('GYOMU_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_GYOMU_05">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_05"></div></div>
+              </div>
+              <!-- Bottom 3x2 Island -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_GYOMU_06" class="bp-seat-cell" onclick="openSeatModal('GYOMU_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_GYOMU_06">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_06"></div></div>
+                <div id="bp_seat_GYOMU_07" class="bp-seat-cell" onclick="openSeatModal('GYOMU_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_GYOMU_07">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_07"></div></div>
+                <div id="bp_seat_GYOMU_08" class="bp-seat-cell" onclick="openSeatModal('GYOMU_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_GYOMU_08">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_08"></div></div>
+                <div id="bp_seat_GYOMU_09" class="bp-seat-cell" onclick="openSeatModal('GYOMU_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_GYOMU_09">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_09"></div></div>
+                <div id="bp_seat_GYOMU_10" class="bp-seat-cell" onclick="openSeatModal('GYOMU_10')"><span class="seat-id-tag">10</span><span class="seat-user-name" id="bp_user_GYOMU_10">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_10"></div></div>
+                <div id="bp_seat_GYOMU_11" class="bp-seat-cell" onclick="openSeatModal('GYOMU_11')"><span class="seat-id-tag">11</span><span class="seat-user-name" id="bp_user_GYOMU_11">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_11"></div></div>
+              </div>
+            </div>
+
+            <!-- Middle Island: 2x3 Desks -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div id="bp_seat_GYOMU_12" class="bp-seat-cell" onclick="openSeatModal('GYOMU_12')"><span class="seat-id-tag">12</span><span class="seat-user-name" id="bp_user_GYOMU_12">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_12"></div></div>
+              <div id="bp_seat_GYOMU_13" class="bp-seat-cell" onclick="openSeatModal('GYOMU_13')"><span class="seat-id-tag">13</span><span class="seat-user-name" id="bp_user_GYOMU_13">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_13"></div></div>
+              <div id="bp_seat_GYOMU_14" class="bp-seat-cell" onclick="openSeatModal('GYOMU_14')"><span class="seat-id-tag">14</span><span class="seat-user-name" id="bp_user_GYOMU_14">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_14"></div></div>
+              <div id="bp_seat_GYOMU_15" class="bp-seat-cell" onclick="openSeatModal('GYOMU_15')"><span class="seat-id-tag">15</span><span class="seat-user-name" id="bp_user_GYOMU_15">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_15"></div></div>
+              <div id="bp_seat_GYOMU_16" class="bp-seat-cell" onclick="openSeatModal('GYOMU_16')"><span class="seat-id-tag">16</span><span class="seat-user-name" id="bp_user_GYOMU_16">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_16"></div></div>
+              <div id="bp_seat_GYOMU_17" class="bp-seat-cell" onclick="openSeatModal('GYOMU_17')"><span class="seat-id-tag">17</span><span class="seat-user-name" id="bp_user_GYOMU_17">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_17"></div></div>
+            </div>
+
+            <!-- Right Island: 2x2 Desks -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div id="bp_seat_GYOMU_18" class="bp-seat-cell" onclick="openSeatModal('GYOMU_18')"><span class="seat-id-tag">18</span><span class="seat-user-name" id="bp_user_GYOMU_18">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_18"></div></div>
+              <div id="bp_seat_GYOMU_19" class="bp-seat-cell" onclick="openSeatModal('GYOMU_19')"><span class="seat-id-tag">19</span><span class="seat-user-name" id="bp_user_GYOMU_19">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_19"></div></div>
+              <div id="bp_seat_GYOMU_20" class="bp-seat-cell" onclick="openSeatModal('GYOMU_20')"><span class="seat-id-tag">20</span><span class="seat-user-name" id="bp_user_GYOMU_20">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_20"></div></div>
+              <div id="bp_seat_GYOMU_21" class="bp-seat-cell" onclick="openSeatModal('GYOMU_21')"><span class="seat-id-tag">21</span><span class="seat-user-name" id="bp_user_GYOMU_21">-</span><div class="seat-devices-pills" id="bp_pills_GYOMU_21"></div></div>
+            </div>
+          </div>
+
+          <!-- Entrances -->
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: space-between; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+            <div class="door-badge">출입구</div>
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+        <!-- ROOM: 3rd Grade -->
+        <div class="room-box" id="room_grade3">
+          <div class="room-header">
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade3')">🏫 3학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-sub">(본관 후관 4층)</div>
+          </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <!-- Left Wing (부장석 1 + 2x2 = 5 seats) -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div id="bp_seat_G3_01" class="bp-seat-cell" style="min-height: 52px; background: #fbfbfb;" onclick="openSeatModal('G3_01')">
+                <span class="seat-id-tag">3학년부장</span>
+                <span class="seat-user-name" id="bp_user_G3_01">-</span>
+                <div class="seat-devices-pills" id="bp_pills_G3_01"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_G3_02" class="bp-seat-cell" onclick="openSeatModal('G3_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_G3_02">-</span><div class="seat-devices-pills" id="bp_pills_G3_02"></div></div>
+                <div id="bp_seat_G3_03" class="bp-seat-cell" onclick="openSeatModal('G3_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_G3_03">-</span><div class="seat-devices-pills" id="bp_pills_G3_03"></div></div>
+                <div id="bp_seat_G3_04" class="bp-seat-cell" onclick="openSeatModal('G3_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_G3_04">-</span><div class="seat-devices-pills" id="bp_pills_G3_04"></div></div>
+                <div id="bp_seat_G3_05" class="bp-seat-cell" onclick="openSeatModal('G3_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_G3_05">-</span><div class="seat-devices-pills" id="bp_pills_G3_05"></div></div>
+              </div>
+            </div>
+
+            <!-- Right Wing (2x3 = 6 seats) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div id="bp_seat_G3_06" class="bp-seat-cell" onclick="openSeatModal('G3_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_G3_06">-</span><div class="seat-devices-pills" id="bp_pills_G3_06"></div></div>
+              <div id="bp_seat_G3_07" class="bp-seat-cell" onclick="openSeatModal('G3_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_G3_07">-</span><div class="seat-devices-pills" id="bp_pills_G3_07"></div></div>
+              <div id="bp_seat_G3_08" class="bp-seat-cell" onclick="openSeatModal('G3_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_G3_08">-</span><div class="seat-devices-pills" id="bp_pills_G3_08"></div></div>
+              <div id="bp_seat_G3_09" class="bp-seat-cell" onclick="openSeatModal('G3_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_G3_09">-</span><div class="seat-devices-pills" id="bp_pills_G3_09"></div></div>
+              <div id="bp_seat_G3_10" class="bp-seat-cell" onclick="openSeatModal('G3_10')"><span class="seat-id-tag">10</span><span class="seat-user-name" id="bp_user_G3_10">-</span><div class="seat-devices-pills" id="bp_pills_G3_10"></div></div>
+              <div id="bp_seat_G3_11" class="bp-seat-cell" onclick="openSeatModal('G3_11')"><span class="seat-id-tag">11</span><span class="seat-user-name" id="bp_user_G3_11">-</span><div class="seat-devices-pills" id="bp_pills_G3_11"></div></div>
+            </div>
+          </div>
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: flex-end; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+        <!-- ROOM: 2nd Grade -->
+        <div class="room-box" id="room_grade2">
+          <div class="room-header">
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade2')">🏫 2학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-sub">(본관 후관 2층)</div>
+          </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <!-- Left Wing -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div id="bp_seat_G2_01" class="bp-seat-cell" style="min-height: 52px; background: #fbfbfb;" onclick="openSeatModal('G2_01')">
+                <span class="seat-id-tag">2학년부장</span>
+                <span class="seat-user-name" id="bp_user_G2_01">-</span>
+                <div class="seat-devices-pills" id="bp_pills_G2_01"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_G2_02" class="bp-seat-cell" onclick="openSeatModal('G2_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_G2_02">-</span><div class="seat-devices-pills" id="bp_pills_G2_02"></div></div>
+                <div id="bp_seat_G2_03" class="bp-seat-cell" onclick="openSeatModal('G2_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_G2_03">-</span><div class="seat-devices-pills" id="bp_pills_G2_03"></div></div>
+                <div id="bp_seat_G2_04" class="bp-seat-cell" onclick="openSeatModal('G2_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_G2_04">-</span><div class="seat-devices-pills" id="bp_pills_G2_04"></div></div>
+                <div id="bp_seat_G2_05" class="bp-seat-cell" onclick="openSeatModal('G2_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_G2_05">-</span><div class="seat-devices-pills" id="bp_pills_G2_05"></div></div>
+              </div>
+            </div>
+
+            <!-- Right Wing -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div id="bp_seat_G2_06" class="bp-seat-cell" onclick="openSeatModal('G2_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_G2_06">-</span><div class="seat-devices-pills" id="bp_pills_G2_06"></div></div>
+              <div id="bp_seat_G2_07" class="bp-seat-cell" onclick="openSeatModal('G2_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_G2_07">-</span><div class="seat-devices-pills" id="bp_pills_G2_07"></div></div>
+              <div id="bp_seat_G2_08" class="bp-seat-cell" onclick="openSeatModal('G2_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_G2_08">-</span><div class="seat-devices-pills" id="bp_pills_G2_08"></div></div>
+              <div id="bp_seat_G2_09" class="bp-seat-cell" onclick="openSeatModal('G2_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_G2_09">-</span><div class="seat-devices-pills" id="bp_pills_G2_09"></div></div>
+              <div id="bp_seat_G2_10" class="bp-seat-cell" onclick="openSeatModal('G2_10')"><span class="seat-id-tag">10</span><span class="seat-user-name" id="bp_user_G2_10">-</span><div class="seat-devices-pills" id="bp_pills_G2_10"></div></div>
+              <div id="bp_seat_G2_11" class="bp-seat-cell" onclick="openSeatModal('G2_11')"><span class="seat-id-tag">11</span><span class="seat-user-name" id="bp_user_G2_11">-</span><div class="seat-devices-pills" id="bp_pills_G2_11"></div></div>
+            </div>
+          </div>
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: flex-end; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Middle Row: 1st Grade, Safety, Support/Info/Library, Health/Meal/Career, Admin -->
+      <div class="rooms-grid-bottom">
+        
+        <!-- ROOM: 1st Grade -->
+        <div class="room-box" id="room_grade1">
+          <div class="room-header">
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('grade1')">🏫 1학년 교무실 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-sub">(본관 후관 3층)</div>
+          </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div id="bp_seat_G1_01" class="bp-seat-cell" style="min-height: 50px; background: #fbfbfb;" onclick="openSeatModal('G1_01')">
+                <span class="seat-id-tag">1학년부장</span>
+                <span class="seat-user-name" id="bp_user_G1_01">-</span>
+                <div class="seat-devices-pills" id="bp_pills_G1_01"></div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_G1_02" class="bp-seat-cell" onclick="openSeatModal('G1_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_G1_02">-</span><div class="seat-devices-pills" id="bp_pills_G1_02"></div></div>
+                <div id="bp_seat_G1_03" class="bp-seat-cell" onclick="openSeatModal('G1_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_G1_03">-</span><div class="seat-devices-pills" id="bp_pills_G1_03"></div></div>
+                <div id="bp_seat_G1_04" class="bp-seat-cell" onclick="openSeatModal('G1_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_G1_04">-</span><div class="seat-devices-pills" id="bp_pills_G1_04"></div></div>
+                <div id="bp_seat_G1_05" class="bp-seat-cell" onclick="openSeatModal('G1_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_G1_05">-</span><div class="seat-devices-pills" id="bp_pills_G1_05"></div></div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+              <div id="bp_seat_G1_06" class="bp-seat-cell" onclick="openSeatModal('G1_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_G1_06">-</span><div class="seat-devices-pills" id="bp_pills_G1_06"></div></div>
+              <div id="bp_seat_G1_07" class="bp-seat-cell" onclick="openSeatModal('G1_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_G1_07">-</span><div class="seat-devices-pills" id="bp_pills_G1_07"></div></div>
+              <div id="bp_seat_G1_08" class="bp-seat-cell" onclick="openSeatModal('G1_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_G1_08">-</span><div class="seat-devices-pills" id="bp_pills_G1_08"></div></div>
+              <div id="bp_seat_G1_09" class="bp-seat-cell" onclick="openSeatModal('G1_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_G1_09">-</span><div class="seat-devices-pills" id="bp_pills_G1_09"></div></div>
+              <div id="bp_seat_G1_10" class="bp-seat-cell" onclick="openSeatModal('G1_10')"><span class="seat-id-tag">10</span><span class="seat-user-name" id="bp_user_G1_10">-</span><div class="seat-devices-pills" id="bp_pills_G1_10"></div></div>
+              <div id="bp_seat_G1_11" class="bp-seat-cell" onclick="openSeatModal('G1_11')"><span class="seat-id-tag">11</span><span class="seat-user-name" id="bp_user_G1_11">-</span><div class="seat-devices-pills" id="bp_pills_G1_11"></div></div>
+            </div>
+          </div>
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: flex-end; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+        <!-- ROOM: Student Safety -->
+        <div class="room-box" id="room_safety">
+          <div class="room-header">
+            <div class="room-title" style="cursor: pointer;" onclick="selectRoom('safety')">🏫 학생안전부 <span style="font-size:0.75rem; color:#1b5e20; font-weight:normal;">[🔍 확대 편집]</span></div>
+            <div class="room-sub">(본관 후관 1층)</div>
+          </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 1fr 1fr 28px; gap: 4px;">
+            <div id="bp_seat_SAFE_01" class="bp-seat-cell" onclick="openSeatModal('SAFE_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_SAFE_01">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_01"></div></div>
+            <div id="bp_seat_SAFE_02" class="bp-seat-cell" onclick="openSeatModal('SAFE_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_SAFE_02">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_02"></div></div>
+            <div id="bp_seat_SAFE_07" class="bp-seat-cell" rowspan="3" style="grid-column: 3; grid-row: 1 / span 3; writing-mode: vertical-rl; text-orientation: upright; font-weight: 700; color: #0d47a1; text-align: center; border: 1px solid var(--border-dark); border-radius: 4px; padding: 4px 0; background: #fdfdfd; cursor: pointer; justify-content: center; align-items: center;" onclick="openSeatModal('SAFE_07')">
+              상담실
+              <div class="seat-devices-pills" id="bp_pills_SAFE_07"></div>
+            </div>
+            <div id="bp_seat_SAFE_03" class="bp-seat-cell" onclick="openSeatModal('SAFE_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_SAFE_03">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_03"></div></div>
+            <div id="bp_seat_SAFE_04" class="bp-seat-cell" onclick="openSeatModal('SAFE_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_SAFE_04">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_04"></div></div>
+            <div id="bp_seat_SAFE_05" class="bp-seat-cell" onclick="openSeatModal('SAFE_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_SAFE_05">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_05"></div></div>
+            <div id="bp_seat_SAFE_06" class="bp-seat-cell" onclick="openSeatModal('SAFE_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_SAFE_06">-</span><div class="seat-devices-pills" id="bp_pills_SAFE_06"></div></div>
+          </div>
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: flex-start; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+        <!-- ROOM: Support & Edu Info & Library -->
+        <div class="room-box" id="room_edu_info_wrap">
+          <div style="display: grid; grid-template-columns: 0.8fr 1.2fr; height: 100%;">
+            <!-- Left: Support Team -->
+            <div style="border-right: 1px solid var(--border-dark); display: flex; flex-direction: column;">
+              <div class="room-header">
+                <div class="room-title" style="font-size: 0.82rem;">통합지원반</div>
+                <div class="room-sub">(본관후관1층)</div>
+              </div>
+              <div style="padding: 6px; display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                <div id="bp_seat_SUPP_01" class="bp-seat-cell" onclick="openSeatModal('SUPP_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_SUPP_01">-</span><div class="seat-devices-pills" id="bp_pills_SUPP_01"></div></div>
+                <div id="bp_seat_SUPP_02" class="bp-seat-cell" onclick="openSeatModal('SUPP_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_SUPP_02">-</span><div class="seat-devices-pills" id="bp_pills_SUPP_02"></div></div>
+                <div id="bp_seat_SUPP_03" class="bp-seat-cell" onclick="openSeatModal('SUPP_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_SUPP_03">-</span><div class="seat-devices-pills" id="bp_pills_SUPP_03"></div></div>
+              </div>
+            </div>
+
+            <!-- Right: Edu Info (Top) & Library (Bottom) -->
+            <div style="display: flex; flex-direction: column;">
+              <div class="room-header">
+                <div class="room-title" style="font-size: 0.85rem;">교육정보부</div>
+                <div class="room-sub">(본관 전관 4층)</div>
+              </div>
+              <div style="padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <div id="bp_seat_INFO_01" class="bp-seat-cell" onclick="openSeatModal('INFO_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_INFO_01">-</span><div class="seat-devices-pills" id="bp_pills_INFO_01"></div></div>
+                <div id="bp_seat_INFO_02" class="bp-seat-cell" onclick="openSeatModal('INFO_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_INFO_02">-</span><div class="seat-devices-pills" id="bp_pills_INFO_02"></div></div>
+                <div id="bp_seat_INFO_03" class="bp-seat-cell" onclick="openSeatModal('INFO_03')"><span class="seat-id-tag">3</span><span class="seat-user-name" id="bp_user_INFO_03">-</span><div class="seat-devices-pills" id="bp_pills_INFO_03"></div></div>
+                <div id="bp_seat_INFO_04" class="bp-seat-cell" onclick="openSeatModal('INFO_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_INFO_04">-</span><div class="seat-devices-pills" id="bp_pills_INFO_04"></div></div>
+              </div>
+              <div class="room-header" style="border-top: 1px solid var(--border-dark);">
+                <div class="room-title" style="font-size: 0.85rem;">도서실</div>
+                <div class="room-sub">(본관 후관 3층)</div>
+              </div>
+              <div style="padding: 6px; flex: 1;">
+                <div id="bp_seat_LIB_01" class="bp-seat-cell" onclick="openSeatModal('LIB_01')"><span class="seat-id-tag">사서</span><span class="seat-user-name" id="bp_user_LIB_01">-</span><div class="seat-devices-pills" id="bp_pills_LIB_01"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROOM: Counsel, Health, Meals -->
+        <div class="room-box" id="room_support_services">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
+            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">위클래스<br><span class="room-sub">(본관 전관 3층)</span></div></div>
+            <div style="padding: 4px;"><div id="bp_seat_WEE_01" class="bp-seat-cell" onclick="openSeatModal('WEE_01')"><span class="seat-id-tag">상담</span><span class="seat-user-name" id="bp_user_WEE_01">-</span><div class="seat-devices-pills" id="bp_pills_WEE_01"></div></div></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
+            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">진로상담실<br><span class="room-sub">(본관 후관 2층)</span></div></div>
+            <div style="padding: 4px;"><div id="bp_seat_CAREER_01" class="bp-seat-cell" onclick="openSeatModal('CAREER_01')"><span class="seat-id-tag">진로</span><span class="seat-user-name" id="bp_user_CAREER_01">-</span><div class="seat-devices-pills" id="bp_pills_CAREER_01"></div></div></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border-dark);">
+            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">보건실<br><span class="room-sub">(본관 전관 1층)</span></div></div>
+            <div style="padding: 4px; display: flex; flex-direction: column; gap: 4px;">
+              <div id="bp_seat_HEALTH_01" class="bp-seat-cell" onclick="openSeatModal('HEALTH_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_HEALTH_01">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_01"></div></div>
+              <div id="bp_seat_HEALTH_02" class="bp-seat-cell" onclick="openSeatModal('HEALTH_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_HEALTH_02">-</span><div class="seat-devices-pills" id="bp_pills_HEALTH_02"></div></div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; flex: 1;">
+            <div class="room-header"><div class="room-title" style="font-size: 0.8rem;">급식실</div></div>
+            <div style="padding: 4px; display: flex; flex-direction: column; gap: 4px;">
+              <div id="bp_seat_MEAL_01" class="bp-seat-cell" onclick="openSeatModal('MEAL_01')"><span class="seat-id-tag">1</span><span class="seat-user-name" id="bp_user_MEAL_01">-</span><div class="seat-devices-pills" id="bp_pills_MEAL_01"></div></div>
+              <div id="bp_seat_MEAL_02" class="bp-seat-cell" onclick="openSeatModal('MEAL_02')"><span class="seat-id-tag">2</span><span class="seat-user-name" id="bp_user_MEAL_02">-</span><div class="seat-devices-pills" id="bp_pills_MEAL_02"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROOM: Administration Office (행정실) -->
+        <div class="room-box" id="room_admin">
+          <div class="room-header">
+            <div class="room-title">행정실(본관 1층)</div>
+            <div class="room-sub">(전화 270-8209 FAX 276-3014)</div>
+          </div>
+          <div class="room-body" style="display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px;">
+            <!-- Left Tall: Head of Admin -->
+            <div style="display: flex; flex-direction: column;">
+              <div id="bp_seat_ADM_01" class="bp-seat-cell" style="min-height: 100px; background: #fbfbfb; justify-content: center;" onclick="openSeatModal('ADM_01')">
+                <span class="seat-id-tag">행정실장</span>
+                <span class="seat-user-name" id="bp_user_ADM_01">-</span>
+                <div class="seat-devices-pills" id="bp_pills_ADM_01"></div>
+              </div>
+            </div>
+
+            <!-- Middle Columns -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div id="bp_seat_ADM_02" class="bp-seat-cell" onclick="openSeatModal('ADM_02')"><span class="seat-id-tag">상단 중앙</span><span class="seat-user-name" id="bp_user_ADM_02">-</span><div class="seat-devices-pills" id="bp_pills_ADM_02"></div></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_ADM_04" class="bp-seat-cell" onclick="openSeatModal('ADM_04')"><span class="seat-id-tag">4</span><span class="seat-user-name" id="bp_user_ADM_04">-</span><div class="seat-devices-pills" id="bp_pills_ADM_04"></div></div>
+                <div id="bp_seat_ADM_05" class="bp-seat-cell" onclick="openSeatModal('ADM_05')"><span class="seat-id-tag">5</span><span class="seat-user-name" id="bp_user_ADM_05">-</span><div class="seat-devices-pills" id="bp_pills_ADM_05"></div></div>
+                <div id="bp_seat_ADM_06" class="bp-seat-cell" onclick="openSeatModal('ADM_06')"><span class="seat-id-tag">6</span><span class="seat-user-name" id="bp_user_ADM_06">-</span><div class="seat-devices-pills" id="bp_pills_ADM_06"></div></div>
+                <div id="bp_seat_ADM_07" class="bp-seat-cell" onclick="openSeatModal('ADM_07')"><span class="seat-id-tag">7</span><span class="seat-user-name" id="bp_user_ADM_07">-</span><div class="seat-devices-pills" id="bp_pills_ADM_07"></div></div>
+              </div>
+            </div>
+
+            <!-- Right Columns -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div id="bp_seat_ADM_03" class="bp-seat-cell" onclick="openSeatModal('ADM_03')"><span class="seat-id-tag">상단 우측</span><span class="seat-user-name" id="bp_user_ADM_03">-</span><div class="seat-devices-pills" id="bp_pills_ADM_03"></div></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1;">
+                <div id="bp_seat_ADM_08" class="bp-seat-cell" onclick="openSeatModal('ADM_08')"><span class="seat-id-tag">8</span><span class="seat-user-name" id="bp_user_ADM_08">-</span><div class="seat-devices-pills" id="bp_pills_ADM_08"></div></div>
+                <div id="bp_seat_ADM_09" class="bp-seat-cell" onclick="openSeatModal('ADM_09')"><span class="seat-id-tag">9</span><span class="seat-user-name" id="bp_user_ADM_09">-</span><div class="seat-devices-pills" id="bp_pills_ADM_09"></div></div>
+                <div id="bp_seat_ADM_10" class="bp-seat-cell" onclick="openSeatModal('ADM_10')"><span class="seat-id-tag">10</span><span class="seat-user-name" id="bp_user_ADM_10">-</span><div class="seat-devices-pills" id="bp_pills_ADM_10"></div></div>
+                <div id="bp_seat_ADM_11" class="bp-seat-cell" onclick="openSeatModal('ADM_11')"><span class="seat-id-tag">11</span><span class="seat-user-name" id="bp_user_ADM_11">-</span><div class="seat-devices-pills" id="bp_pills_ADM_11"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 4px 8px; border-top: 1px solid var(--border-dark); display: flex; justify-content: space-between; background: #fafafa;">
+            <div class="door-badge">출입구</div>
+            <div class="door-badge">출입구</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Special Rooms Table at bottom -->
+      <table class="special-table" id="specialRoomsTable">
+        <tr>
+          <th style="width: 70px;">특별실</th>
+          <th>미술실</th>
+          <th>음악실</th>
+          <th colspan="3">체육과실</th>
+          <th>소회의실</th>
+          <th>대회의실</th>
+          <th>당직실</th>
+          <th>식생활관</th>
+          <th>인쇄실</th>
+          <th>기숙사</th>
+          <td rowspan="4" class="info-right-box" style="width: 210px;">
+            ♣ 270 – 8***<br>
+            <span style="color: #c62828;">♣ 돌려주기 – 번호 - #</span><br>
+            ♣ FAX: 276-3015(교무센터)<br>
+            <span style="color: #1565c0;">♣ (54385) 덕진구 송천중앙로 170</span>
+          </td>
+        </tr>
+        <tr>
+          <th>위치</th>
+          <td class="special-loc">별관</td>
+          <td class="special-loc">별관</td>
+          <td colspan="3" class="special-loc">본관 전관1층</td>
+          <td class="special-loc">교무센터옆</td>
+          <td class="special-loc">본관3층</td>
+          <td class="special-loc">본관1층</td>
+          <td class="special-loc">식생활관</td>
+          <td class="special-loc">본관전관1층</td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>좌석/현황</th>
+          <td><div id="bp_seat_SPEC_ART" class="bp-seat-cell" onclick="openSeatModal('SPEC_ART')"><span class="seat-user-name" id="bp_user_SPEC_ART">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_ART"></div></div></td>
+          <td><div id="bp_seat_SPEC_MUSIC" class="bp-seat-cell" onclick="openSeatModal('SPEC_MUSIC')"><span class="seat-user-name" id="bp_user_SPEC_MUSIC">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_MUSIC"></div></div></td>
+          <td><div id="bp_seat_SPEC_PE_1" class="bp-seat-cell" onclick="openSeatModal('SPEC_PE_1')"><span class="seat-user-name" id="bp_user_SPEC_PE_1">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_PE_1"></div></div></td>
+          <td><div id="bp_seat_SPEC_PE_2" class="bp-seat-cell" onclick="openSeatModal('SPEC_PE_2')"><span class="seat-user-name" id="bp_user_SPEC_PE_2">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_PE_2"></div></div></td>
+          <td><div id="bp_seat_SPEC_PE_3" class="bp-seat-cell" onclick="openSeatModal('SPEC_PE_3')"><span class="seat-user-name" id="bp_user_SPEC_PE_3">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_PE_3"></div></div></td>
+          <td><div id="bp_seat_SPEC_CONF_S" class="bp-seat-cell" onclick="openSeatModal('SPEC_CONF_S')"><span class="seat-user-name" id="bp_user_SPEC_CONF_S">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_CONF_S"></div></div></td>
+          <td><div id="bp_seat_SPEC_CONF_L" class="bp-seat-cell" onclick="openSeatModal('SPEC_CONF_L')"><span class="seat-user-name" id="bp_user_SPEC_CONF_L">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_CONF_L"></div></div></td>
+          <td><div id="bp_seat_SPEC_DUTY" class="bp-seat-cell" onclick="openSeatModal('SPEC_DUTY')"><span class="seat-user-name" id="bp_user_SPEC_DUTY">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_DUTY"></div></div></td>
+          <td><div id="bp_seat_SPEC_DINE" class="bp-seat-cell" onclick="openSeatModal('SPEC_DINE')"><span class="seat-user-name" id="bp_user_SPEC_DINE">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_DINE"></div></div></td>
+          <td><div id="bp_seat_SPEC_PRINT" class="bp-seat-cell" onclick="openSeatModal('SPEC_PRINT')"><span class="seat-user-name" id="bp_user_SPEC_PRINT">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_PRINT"></div></div></td>
+          <td><div id="bp_seat_SPEC_DORM" class="bp-seat-cell" onclick="openSeatModal('SPEC_DORM')"><span class="seat-user-name" id="bp_user_SPEC_DORM">-</span><div class="seat-devices-pills" id="bp_pills_SPEC_DORM"></div></div></td>
+        </tr>
+      </table>
+
+    </div>
+  </template>
+
 </body>
 </html>
