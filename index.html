@@ -3104,8 +3104,6 @@ function renderActiveRoomView() {
         document.getElementById('pc_model_name').value = pc.model_name || '';
         document.getElementById('pc_acquired_date').value = pc.acquired_date || '';
         document.getElementById('pc_asset_number').value = pc.asset_number || '';
-        document.getElementById('pc_item_code').value = pc.item_code || '';
-        document.getElementById('pc_serial_number').value = pc.serial_number || '';
         document.getElementById('pc_notes').value = pc.notes || '';
         document.getElementById('badge_pc').className = 'device-pill pill-pc';
         document.getElementById('badge_pc').textContent = '등록완료';
@@ -3124,7 +3122,6 @@ function renderActiveRoomView() {
         document.getElementById('mon1_model_name').value = mon1.model_name || '';
         document.getElementById('mon1_acquired_date').value = mon1.acquired_date || '';
         document.getElementById('mon1_asset_number').value = mon1.asset_number || '';
-        document.getElementById('mon1_serial_number').value = mon1.serial_number || '';
         document.getElementById('mon1_notes').value = mon1.notes || '';
         document.getElementById('badge_monitor1').className = 'device-pill pill-monitor';
         document.getElementById('badge_monitor1').textContent = '등록완료';
@@ -3224,7 +3221,7 @@ function renderActiveRoomView() {
       const date = document.getElementById(`${prefix}_acquired_date`) ? document.getElementById(`${prefix}_acquired_date`).value.trim() : '';
       const asset = document.getElementById(`${prefix}_asset_number`).value.trim();
       const itemCode = document.getElementById(`${prefix}_item_code`) ? document.getElementById(`${prefix}_item_code`).value.trim() : '';
-      const sn = document.getElementById(`${prefix}_serial_number`).value.trim();
+      const sn = document.getElementById(`${prefix}_serial_number`) ? document.getElementById(`${prefix}_serial_number`).value.trim() : '';
       const notes = document.getElementById(`${prefix}_notes`) ? document.getElementById(`${prefix}_notes`).value.trim() : '';
       
       const thumbEl = document.getElementById(`${prefix}_photo_thumb`);
