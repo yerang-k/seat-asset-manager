@@ -808,6 +808,39 @@ function updateRoomSeatCount_(ss, roomId) {
 
 
 /** 단일 좌석 위치(pos_x, pos_y) 저장 */
+/** 좌석 정보(이름, 내선, 위치, 고정여부 등) 범용 갱신 */
+function updateSeatInfo(seatId, seatData) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const seatSheet = ss.getSheetByName(SHEET_SEATS);
+    const data = seatSheet.getDataRange().getValues();
+    let headers = data[0];
+    const idCol = headers.indexOf('seat_id');
+
+    Object.keys(seatData).forEach(k => {
+      if (headers.indexOf(k) === -1) {
+        seatSheet.getRange(1, headers.length + 1).setValue(k);
+        headers.push(k);
+      }
+    });
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idCol]) === String(seatId)) {
+        Object.keys(seatData).forEach(k => {
+          const colIdx = headers.indexOf(k);
+          if (colIdx !== -1) {
+            seatSheet.getRange(i + 1, colIdx + 1).setValue(seatData[k]);
+          }
+        });
+        return { success: true };
+      }
+    }
+    return { success: false, error: '좌석을 찾을 수 없습니다.' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 function updateSeatPosition(seatId, posX, posY) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
