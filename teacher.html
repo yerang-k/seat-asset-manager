@@ -1215,7 +1215,7 @@
   <div class="sub-controls-bar">
     <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput" placeholder="선생님 성명 / 좌석 / 모델명 검색" oninput="handleSearch(this.value)">
+      <input type="text" class="search-input" id="searchInput" placeholder="선생님 성명 / 좌석 / 모델명 검색" oninput="onSearchInput(this.value)">
     </div>
   </div>
 
@@ -3949,6 +3949,14 @@ function renderActiveRoomView() {
         refreshCurrentView();
         showToast("인사이동 정보가 로컬에 일괄 저장되었습니다!");
       }
+    }
+
+    // 타이핑(특히 한글 자모 조합) 도중마다 화면을 다시 그리면 입력 자체가 씹히므로,
+    // 입력이 잠깐 멈췄을 때만 실제 검색을 실행하도록 지연시킨다.
+    let searchDebounceTimer = null;
+    function onSearchInput(value) {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => handleSearch(value), 300);
     }
 
     function handleSearch(query) {
