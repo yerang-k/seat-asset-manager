@@ -507,7 +507,8 @@ const ROOM_TAB_DEFS = [
   { id: 'library', tabName: '도서실' },
   { id: 'counsel_health_meal', tabName: '상담·보건·급식실' },
   { id: 'admin', tabName: '행정실' },
-  { id: 'special', tabName: '특별실' }
+  { id: 'special', tabName: '특별실' },
+  { id: 'class_common', tabName: '학급및공용실' }
 ];
 
 const VIEW_HEADERS = [
@@ -735,8 +736,54 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🏫 솔내고 교직원 기기관리')
     .addItem('🔄 전체 교무실별 탭 동기화/새로고침', 'syncAllRoomSheets')
-    .addItem('⚙️ 초기 데이터 및 탭 전체 재설정', '초기데이터생성')
+    .addItem('➕ [신규] 학급 및 공용실 등 교무실 추가', '신규교무실_학급및공용실_추가')
+    .addItem('⚙️ 초기 데이터 및 탭 전체 재설정 (⚠️ 기존 데이터 초기화됨)', '초기데이터생성')
     .addToUi();
+}
+
+/**
+ * [관리자 전용] 기존 좌석·기기 데이터는 전혀 건드리지 않고,
+ * '교무실' 시트에 "학급 및 공용실 등" 행 1개만 안전하게 추가합니다.
+ * (초기데이터생성과 달리 시트를 clear()하지 않으므로 이미 등록된 98석 데이터가 보존됩니다)
+ */
+function 신규교무실_학급및공용실_추가() {
+  const ui = SpreadsheetApp.getUi();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const roomSheet = ss.getSheetByName(SHEET_ROOMS);
+  if (!roomSheet) {
+    ui.alert('"교무실" 시트를 찾을 수 없습니다. 먼저 초기 데이터를 생성해 주세요.');
+    return;
+  }
+
+  const data = roomSheet.getDataRange().getValues();
+  const headers = data[0];
+  const idCol = headers.indexOf('room_id');
+  const orderCol = headers.indexOf('order_index');
+
+  const already = data.some((row, i) => i > 0 && String(row[idCol]) === 'class_common');
+  if (already) {
+    ui.alert('"학급 및 공용실 등" 교무실은 이미 등록되어 있습니다.');
+    return;
+  }
+
+  let maxOrder = 0;
+  for (let i = 1; i < data.length; i++) {
+    const v = Number(data[i][orderCol]) || 0;
+    if (v > maxOrder) maxOrder = v;
+  }
+
+  const newRow = headers.map(h => {
+    if (h === 'room_id') return 'class_common';
+    if (h === 'room_name') return '학급 및 공용실 등';
+    if (h === 'floor_info') return '교내 각 층';
+    if (h === 'phone_fax') return '';
+    if (h === 'seat_count') return 0;
+    if (h === 'order_index') return maxOrder + 1;
+    return '';
+  });
+  roomSheet.appendRow(newRow);
+
+  ui.alert('"학급 및 공용실 등" 교무실이 추가되었습니다!\n기존 좌석/기기 데이터는 전혀 변경되지 않았습니다.\n\n이제 웹앱에서 교무실 선택 드롭다운의 "학급 및 공용실 등"을 고른 뒤 "좌석 추가" 버튼으로 교실/공용실을 하나씩 등록하면 됩니다.');
 }
 
 
@@ -1063,6 +1110,13 @@ function getPresetRooms_() {
         { id: "SPEC_PRINT", label: "인쇄실(본관전관1층)", user: "", ext: "" },
         { id: "SPEC_DORM", label: "기숙사", user: "", ext: "" }
       ]
+    },
+    {
+      id: "class_common",
+      name: "학급 및 공용실 등",
+      floor: "교내 각 층",
+      phone: "",
+      seats: []
     }
   ];
 }

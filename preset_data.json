@@ -859,5 +859,13 @@
         "ext": ""
       }
     ]
+  },
+  {
+    "id": "class_common",
+    "name": "학급 및 공용실 등",
+    "floor": "교내 각 층",
+    "phone": "",
+    "category": "공용",
+    "seats": []
   }
 ]
