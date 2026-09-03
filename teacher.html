@@ -1208,30 +1208,11 @@
           <option value="special">🎨 특별실 (11석)</option>
         </select>
       </div>
-      <div class="room-dropdown-nav-btns">
-        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(-1)" title="이전 교무실">
-          ◀ 이전
-        </button>
-        <button type="button" class="btn btn-light" style="padding: 7px 12px; font-weight: 700; font-size: 0.85rem; border: 1.5px solid #cbd5e1; color: #1e293b; border-radius: 6px; background: #fff;" onclick="navigateRoom(1)" title="다음 교무실">
-          다음 ▶
-        </button>
-      </div>
     </div>
   </nav>
 
-  <!-- SUB CONTROLS (Navigation arrows & Search) -->
+  <!-- SUB CONTROLS (Search) -->
   <div class="sub-controls-bar">
-    <div class="room-nav-arrows">
-      <!-- Seat Zoom & Size Controls (좌석 크기 전체 조절 바) -->
-      <div class="zoom-controls-wrap">
-        <span style="font-size: 0.78rem; font-weight: 700; color: #333;">🔍 좌석 크기:</span>
-        <button class="btn-zoom" onclick="adjustZoom(-0.1)" title="좌석 축소">➖</button>
-        <input type="range" class="zoom-slider" id="zoomRangeInput" min="70" max="150" step="5" value="100" oninput="onZoomSliderChange(this.value)" title="좌석 배율 조절">
-        <button class="btn-zoom" onclick="adjustZoom(0.1)" title="좌석 확대">➕</button>
-        <span id="zoomPercentLabel" style="font-size: 0.78rem; font-weight: 800; color: var(--primary); min-width: 38px; text-align: center;">100%</span>
-        <button class="btn btn-light" style="padding: 2px 7px; font-size: 0.72rem; border: 1px solid #ccc;" onclick="resetZoom()">초기화</button>
-      </div>
-    </div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="text" class="search-input" id="searchInput" placeholder="선생님 성명 / 좌석 / 모델명 검색" oninput="handleSearch(this.value)">
@@ -1405,7 +1386,7 @@
             </div>
             <div>
               <label class="camera-scan-btn">
-                📷 본체 라벨 촬영 (AI 판독)
+                📷 본체 라벨 촬영하기
                 <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleLabelScan(event, 'PC')">
               </label>
             </div>
@@ -1460,7 +1441,7 @@
             </div>
             <div>
               <label class="camera-scan-btn">
-                📷 모니터1 라벨 촬영 (AI 판독)
+                📷 모니터1 라벨 촬영하기
                 <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleLabelScan(event, 'MONITOR_1')">
               </label>
             </div>
@@ -1515,7 +1496,7 @@
             </div>
             <div>
               <label class="camera-scan-btn">
-                📷 모니터2 라벨 촬영 (AI 판독)
+                📷 모니터2 라벨 촬영하기
                 <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleLabelScan(event, 'MONITOR_2')">
               </label>
             </div>
@@ -1814,7 +1795,7 @@
       viewMode: 'room', // 'room', 'reassign'
       isGas: false,
       geminiKey: safeGetStorage('SOLNAE_GEMINI_KEY', ''),
-      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '1.0')) || 1.0,
+      canvasZoom: parseFloat(safeGetStorage('SOLNAE_ZOOM', '0.7')) || 0.7,
       layoutLocked: true // 교사용 화면은 배치 이동/크기조절 불가 (항상 잠금)
     };
 
@@ -2312,7 +2293,33 @@
       el.addEventListener('pointerdown', (e) => onSeatPointerDown(e, el, seatId));
     }
 
-    
+    // 전체 배치도(bp_seat_*) 등 정적 onclick 카드들은 스크롤 중 손을 떼도 그냥 클릭이 되어버리므로,
+    // 이동 거리가 크면(=스크롤) 그 클릭을 취소한다.
+    (function guardScrollAccidentalClicks() {
+      let startX = 0, startY = 0, scrolled = false;
+      document.addEventListener('touchstart', (e) => {
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        startX = t.clientX;
+        startY = t.clientY;
+        scrolled = false;
+      }, { passive: true, capture: true });
+      document.addEventListener('touchmove', (e) => {
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (Math.sqrt(dx * dx + dy * dy) > 10) scrolled = true;
+      }, { passive: true, capture: true });
+      document.addEventListener('click', (e) => {
+        if (scrolled && e.target.closest('[onclick*="openSeatModal"]')) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }, { capture: true });
+    })();
+
+
     // Layout Lock Controller
     function toggleLayoutLock() {
       // 교사용 화면은 좌석 배치를 옮기거나 크기 조절할 수 없도록 항상 고정
@@ -2678,8 +2685,13 @@
           showToast(`좌석 [${displayName}]이(가) 그리드에 반듯하게 정렬되었습니다.`);
         }
       } else {
-        // CASE 3: Quick tap/click (open modal)
-        openSeatModal(dragState.seatId);
+        // CASE 3: Quick tap/click (open modal) — 스크롤하다 손가락이 좌석 위에서 떨어져도
+        // 실제 이동 거리가 크면(=스크롤) 모달을 열지 않는다 (교사용은 항상 layoutLocked라 드래그가 시작되지 않으므로 별도 확인 필요)
+        const dx = e.clientX - dragState.startX;
+        const dy = e.clientY - dragState.startY;
+        if (Math.sqrt(dx * dx + dy * dy) < 10) {
+          openSeatModal(dragState.seatId);
+        }
       }
 
       dragState.active = false;
