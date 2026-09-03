@@ -3425,6 +3425,10 @@ function renderActiveRoomView() {
       updateTabBadges();
       setCanvasZoom(appState.canvasZoom || 1.0);
       updateLayoutLockUI();
+
+      // 서버 동기화 등으로 화면이 다시 그려져도 입력해둔 검색어의 강조 표시가 풀리지 않도록 재적용
+      const searchInputEl = document.getElementById('searchInput');
+      if (searchInputEl && searchInputEl.value.trim()) handleSearch(searchInputEl.value);
     }
 
     function updateTabBadges() {
