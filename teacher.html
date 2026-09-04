@@ -1735,6 +1735,26 @@
       { id: 'spec_science', name: '과학실', floor: '', icon: '🔬', seat_ids: ['SPEC_SCIENCE'] }
     ];
 
+    // 관리자가 앱에서 직접 만든 특별실 구역(방송실, 송향관 등)까지 합친 전체 목록.
+    function getAllSpecialDefs() {
+      const defs = SPECIAL_ROOM_DEFINITIONS.slice();
+      const seenIds = new Set(defs.map(d => d.id));
+      (appState.seats || []).forEach(s => {
+        if (s.room_id !== 'special' || !s.special_subroom_id) return;
+        if (seenIds.has(s.special_subroom_id)) return;
+        seenIds.add(s.special_subroom_id);
+        defs.push({
+          id: s.special_subroom_id,
+          name: s.special_subroom_name || s.seat_label || s.special_subroom_id,
+          floor: s.special_subroom_floor || '',
+          icon: s.special_subroom_icon || '🏷️',
+          seat_ids: [],
+          isCustom: true
+        });
+      });
+      return defs;
+    }
+
     let specialSubroomFilter = 'all';
 
     function selectSpecialRoom(subId) {
@@ -3263,7 +3283,7 @@
     
     function renderSpecialRoomsView() {
       const container = document.getElementById('singleRoomContainer');
-      const allSpecs = SPECIAL_ROOM_DEFINITIONS;
+      const allSpecs = getAllSpecialDefs();
 
       let filterButtonsHtml = `
         <button class="btn btn-sm ${specialSubroomFilter === 'all' ? 'btn-primary' : 'btn-light'}" style="font-weight: 700;" onclick="selectSpecialRoom('all')">전체 실 모아보기</button>

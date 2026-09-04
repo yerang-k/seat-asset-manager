@@ -1236,6 +1236,7 @@
         🔒 좌석 배치 고정
       </button>
       <button class="btn btn-primary" onclick="openAddSeatModal()">➕ 이 교무실에 좌석 추가</button>
+      <button class="btn btn-accent" id="btnAddSpecialSubroom" style="display: none;" onclick="openAddSpecialSubroomModal()">🏷️ 새 특별실 구역 만들기</button>
       <button class="btn btn-light" style="border: 1px solid #bbb;" onclick="resetCurrentRoomPositions()">🔄 기본 배치 복원</button>
       
       <!-- Seat Zoom & Size Controls (좌석 크기 전체 조절 바) -->
@@ -1378,6 +1379,35 @@
       <div class="modal-footer">
         <button class="btn btn-light" onclick="closeAddSeatModal()">취소</button>
         <button class="btn btn-primary" onclick="submitAddSeat()">💾 좌석 생성 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD SPECIAL SUBROOM MODAL (새 특별실 구역 만들기: 방송실, 송향관 등) -->
+  <div class="modal-backdrop" id="addSpecialSubroomModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h2>🏷️ 새 특별실 구역 만들기</h2>
+        <button class="modal-close" onclick="closeAddSpecialSubroomModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label><strong>구역 이름</strong></label>
+          <input type="text" id="newSpecialSubroomName" placeholder="예: 방송실, 송향관">
+          <small style="color: #666;">특별실 화면에 새로운 카드/필터 버튼으로 바로 추가됩니다.</small>
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>아이콘 (이모지, 선택)</strong></label>
+          <input type="text" id="newSpecialSubroomIcon" placeholder="예: 📻 (비워두면 기본 아이콘)" maxlength="4">
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label><strong>담당 선생님 성명 (선택)</strong></label>
+          <input type="text" id="newSpecialSubroomUser" placeholder="예: 김선생">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" onclick="closeAddSpecialSubroomModal()">취소</button>
+        <button class="btn btn-primary" onclick="submitAddSpecialSubroom()">💾 구역 만들기</button>
       </div>
     </div>
   </div>
@@ -1696,6 +1726,27 @@
       { id: 'spec_dorm', name: '기숙사', floor: '', icon: '🏢', seat_ids: ['SPEC_DORM'] },
       { id: 'spec_science', name: '과학실', floor: '', icon: '🔬', seat_ids: ['SPEC_SCIENCE'] }
     ];
+
+    // 관리자가 앱에서 직접 만든 특별실 구역(방송실, 송향관 등)까지 합친 전체 목록.
+    // 새 구역은 코드 수정 없이 seat 데이터의 special_subroom_id/name/icon만으로 인식됩니다.
+    function getAllSpecialDefs() {
+      const defs = SPECIAL_ROOM_DEFINITIONS.slice();
+      const seenIds = new Set(defs.map(d => d.id));
+      (appState.seats || []).forEach(s => {
+        if (s.room_id !== 'special' || !s.special_subroom_id) return;
+        if (seenIds.has(s.special_subroom_id)) return;
+        seenIds.add(s.special_subroom_id);
+        defs.push({
+          id: s.special_subroom_id,
+          name: s.special_subroom_name || s.seat_label || s.special_subroom_id,
+          floor: s.special_subroom_floor || '',
+          icon: s.special_subroom_icon || '🏷️',
+          seat_ids: [],
+          isCustom: true
+        });
+      });
+      return defs;
+    }
 
     let specialSubroomFilter = 'all';
 
@@ -2121,12 +2172,19 @@
       } else if (appState.activeRoomId === 'special') {
         const subControls = document.querySelector('.sub-controls-bar');
         if (subControls) subControls.style.display = 'flex';
+        updateSpecialSubroomButtonVisibility();
         renderSpecialRoomsView();
       } else {
         const subControls = document.querySelector('.sub-controls-bar');
         if (subControls) subControls.style.display = 'flex';
+        updateSpecialSubroomButtonVisibility();
         renderActiveRoomView();
       }
+    }
+
+    function updateSpecialSubroomButtonVisibility() {
+      const btn = document.getElementById('btnAddSpecialSubroom');
+      if (btn) btn.style.display = (appState.activeRoomId === 'special') ? 'inline-flex' : 'none';
     }
 
     // Select Room
@@ -2153,6 +2211,7 @@
         renderAllRoomsView();
       } else {
         if (subControls) subControls.style.display = 'flex';
+        updateSpecialSubroomButtonVisibility();
         if (appState.viewMode !== 'room') {
           switchViewMode('room');
         } else {
@@ -3058,13 +3117,16 @@
       const subSelect = document.getElementById('newSeatSpecialSubroom');
       if (roomId === 'special') {
         subGroup.style.display = 'block';
-        if (!subSelect.options.length) {
-          SPECIAL_ROOM_DEFINITIONS.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.id;
-            opt.textContent = `${r.icon} ${r.name}`;
-            subSelect.appendChild(opt);
-          });
+        const prevValue = subSelect.value;
+        subSelect.innerHTML = '';
+        getAllSpecialDefs().forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.id;
+          opt.textContent = `${r.icon} ${r.name}`;
+          subSelect.appendChild(opt);
+        });
+        if (prevValue && Array.from(subSelect.options).some(o => o.value === prevValue)) {
+          subSelect.value = prevValue;
         }
       } else {
         subGroup.style.display = 'none';
@@ -3182,6 +3244,82 @@
       }
     }
 
+    // =========================================================================
+    // 새 특별실 구역 만들기 (방송실, 송향관 등 - 코드 수정 없이 관리자가 직접 추가)
+    // =========================================================================
+    function openAddSpecialSubroomModal() {
+      document.getElementById('newSpecialSubroomName').value = '';
+      document.getElementById('newSpecialSubroomIcon').value = '';
+      document.getElementById('newSpecialSubroomUser').value = '';
+      document.getElementById('addSpecialSubroomModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('newSpecialSubroomName').focus(), 100);
+    }
+
+    function closeAddSpecialSubroomModal() {
+      document.getElementById('addSpecialSubroomModal').style.display = 'none';
+    }
+
+    function submitAddSpecialSubroom() {
+      const name = document.getElementById('newSpecialSubroomName').value.trim();
+      const icon = document.getElementById('newSpecialSubroomIcon').value.trim() || '🏷️';
+      const user = document.getElementById('newSpecialSubroomUser').value.trim();
+
+      if (!name) {
+        alert("구역 이름을 입력해 주세요. (예: 방송실, 송향관)");
+        return;
+      }
+      if (getAllSpecialDefs().some(r => r.name === name)) {
+        alert("이미 같은 이름의 특별실 구역이 있습니다. 다른 이름을 입력해 주세요.");
+        return;
+      }
+
+      const subroomId = 'custom_' + Date.now().toString(36);
+      const seatId = 'CUSTOM_' + Date.now().toString(36).toUpperCase();
+
+      const newSeat = {
+        seat_id: seatId,
+        room_id: 'special',
+        room_name: '특별실',
+        seat_label: name,
+        current_user: user,
+        extension: '',
+        special_subroom_id: subroomId,
+        special_subroom_name: name,
+        special_subroom_icon: icon,
+        pos_x: 60,
+        pos_y: 60,
+        width: 140,
+        height: 70,
+        is_custom: true
+      };
+
+      const finishUp = (savedSeat) => {
+        appState.seats.push(savedSeat || newSeat);
+        closeAddSpecialSubroomModal();
+        selectSpecialRoom(subroomId);
+        refreshCurrentView();
+        updateTopStats();
+        showToast(`새 특별실 구역 [${icon} ${name}]이(가) 추가되었습니다!`);
+        openSeatModal(seatId);
+      };
+
+      if (appState.isGas) {
+        showToast("새 특별실 구역을 등록 중...");
+        gasRunner()
+          .withSuccessHandler(res => {
+            if (res.success) finishUp(res.seat);
+            else alert("구역 추가 실패: " + res.error);
+          })
+          .withFailureHandler(err => {
+            alert("서버 통신 실패: " + err.message);
+          })
+          .addSeat(newSeat);
+      } else {
+        finishUp(null);
+        saveLocalData();
+      }
+    }
+
     // Delete current seat
     function deleteCurrentSeat() {
       const seatId = appState.currentSeatId;
@@ -3230,7 +3368,7 @@
     
     function renderSpecialRoomsView() {
       const container = document.getElementById('singleRoomContainer');
-      const allSpecs = SPECIAL_ROOM_DEFINITIONS;
+      const allSpecs = getAllSpecialDefs();
 
       let filterButtonsHtml = `
         <button class="btn btn-sm ${specialSubroomFilter === 'all' ? 'btn-primary' : 'btn-light'}" style="font-weight: 700;" onclick="selectSpecialRoom('all')">전체 실 모아보기</button>
