@@ -1748,6 +1748,34 @@
       return defs;
     }
 
+    // 특별실 구역(미술실, 음악실, 체육과실 포함 전부) 카드 순서를 사용자가 정한 대로
+    // (브라우저에 저장) 정렬해 돌려준다.
+    function getSpecialOrderIds(defs) {
+      let saved = [];
+      try { saved = JSON.parse(safeGetStorage('specialSubroomOrder', '[]')); } catch (e) { saved = []; }
+      const allIds = defs.map(d => d.id);
+      const known = saved.filter(id => allIds.includes(id));
+      const rest = allIds.filter(id => !known.includes(id));
+      return known.concat(rest);
+    }
+
+    function getOrderedSpecialDefs() {
+      const defs = getAllSpecialDefs();
+      const orderIds = getSpecialOrderIds(defs);
+      return orderIds.map(id => defs.find(d => d.id === id)).filter(Boolean);
+    }
+
+    function moveSpecialSubroom(id, dir) {
+      const defs = getAllSpecialDefs();
+      const orderIds = getSpecialOrderIds(defs);
+      const idx = orderIds.indexOf(id);
+      const swapIdx = idx + dir;
+      if (idx === -1 || swapIdx < 0 || swapIdx >= orderIds.length) return;
+      [orderIds[idx], orderIds[swapIdx]] = [orderIds[swapIdx], orderIds[idx]];
+      safeSetStorage('specialSubroomOrder', JSON.stringify(orderIds));
+      refreshCurrentView();
+    }
+
     let specialSubroomFilter = 'all';
 
     function selectSpecialRoom(subId) {
@@ -3119,7 +3147,7 @@
         subGroup.style.display = 'block';
         const prevValue = subSelect.value;
         subSelect.innerHTML = '';
-        getAllSpecialDefs().forEach(r => {
+        getOrderedSpecialDefs().forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.id;
           opt.textContent = `${r.icon} ${r.name}`;
@@ -3368,7 +3396,7 @@
     
     function renderSpecialRoomsView() {
       const container = document.getElementById('singleRoomContainer');
-      const allSpecs = getAllSpecialDefs();
+      const allSpecs = getOrderedSpecialDefs();
 
       let filterButtonsHtml = `
         <button class="btn btn-sm ${specialSubroomFilter === 'all' ? 'btn-primary' : 'btn-light'}" style="font-weight: 700;" onclick="selectSpecialRoom('all')">전체 실 모아보기</button>
@@ -3383,13 +3411,15 @@
       });
 
       // Helper to generate a room box HTML
-      function generateRoomBoxHtml(r, isPeWide = false) {
+      function generateRoomBoxHtml(r, reorderCtx = null) {
         let seatCardsHtml = '';
         // 미리 정의된 좌석(seat_ids) + 나중에 이 세부 구역으로 추가된 좌석(special_subroom_id) 합치기
         const extraSeatIds = appState.seats
           .filter(s => s.room_id === 'special' && s.special_subroom_id === r.id && !r.seat_ids.includes(s.seat_id))
           .map(s => s.seat_id);
         const allSeatIds = r.seat_ids.concat(extraSeatIds);
+        // 좌석이 3개 이상인 구역(예: 체육과실)은 카드를 가로로 나란히 배치해 더 넓게 보여준다.
+        const isWide = allSeatIds.length >= 3;
         allSeatIds.forEach(sId => {
           const seat = appState.seats.find(s => s.seat_id === sId);
           if (!seat) return;
@@ -3411,7 +3441,7 @@
             ? `<strong style="color: #0f172a; font-size: 0.95rem;">${seat.current_user}</strong>` 
             : `<span style="color: #64748b; font-size: 0.82rem;">(담당자 미배정)</span>`;
 
-          const cardWidth = isPeWide ? '220px' : '100%';
+          const cardWidth = isWide ? '220px' : '100%';
 
           seatCardsHtml += `
             <div class="special-seat-card status-${status}" onclick="openSeatModal('${seat.seat_id}')" style="background: #fff; border: 1.5px solid var(--border-dark); border-radius: 6px; padding: 10px 12px; width: ${cardWidth}; min-width: 200px; box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.15s ease; text-align: left; box-sizing: border-box;">
@@ -3433,16 +3463,22 @@
           `;
         });
 
-        const flexStyle = isPeWide ? 'display: flex; gap: 10px; flex-wrap: nowrap;' : 'display: flex; gap: 10px; flex-direction: column;';
+        const flexStyle = isWide ? 'display: flex; gap: 10px; flex-wrap: wrap;' : 'display: flex; gap: 10px; flex-direction: column;';
 
         return `
-          <div class="special-room-box" style="background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+          <div class="special-room-box" style="background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: var(--shadow-sm); overflow: hidden; display: flex; flex-direction: column; height: 100%; ${isWide ? 'grid-column: span 2;' : ''}">
             <div style="background: #f1f5f9; border-bottom: 1.5px solid #cbd5e1; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <span style="font-weight: 800; font-size: 1rem; color: #0f172a;">${r.icon} ${r.name}</span>
                 <span style="font-size: 0.76rem; background: #e0f2fe; color: #0369a1; padding: 2px 7px; border-radius: 4px; font-weight: 700; margin-left: 6px;">${r.floor}</span>
               </div>
-              <span style="font-size: 0.76rem; color: #475569; font-weight: 600;">${allSeatIds.length}석</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                ${reorderCtx ? `
+                  <button class="btn btn-sm btn-light" style="padding: 1px 6px; font-size: 0.75rem;" onclick="event.stopPropagation(); moveSpecialSubroom('${r.id}', -1)" ${reorderCtx.idx === 0 ? 'disabled' : ''} title="순서 앞으로">◀</button>
+                  <button class="btn btn-sm btn-light" style="padding: 1px 6px; font-size: 0.75rem;" onclick="event.stopPropagation(); moveSpecialSubroom('${r.id}', 1)" ${reorderCtx.idx === reorderCtx.total - 1 ? 'disabled' : ''} title="순서 뒤로">▶</button>
+                ` : ''}
+                <span style="font-size: 0.76rem; color: #475569; font-weight: 600;">${allSeatIds.length}석</span>
+              </div>
             </div>
             <div style="padding: 12px; background: #fafafa; flex: 1; align-items: stretch; ${flexStyle}">
               ${seatCardsHtml}
@@ -3453,36 +3489,24 @@
 
       let contentHtml = '';
       if (specialSubroomFilter === 'all') {
-        const art = allSpecs.find(r => r.id === 'spec_art');
-        const music = allSpecs.find(r => r.id === 'spec_music');
-        const pe = allSpecs.find(r => r.id === 'spec_pe');
-        const others = allSpecs.filter(r => !['spec_art', 'spec_music', 'spec_pe'].includes(r.id));
-
+        // 모든 특별실 구역(미술실·음악실·체육과실 포함)을 사용자가 정한 순서 그대로
+        // 하나의 그리드에 배치한다. 좌석이 많은 구역(예: 체육과실)은 자동으로 넓게 표시됨.
         contentHtml = `
-          <!-- Row 1: 미술실 (슬림) + 음악실 (슬림) + 체육과실 (3좌석 나란히 수평 배치) -->
-          <div style="display: flex; gap: 14px; align-items: stretch; margin-bottom: 14px;">
-            <div style="width: 260px; flex-shrink: 0;">
-              ${generateRoomBoxHtml(art, false)}
-            </div>
-            <div style="width: 260px; flex-shrink: 0;">
-              ${generateRoomBoxHtml(music, false)}
-            </div>
-            <div style="flex: 1; min-width: 720px;">
-              ${generateRoomBoxHtml(pe, true)}
-            </div>
-          </div>
-
-          <!-- Row 2: 나머지 특별실들 (소회의실, 대회의실, 당직실, 식생활관, 인쇄실, 기숙사) -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-            ${others.map(r => generateRoomBoxHtml(r, false)).join('')}
+            ${allSpecs.map((r, idx) => generateRoomBoxHtml(r, { idx, total: allSpecs.length })).join('')}
           </div>
         `;
       } else {
         const selectedRoom = allSpecs.find(r => r.id === specialSubroomFilter);
-        const isPe = selectedRoom.id === 'spec_pe';
+        const seatCount = selectedRoom.seat_ids.concat(
+          appState.seats
+            .filter(s => s.room_id === 'special' && s.special_subroom_id === selectedRoom.id && !selectedRoom.seat_ids.includes(s.seat_id))
+            .map(s => s.seat_id)
+        ).length;
+        const isWide = seatCount >= 3;
         contentHtml = `
-          <div style="max-width: ${isPe ? '820px' : '400px'}; margin: 10px auto;">
-            ${generateRoomBoxHtml(selectedRoom, isPe)}
+          <div style="max-width: ${isWide ? '820px' : '400px'}; margin: 10px auto;">
+            ${generateRoomBoxHtml(selectedRoom)}
           </div>
         `;
       }
