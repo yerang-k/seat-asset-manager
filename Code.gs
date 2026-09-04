@@ -1108,7 +1108,8 @@ function getPresetRooms_() {
         { id: "SPEC_DUTY", label: "당직실(본관1층)", user: "", ext: "" },
         { id: "SPEC_DINE", label: "식생활관", user: "", ext: "" },
         { id: "SPEC_PRINT", label: "인쇄실(본관전관1층)", user: "", ext: "" },
-        { id: "SPEC_DORM", label: "기숙사", user: "", ext: "" }
+        { id: "SPEC_DORM", label: "기숙사", user: "", ext: "" },
+        { id: "SPEC_SCIENCE", label: "과학실", user: "", ext: "" }
       ]
     },
     {

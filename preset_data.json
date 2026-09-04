@@ -857,6 +857,13 @@
         "floor": "기숙사",
         "user": "",
         "ext": ""
+      },
+      {
+        "id": "SPEC_SCIENCE",
+        "label": "과학실",
+        "floor": "",
+        "user": "",
+        "ext": ""
       }
     ]
   },
