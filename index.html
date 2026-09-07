@@ -1186,6 +1186,7 @@
       <button class="btn btn-warning" style="background: #f59e0b; color: #fff; font-weight: 800; border:none;" onclick="openTeacherLinkModal()">🔗 교사용 조사 링크</button>
 
       <button class="btn btn-outline" id="btnModeReassign" onclick="switchViewMode('reassign')">👥 인사이동 모드</button>
+      <button class="btn btn-outline" id="btnAiScanToggle" onclick="toggleAiScan()" title="Gemini API 지출 한도 초과 등으로 AI 라벨 인식을 잠시 끄고 싶을 때 사용">🤖 AI 인식 확인 중...</button>
       <button class="btn btn-outline" onclick="openSettingsModal()">⚙️ 설정</button>
       <button class="btn btn-light" onclick="refreshData()">🔄 새로고침</button>
     </div>
@@ -2065,6 +2066,9 @@
                 const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
                 if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
 
+                appState.aiScanEnabled = (res.aiScanEnabled !== false);
+                updateAiScanToggleUI();
+
                 initSeatPositions();
                 renderActiveRoomView();
                 updateTopStats();
@@ -2120,9 +2124,59 @@
           }
           initSeatPositions();
         }
+        appState.aiScanEnabled = safeGetStorage('SOLNAE_AI_SCAN_ENABLED', 'true') !== 'false';
+        updateAiScanToggleUI();
+
         renderActiveRoomView();
         updateTopStats();
         selectRoom(appState.activeRoomId);
+      }
+    }
+
+    // AI 라벨 인식 켜기/끄기 (Gemini API 지출 한도 초과 등으로 임시 차단하고 싶을 때)
+    function updateAiScanToggleUI() {
+      const btn = document.getElementById('btnAiScanToggle');
+      if (!btn) return;
+      if (appState.aiScanEnabled) {
+        btn.textContent = '🤖 AI 인식: 켜짐';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      } else {
+        btn.textContent = '🔒 AI 인식: 꺼짐';
+        btn.style.background = '#fee2e2';
+        btn.style.color = '#b91c1c';
+        btn.style.borderColor = '#fecaca';
+      }
+    }
+
+    function toggleAiScan() {
+      const next = !appState.aiScanEnabled;
+      const msg = next
+        ? 'AI 라벨 인식 기능을 다시 켤까요?'
+        : 'AI 라벨 인식 기능을 잠시 끌까요?\n선생님들이 "AI 판독" 버튼을 눌러도 Gemini API가 호출되지 않아 지출이 발생하지 않습니다.\n(본체/모니터 정보는 계속 손으로 입력하실 수 있습니다)';
+      if (!confirm(msg)) return;
+
+      if (appState.isGas) {
+        gasRunner()
+          .withSuccessHandler(res => {
+            if (res.success) {
+              appState.aiScanEnabled = res.aiScanEnabled;
+              updateAiScanToggleUI();
+              showToast(appState.aiScanEnabled ? 'AI 라벨 인식 기능을 켰습니다.' : 'AI 라벨 인식 기능을 껐습니다.');
+            } else {
+              alert('설정 변경 실패: ' + res.error);
+            }
+          })
+          .withFailureHandler(err => {
+            alert('서버 통신 실패: ' + err.message);
+          })
+          .setAiScanEnabled(next);
+      } else {
+        appState.aiScanEnabled = next;
+        safeSetStorage('SOLNAE_AI_SCAN_ENABLED', next ? 'true' : 'false');
+        updateAiScanToggleUI();
+        showToast(next ? 'AI 라벨 인식 기능을 켰습니다.' : 'AI 라벨 인식 기능을 껐습니다.');
       }
     }
 
@@ -4045,6 +4099,11 @@ function renderActiveRoomView() {
     }
 
     function runGeminiOcr(base64Data, targetType) {
+      if (appState.aiScanEnabled === false) {
+        alert('지금은 AI 라벨 자동 인식 기능이 잠시 꺼져 있습니다. 관리자에게 문의해 주시고, 본체/모니터 정보는 아래 칸에 직접 입력해 주세요.');
+        return;
+      }
+
       const banner = document.getElementById('aiScanBanner');
       banner.style.display = 'flex';
 

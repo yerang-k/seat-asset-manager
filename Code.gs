@@ -48,7 +48,7 @@ function doGet(e) {
 const ALLOWED_FUNCTIONS_ = {
   getInitialData, saveDevice, deleteDevice, updateSeatUser, saveSeatDevices,
   batchUpdateSeatUsers, analyzeLabelImage, addSeat, deleteSeat, updateSeatInfo,
-  updateSeatPosition, batchUpdateSeatPositions
+  updateSeatPosition, batchUpdateSeatPositions, setAiScanEnabled
 };
 function doPost(e) {
   try {
@@ -123,11 +123,25 @@ function getInitialData() {
       devices: devices,
       rooms: rooms,
       webAppUrl: webAppUrl,
-      serverTime: new Date().toISOString()
+      serverTime: new Date().toISOString(),
+      aiScanEnabled: isAiScanEnabled_()
     };
   } catch (err) {
     return { success: false, error: err.message };
   }
+}
+
+/** AI 라벨 인식(Gemini API 호출) 기능이 켜져 있는지 여부. 설정을 아예 안 한 경우 기본값은 '켜짐'. */
+function isAiScanEnabled_() {
+  const val = PropertiesService.getScriptProperties().getProperty('AI_SCAN_ENABLED');
+  return val !== 'false';
+}
+
+/** [관리자 전용] AI 라벨 인식 기능 켜기/끄기. Gemini API 지출 한도 초과 등으로 잠시
+ * 끄고 싶을 때 사용. 꺼져 있어도 본체/모니터 정보를 손으로 입력하는 것은 항상 가능함. */
+function setAiScanEnabled(enabled) {
+  PropertiesService.getScriptProperties().setProperty('AI_SCAN_ENABLED', enabled ? 'true' : 'false');
+  return { success: true, aiScanEnabled: !!enabled };
 }
 
 /** 기기 정보 저장 (신규 등록 및 기존 수정) */
@@ -322,6 +336,13 @@ function batchUpdateSeatUsers(seatList) {
 /** Gemini Vision API로 라벨 사진 판독 */
 function analyzeLabelImage(base64Data, seatId, deviceType) {
   try {
+    if (!isAiScanEnabled_()) {
+      return {
+        success: false,
+        error: '지금은 AI 라벨 자동 인식 기능이 잠시 꺼져 있습니다. 관리자에게 문의해 주시고, 본체/모니터 정보는 아래 칸에 직접 입력해 주세요.'
+      };
+    }
+
     const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
     if (!apiKey) {
       return {
@@ -737,8 +758,19 @@ function onOpen() {
     .createMenu('🏫 솔내고 교직원 기기관리')
     .addItem('🔄 전체 교무실별 탭 동기화/새로고침', 'syncAllRoomSheets')
     .addItem('➕ [신규] 학급 및 공용실 등 교무실 추가', '신규교무실_학급및공용실_추가')
+    .addItem('🤖 AI 라벨 인식 켜기/끄기 (지출 한도 초과 시 임시 차단용)', 'AI인식_토글')
     .addItem('⚙️ 초기 데이터 및 탭 전체 재설정 (⚠️ 기존 데이터 초기화됨)', '초기데이터생성')
     .addToUi();
+}
+
+/** [관리자 전용] 스프레드시트 메뉴에서 AI 라벨 인식 기능을 빠르게 켜고 끕니다. */
+function AI인식_토글() {
+  const ui = SpreadsheetApp.getUi();
+  const nowOn = isAiScanEnabled_();
+  setAiScanEnabled(!nowOn);
+  ui.alert(!nowOn
+    ? '🤖 AI 라벨 인식 기능을 껐습니다.\n선생님들이 "AI 판독" 버튼을 눌러도 Gemini API가 호출되지 않아 지출이 발생하지 않습니다.\n(본체/모니터 정보는 계속 손으로 입력하실 수 있습니다)'
+    : '🤖 AI 라벨 인식 기능을 다시 켰습니다.');
 }
 
 /**

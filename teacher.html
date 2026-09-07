@@ -2092,6 +2092,8 @@
                 const g1 = appState.seats.find(s => s.seat_id === 'GYOMU_01');
                 if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
 
+                appState.aiScanEnabled = (res.aiScanEnabled !== false);
+
                 initSeatPositions();
                 renderActiveRoomView();
                 updateTopStats();
@@ -2148,6 +2150,8 @@
           }
           initSeatPositions();
         }
+        appState.aiScanEnabled = safeGetStorage('SOLNAE_AI_SCAN_ENABLED', 'true') !== 'false';
+
         renderActiveRoomView();
         updateTopStats();
         selectRoom(appState.activeRoomId);
@@ -3942,6 +3946,11 @@ function renderActiveRoomView() {
     }
 
     function runGeminiOcr(base64Data, targetType) {
+      if (appState.aiScanEnabled === false) {
+        alert('지금은 AI 라벨 자동 인식 기능이 잠시 꺼져 있습니다. 관리자에게 문의해 주시고, 본체/모니터 정보는 아래 칸에 직접 입력해 주세요.');
+        return;
+      }
+
       const banner = document.getElementById('aiScanBanner');
       banner.style.display = 'flex';
 
