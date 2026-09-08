@@ -774,6 +774,19 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
       border-color: var(--primary) !important;
     }
+    /* 카드에 인라인 background/border 스타일이 걸려 있어 !important로 덮어써야 status 색이 반영됨 */
+    .special-seat-card.status-done {
+      border-color: #2e7d32 !important;
+      background: #f1f8e9 !important;
+    }
+    .special-seat-card.status-part {
+      border-color: #f57f17 !important;
+      background: #fffde7 !important;
+    }
+    .special-seat-card.status-none {
+      border-color: #aaa !important;
+      background: #ffffff !important;
+    }
 
     /* Modal Styling */
     .modal-backdrop {
