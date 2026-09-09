@@ -2469,7 +2469,8 @@
       origTop: 0,
       hasMoved: false,
       longPressTimer: null,
-      currentSwapTargetId: null
+      currentSwapTargetId: null,
+      maxMoveDist: 0
     };
 
     function attachSeatDragListeners(el, seatId) {
@@ -2564,6 +2565,7 @@
       dragState.hasMoved = false;
       dragState.active = false;
       dragState.currentSwapTargetId = null;
+      dragState.maxMoveDist = 0;
 
       // Long-press timer (250ms) - 배치가 고정된 경우 드래그 자체를 시작하지 않음 (클릭으로 모달만 열림)
       if (!appState.layoutLocked) {
@@ -2633,6 +2635,9 @@
       const dx = e.clientX - dragState.startX;
       const dy = e.clientY - dragState.startY;
       const dist = Math.sqrt(dx * dx + dy * dy);
+      // pointercancel(네이티브 스크롤로 넘어갈 때)은 좌표가 눌렀던 지점 그대로 오는 경우가 있어서,
+      // 여기서 실제로 움직인 최대 거리를 기록해뒀다가 pointerup/cancel 시점에 그 값을 대신 쓴다.
+      dragState.maxMoveDist = Math.max(dragState.maxMoveDist, dist);
 
       if (!dragState.active) {
         // Desktop mouse: start drag if moved > 5px (배치 고정 시에는 드래그 시작 금지)
@@ -2872,7 +2877,8 @@
         // 실제 이동 거리가 크면(=스크롤) 모달을 열지 않는다 (교사용은 항상 layoutLocked라 드래그가 시작되지 않으므로 별도 확인 필요)
         const dx = e.clientX - dragState.startX;
         const dy = e.clientY - dragState.startY;
-        if (Math.sqrt(dx * dx + dy * dy) < 10) {
+        const upDist = Math.sqrt(dx * dx + dy * dy);
+        if (Math.max(upDist, dragState.maxMoveDist) < 10) {
           openSeatModal(dragState.seatId);
         }
       }
