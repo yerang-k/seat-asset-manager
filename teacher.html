@@ -2479,24 +2479,29 @@
 
     // 전체 배치도(bp_seat_*) 등 정적 onclick 카드들은 스크롤 중 손을 떼도 그냥 클릭이 되어버리므로,
     // 이동 거리가 크면(=스크롤) 그 클릭을 취소한다.
+    // 포인터 이벤트(pointermove/pointercancel)는 브라우저가 네이티브 스크롤로
+    // 판단하는 순간부터 더 이상 갱신되지 않는 경우가 있어(iOS 등) dragState.maxMoveDist만으로는
+    // 못 잡는 스크롤이 있다. 터치 이벤트는 스크롤 중에도 계속 들어오므로 여기 결과(scrolled)를
+    // window.touchScrollGuard로 공유해 onWindowPointerUp의 CASE 3에서도 함께 확인한다.
+    window.touchScrollGuard = { scrolled: false };
     (function guardScrollAccidentalClicks() {
-      let startX = 0, startY = 0, scrolled = false;
+      let startX = 0, startY = 0;
       document.addEventListener('touchstart', (e) => {
         const t = e.touches && e.touches[0];
         if (!t) return;
         startX = t.clientX;
         startY = t.clientY;
-        scrolled = false;
+        window.touchScrollGuard.scrolled = false;
       }, { passive: true, capture: true });
       document.addEventListener('touchmove', (e) => {
         const t = e.touches && e.touches[0];
         if (!t) return;
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
-        if (Math.sqrt(dx * dx + dy * dy) > 10) scrolled = true;
+        if (Math.sqrt(dx * dx + dy * dy) > 10) window.touchScrollGuard.scrolled = true;
       }, { passive: true, capture: true });
       document.addEventListener('click', (e) => {
-        if (scrolled && e.target.closest('[onclick*="openSeatModal"]')) {
+        if (window.touchScrollGuard.scrolled && e.target.closest('[onclick*="openSeatModal"]')) {
           e.stopPropagation();
           e.preventDefault();
         }
@@ -2878,7 +2883,8 @@
         const dx = e.clientX - dragState.startX;
         const dy = e.clientY - dragState.startY;
         const upDist = Math.sqrt(dx * dx + dy * dy);
-        if (Math.max(upDist, dragState.maxMoveDist) < 10) {
+        const touchScrolled = window.touchScrollGuard && window.touchScrollGuard.scrolled;
+        if (!touchScrolled && Math.max(upDist, dragState.maxMoveDist) < 10) {
           openSeatModal(dragState.seatId);
         }
       }
