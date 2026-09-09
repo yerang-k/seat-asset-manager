@@ -2470,7 +2470,10 @@
       hasMoved: false,
       longPressTimer: null,
       currentSwapTargetId: null,
-      maxMoveDist: 0
+      maxMoveDist: 0,
+      scroller: null,
+      scrollStartLeft: 0,
+      scrollStartTop: 0
     };
 
     function attachSeatDragListeners(el, seatId) {
@@ -2571,6 +2574,14 @@
       dragState.active = false;
       dragState.currentSwapTargetId = null;
       dragState.maxMoveDist = 0;
+
+      // 안드로이드 등 일부 브라우저는 네이티브 스크롤이 시작되는 순간 pointermove/touchmove를
+      // 아예 더 이상 안 보내버려서 위 두 값으로도 못 잡는 경우가 있다. 이럴 땐 스크롤 컨테이너의
+      // 실제 scrollLeft/scrollTop이 바뀌었는지를 직접 비교하는 게 제일 확실하다.
+      const scroller = el.closest('.room-canvas-wrapper');
+      dragState.scroller = scroller;
+      dragState.scrollStartLeft = scroller ? scroller.scrollLeft : 0;
+      dragState.scrollStartTop = scroller ? scroller.scrollTop : 0;
 
       // Long-press timer (250ms) - 배치가 고정된 경우 드래그 자체를 시작하지 않음 (클릭으로 모달만 열림)
       if (!appState.layoutLocked) {
@@ -2884,7 +2895,12 @@
         const dy = e.clientY - dragState.startY;
         const upDist = Math.sqrt(dx * dx + dy * dy);
         const touchScrolled = window.touchScrollGuard && window.touchScrollGuard.scrolled;
-        if (!touchScrolled && Math.max(upDist, dragState.maxMoveDist) < 10) {
+        const scroller = dragState.scroller;
+        const scrollMoved = scroller && (
+          Math.abs(scroller.scrollLeft - dragState.scrollStartLeft) > 2 ||
+          Math.abs(scroller.scrollTop - dragState.scrollStartTop) > 2
+        );
+        if (!touchScrolled && !scrollMoved && Math.max(upDist, dragState.maxMoveDist) < 10) {
           openSeatModal(dragState.seatId);
         }
       }
