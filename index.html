@@ -360,9 +360,10 @@
       background: #f0f3f1;
       -webkit-overflow-scrolling: touch;
       /* 좌석 pointerdown 리스너 때문에 브라우저가 스크롤 여부 판단을 JS에 미루면서
-         일부 안드로이드 브라우저(삼성 인터넷 등)에서 가로 스크롤 자체가 씹히는 문제가
-         있어, 가로 스와이프는 무조건 네이티브 스크롤로 처리하도록 명시. */
-      touch-action: pan-x;
+         일부 안드로이드 브라우저(삼성 인터넷 등)에서 스크롤 자체가 씹히는 문제가 있어,
+         스와이프는 무조건 네이티브 스크롤로 처리하도록 명시. (pan-x만 넣었더니 좌석 카드
+         위에서 세로 스크롤이 막히는 부작용이 있어 pan-x pan-y로 둘 다 허용) */
+      touch-action: pan-x pan-y;
     }
 
     .room-canvas {
@@ -2615,28 +2616,7 @@
       }
     }
 
-    // ⚠️ 임시 디버그 패널 - 실기기 스크롤/탭 오작동 원인 확인용. 확인 끝나면 제거할 것.
-    // 삼성 인터넷 등 일부 브라우저는 하단 툴바가 position:fixed;bottom:0 요소를 가릴 수 있어
-    // 화면 "맨 위"에 고정한다.
-    function __dbg(msg) {
-      let panel = document.getElementById('__dbgPanel');
-      if (!panel) {
-        panel = document.createElement('div');
-        panel.id = '__dbgPanel';
-        panel.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:999999;background:#000;color:#7CFC00;font:13px/1.5 monospace;padding:6px 8px;max-height:45vh;overflow-y:auto;white-space:pre-wrap;border-bottom:3px solid #7CFC00;';
-        document.body.appendChild(panel);
-      }
-      const line = document.createElement('div');
-      line.textContent = msg;
-      panel.appendChild(line);
-      while (panel.children.length > 16) panel.removeChild(panel.firstChild);
-    }
-    // 패널 자체가 뜨는지부터 확인 (터치 없이도 즉시 표시)
-    document.addEventListener('DOMContentLoaded', () => __dbg('✅ 디버그 패널 로드됨 - 이 줄이 보이면 패널은 정상. 이제 좌석을 눌렀다 떼보세요.'));
-    if (document.readyState !== 'loading') __dbg('✅ 디버그 패널 로드됨 - 이 줄이 보이면 패널은 정상. 이제 좌석을 눌렀다 떼보세요.');
-
     function onSeatPointerDown(e, el, seatId) {
-      __dbg(`DOWN seat=${seatId} type=${e.pointerType} x=${Math.round(e.clientX)} y=${Math.round(e.clientY)} locked=${appState.layoutLocked}`);
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       const chkSeat = appState.seats.find(s => s.seat_id === seatId);
       if (chkSeat && chkSeat.is_locked && !appState.layoutLocked) {
@@ -2657,7 +2637,6 @@
       dragState.active = false;
       dragState.currentSwapTargetId = null;
       dragState.maxMoveDist = 0;
-      dragState.moveCount = 0;
 
       const scroller = el.closest('.room-canvas-wrapper');
       dragState.scroller = scroller;
@@ -2733,7 +2712,6 @@
       const dy = e.clientY - dragState.startY;
       const dist = Math.sqrt(dx * dx + dy * dy);
       dragState.maxMoveDist = Math.max(dragState.maxMoveDist, dist);
-      dragState.moveCount = (dragState.moveCount || 0) + 1;
 
       if (!dragState.active) {
         // Desktop mouse: start drag if moved > 5px (배치 고정 시에는 드래그 시작 금지)
@@ -2982,9 +2960,7 @@
           Math.abs(scroller.scrollLeft - dragState.scrollStartLeft) > 2 ||
           Math.abs(scroller.scrollTop - dragState.scrollStartTop) > 2
         );
-        const willOpen = !touchScrolled && !scrollMoved && Math.max(upDist, dragState.maxMoveDist) < 10;
-        __dbg(`UP type=${e.type} moves=${dragState.moveCount} upDist=${upDist.toFixed(1)} maxDist=${dragState.maxMoveDist.toFixed(1)} touchScrolled=${touchScrolled} scrollL=${scroller ? scroller.scrollLeft : 'n/a'}(start ${dragState.scrollStartLeft}) => ${willOpen ? 'OPEN ' + dragState.seatId : 'skip'}`);
-        if (willOpen) {
+        if (!touchScrolled && !scrollMoved && Math.max(upDist, dragState.maxMoveDist) < 10) {
           openSeatModal(dragState.seatId);
         }
       }

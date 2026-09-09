@@ -360,9 +360,10 @@
       background: #f0f3f1;
       -webkit-overflow-scrolling: touch;
       /* 좌석 pointerdown 리스너 때문에 브라우저가 스크롤 여부 판단을 JS에 미루면서
-         일부 안드로이드 브라우저(삼성 인터넷 등)에서 가로 스크롤 자체가 씹히는 문제가
-         있어, 가로 스와이프는 무조건 네이티브 스크롤로 처리하도록 명시. */
-      touch-action: pan-x;
+         일부 안드로이드 브라우저(삼성 인터넷 등)에서 스크롤 자체가 씹히는 문제가 있어,
+         스와이프는 무조건 네이티브 스크롤로 처리하도록 명시. (pan-x만 넣었더니 좌석 카드
+         위에서 세로 스크롤이 막히는 부작용이 있어 pan-x pan-y로 둘 다 허용) */
+      touch-action: pan-x pan-y;
     }
 
     .room-canvas {
