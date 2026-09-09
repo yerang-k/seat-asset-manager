@@ -1420,23 +1420,23 @@
 
         <div class="form-group" style="margin-top: 10px;">
           <label><strong>좌석 명칭 / 라벨</strong></label>
-          <input type="text" id="newSeatLabel" placeholder="예: 12번, 교무실 앞쪽 보조석, 실습교사석">
+          <input type="text" id="newSeatLabel">
           <small style="color: #666;">배치도 및 목록에 표시될 자리 이름입니다.</small>
         </div>
 
         <div class="form-group" style="margin-top: 10px;">
           <label><strong>담당 선생님 성명 (선택)</strong></label>
-          <input type="text" id="newSeatUser" placeholder="예: 김선생">
+          <input type="text" id="newSeatUser">
         </div>
 
         <div class="form-group" style="margin-top: 10px;">
           <label><strong>내선번호 (선택)</strong></label>
-          <input type="text" id="newSeatExt" placeholder="예: 215">
+          <input type="text" id="newSeatExt">
         </div>
 
         <div class="form-group" style="margin-top: 10px;">
           <label><strong>좌석 고유 ID</strong></label>
-          <input type="text" id="newSeatId" placeholder="자동 생성 (예: G3_12, GYOMU_22 등)">
+          <input type="text" id="newSeatId" placeholder="자동 생성">
           <small style="color: #666;">시스템 내부 식별용 ID입니다 (필요시 직접 수정 가능).</small>
         </div>
       </div>
@@ -1462,11 +1462,11 @@
         <div class="seat-meta-box">
           <div class="meta-group">
             <label>👤 현재 사용자 (선생님 성명)</label>
-            <input type="text" id="modalSeatUser" placeholder="예: 김솔내">
+            <input type="text" id="modalSeatUser">
           </div>
           <div class="meta-group">
             <label>📞 내선번호</label>
-            <input type="text" id="modalSeatExt" placeholder="예: 208">
+            <input type="text" id="modalSeatExt">
           </div>
           <div class="meta-group" style="display: flex; align-items: flex-end;">
             <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="saveSeatUserInfo()">
@@ -1506,27 +1506,27 @@
             <input type="hidden" id="pc_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
-              <input type="text" id="pc_manufacturer" placeholder="예: 삼성전자, LG전자, 삼보" list="mfgList">
+              <input type="text" id="pc_manufacturer" list="mfgList">
             </div>
             <div class="form-group">
               <label>모델명</label>
-              <input type="text" id="pc_model_name" placeholder="예: DM500SDA-A58A">
+              <input type="text" id="pc_model_name">
             </div>
             <div class="form-group">
               <label>취득일자 또는 제조연월</label>
-              <input type="text" id="pc_acquired_date" placeholder="예: 2022-05-18 또는 2022.05">
+              <input type="text" id="pc_acquired_date">
             </div>
             <div class="form-group">
               <label>물품관리번호 (RFID)</label>
-              <input type="text" id="pc_asset_number" placeholder="예: KKR-GAP-0011248986">
+              <input type="text" id="pc_asset_number">
             </div>
             <div class="form-group">
               <label>자체 물품관리대장번호</label>
-              <input type="text" id="pc_school_asset_number" placeholder="예: M000018563">
+              <input type="text" id="pc_school_asset_number">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
-              <input type="text" id="pc_notes" placeholder="예: 슬림형 데스크톱, 팬 소음 점검 필요 등">
+              <input type="text" id="pc_notes">
             </div>
           </div>
 
@@ -1561,27 +1561,27 @@
             <input type="hidden" id="mon1_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
-              <input type="text" id="mon1_manufacturer" placeholder="예: LG전자, 삼성전자, 한성" list="mfgList">
+              <input type="text" id="mon1_manufacturer" list="mfgList">
             </div>
             <div class="form-group">
               <label>모델명</label>
-              <input type="text" id="mon1_model_name" placeholder="예: 24BN650P">
+              <input type="text" id="mon1_model_name">
             </div>
             <div class="form-group">
               <label>취득일자 또는 제조연월</label>
-              <input type="text" id="mon1_acquired_date" placeholder="예: 2021-11-20 또는 2021.11">
+              <input type="text" id="mon1_acquired_date">
             </div>
             <div class="form-group">
               <label>물품관리번호 (RFID)</label>
-              <input type="text" id="mon1_asset_number" placeholder="예: KKR-GAP-...">
+              <input type="text" id="mon1_asset_number">
             </div>
             <div class="form-group">
               <label>자체 물품관리대장번호</label>
-              <input type="text" id="mon1_school_asset_number" placeholder="예: M000018564">
+              <input type="text" id="mon1_school_asset_number">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
-              <input type="text" id="mon1_notes" placeholder="예: 24인치 IPS 피벗, 화면 정상 등">
+              <input type="text" id="mon1_notes">
             </div>
           </div>
 
@@ -1616,27 +1616,27 @@
             <input type="hidden" id="mon2_photo_url_pending">
             <div class="form-group">
               <label>제조사</label>
-              <input type="text" id="mon2_manufacturer" placeholder="예: LG전자, 삼성전자" list="mfgList">
+              <input type="text" id="mon2_manufacturer" list="mfgList">
             </div>
             <div class="form-group">
               <label>모델명</label>
-              <input type="text" id="mon2_model_name" placeholder="예: 24MB35V">
+              <input type="text" id="mon2_model_name">
             </div>
             <div class="form-group">
               <label>취득일자 또는 제조연월</label>
-              <input type="text" id="mon2_acquired_date" placeholder="예: 2020-08-15 또는 2020.08">
+              <input type="text" id="mon2_acquired_date">
             </div>
             <div class="form-group">
               <label>물품관리번호 (RFID)</label>
-              <input type="text" id="mon2_asset_number" placeholder="예: KKR-GAP-...">
+              <input type="text" id="mon2_asset_number">
             </div>
             <div class="form-group">
               <label>자체 물품관리대장번호</label>
-              <input type="text" id="mon2_school_asset_number" placeholder="예: M000018565">
+              <input type="text" id="mon2_school_asset_number">
             </div>
             <div class="form-group full">
               <label>특이사항</label>
-              <input type="text" id="mon2_notes" placeholder="예: 서브 모니터, HDMI 케이블 연결 등">
+              <input type="text" id="mon2_notes">
             </div>
           </div>
 
