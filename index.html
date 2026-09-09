@@ -375,7 +375,6 @@
       border-radius: 8px;
       margin: 0 auto;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.03);
-      touch-action: none;
     }
 
     /* Desk (Seat) Cell Styling */
@@ -393,7 +392,9 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.08);
       z-index: 10;
       box-sizing: border-box;
-      touch-action: none;
+      /* 기본값은 auto(=상위 .room-canvas-wrapper의 pan-x pan-y를 따름)로 둬서 스크롤이
+         막히지 않게 하고, 실제로 드래그가 시작될 때만(startSeatDrag) JS로 touch-action:none을
+         걸어 네이티브 스크롤과 충돌하지 않게 한다. */
       /* Smooth transition when snapping back or swapping */
       transition: left 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), 
                   top 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -2616,39 +2617,6 @@
       }
     }
 
-    // ⚠️ 임시 디버그 패널 v2 - 세로 스크롤 자체가 실제로 일어나는지 확인용. 확인 끝나면 제거할 것.
-    function __dbg(msg) {
-      let panel = document.getElementById('__dbgPanel');
-      if (!panel) {
-        panel = document.createElement('div');
-        panel.id = '__dbgPanel';
-        panel.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:999999;background:#000;color:#7CFC00;font:13px/1.5 monospace;padding:6px 8px;max-height:45vh;overflow-y:auto;white-space:pre-wrap;border-bottom:3px solid #7CFC00;';
-        document.body.appendChild(panel);
-      }
-      const line = document.createElement('div');
-      line.textContent = msg;
-      panel.appendChild(line);
-      while (panel.children.length > 18) panel.removeChild(panel.firstChild);
-    }
-    (function () {
-      const ready = () => __dbg('✅ v2 로드됨. 좌석 위에서 아래로 드래그해보세요 (스크롤 시도).');
-      if (document.readyState !== 'loading') ready(); else document.addEventListener('DOMContentLoaded', ready);
-      let downY = 0, downScrollY = 0, defaultPrevented = false;
-      document.addEventListener('touchstart', (e) => {
-        const t = e.touches && e.touches[0];
-        downY = t ? t.clientY : 0;
-        downScrollY = window.scrollY;
-        defaultPrevented = false;
-        __dbg(`TS y=${Math.round(downY)} scrollY=${downScrollY} target=${e.target.className || e.target.tagName}`);
-      }, { passive: true, capture: true });
-      document.addEventListener('touchmove', (e) => {
-        if (e.defaultPrevented) defaultPrevented = true;
-      }, { passive: true, capture: true });
-      document.addEventListener('touchend', (e) => {
-        __dbg(`TE scrollY=${window.scrollY} (Δ${(window.scrollY - downScrollY).toFixed(0)}) defaultPrevented=${defaultPrevented}`);
-      }, { passive: true, capture: true });
-    })();
-
     function onSeatPointerDown(e, el, seatId) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       const chkSeat = appState.seats.find(s => s.seat_id === seatId);
@@ -2691,6 +2659,7 @@
     function startSeatDrag(e, el, seatId) {
       dragState.active = true;
       el.classList.add('is-dragging');
+      el.style.touchAction = 'none'; // 실제 드래그가 시작된 동안만 네이티브 스크롤과 충돌 방지
       try {
         el.setPointerCapture(e.pointerId);
       } catch (err) {}
@@ -2898,6 +2867,7 @@
 
       if (dragState.active) {
         el.classList.remove('is-dragging');
+        el.style.touchAction = '';
         try {
           el.releasePointerCapture(e.pointerId);
         } catch (err) {}
