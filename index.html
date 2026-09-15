@@ -1669,6 +1669,13 @@
           </small>
         </div>
         <div class="form-group" style="margin-top: 12px;">
+          <label><strong>서버에 저장된 Gemini API 키</strong> (인수인계 시 삭제용)</label>
+          <div id="geminiKeyStatusText" style="font-size: 0.85rem; padding: 8px; background: #f1f5f9; border-radius: 6px; color: #334155; margin-bottom: 6px;">
+            확인 중...
+          </div>
+          <button id="btnDeleteGeminiKey" class="btn" style="display:none; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;" onclick="deleteGeminiApiKeyFromServer()">🗑️ 서버에 저장된 API 키 삭제</button>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
           <label><strong>동작 모드</strong></label>
           <div id="modeStatusText" style="font-size: 0.85rem; padding: 8px; background: #e8f5e9; border-radius: 6px; color: #1b5e20;">
             판별 중...
@@ -2086,7 +2093,9 @@
                 if (g1 && g1.seat_label !== '교감') g1.seat_label = '교감';
 
                 appState.aiScanEnabled = (res.aiScanEnabled !== false);
+                appState.geminiKeySet = !!res.geminiKeySet;
                 updateAiScanToggleUI();
+                updateGeminiKeyStatusUI();
 
                 initSeatPositions();
                 renderActiveRoomView();
@@ -2144,7 +2153,9 @@
           initSeatPositions();
         }
         appState.aiScanEnabled = safeGetStorage('SOLNAE_AI_SCAN_ENABLED', 'true') !== 'false';
+        appState.geminiKeySet = !!appState.geminiKey;
         updateAiScanToggleUI();
+        updateGeminiKeyStatusUI();
 
         renderActiveRoomView();
         updateTopStats();
@@ -2197,6 +2208,44 @@
         updateAiScanToggleUI();
         showToast(next ? 'AI 라벨 인식 기능을 켰습니다.' : 'AI 라벨 인식 기능을 껐습니다.');
       }
+    }
+
+    // 설정 모달에 "서버에 Gemini API 키가 저장되어 있는지"와 삭제 버튼을 반영
+    function updateGeminiKeyStatusUI() {
+      const statusEl = document.getElementById('geminiKeyStatusText');
+      const delBtn = document.getElementById('btnDeleteGeminiKey');
+      if (!statusEl) return;
+      if (appState.isGas) {
+        statusEl.textContent = appState.geminiKeySet
+          ? '✅ 이 학교 스프레드시트(스크립트 속성)에 Gemini API 키가 저장되어 있습니다.'
+          : '⚪ 저장된 Gemini API 키가 없습니다. (AI 라벨 인식 기능이 동작하지 않습니다)';
+        if (delBtn) delBtn.style.display = appState.geminiKeySet ? 'inline-flex' : 'none';
+      } else {
+        statusEl.textContent = '💻 로컬 테스트 모드에서는 이 브라우저에만 저장되며, 서버 키와는 별개입니다.';
+        if (delBtn) delBtn.style.display = 'none';
+      }
+    }
+
+    // [담당자 인수인계용] 학교를 옮기거나 개인 API 키를 그만 쓸 때, 서버(스크립트 속성)에 저장된
+    // Gemini API 키를 완전히 삭제한다. GAS 배포 모드에서만 동작(로컬 테스트 키는 브라우저 설정에서 지움).
+    function deleteGeminiApiKeyFromServer() {
+      if (!appState.isGas) return;
+      if (!confirm('서버에 저장된 Gemini API 키를 완전히 삭제하시겠습니까?\n삭제 후에는 새 관리자가 본인의 키를 다시 등록해야 AI 라벨 인식 기능을 쓸 수 있습니다.\n(본체/모니터 정보 수동 입력은 계속 가능합니다)')) return;
+
+      gasRunner()
+        .withSuccessHandler(res => {
+          if (res.success) {
+            appState.geminiKeySet = false;
+            updateGeminiKeyStatusUI();
+            showToast('서버에 저장된 Gemini API 키를 삭제했습니다.');
+          } else {
+            alert('삭제 실패: ' + res.error);
+          }
+        })
+        .withFailureHandler(err => {
+          alert('서버 통신 실패: ' + err.message);
+        })
+        .deleteGeminiApiKey();
     }
 
     function initSeatPositions() {
@@ -4377,6 +4426,7 @@ function renderActiveRoomView() {
 
     function openSettingsModal() {
       document.getElementById('cfgGeminiKey').value = appState.geminiKey;
+      updateGeminiKeyStatusUI();
       document.getElementById('settingsModal').style.display = 'flex';
     }
     function closeSettingsModal() {

@@ -48,7 +48,7 @@ function doGet(e) {
 const ALLOWED_FUNCTIONS_ = {
   getInitialData, saveDevice, deleteDevice, updateSeatUser, saveSeatDevices,
   batchUpdateSeatUsers, analyzeLabelImage, addSeat, deleteSeat, updateSeatInfo,
-  updateSeatPosition, batchUpdateSeatPositions, setAiScanEnabled
+  updateSeatPosition, batchUpdateSeatPositions, setAiScanEnabled, deleteGeminiApiKey
 };
 function doPost(e) {
   try {
@@ -124,7 +124,8 @@ function getInitialData() {
       rooms: rooms,
       webAppUrl: webAppUrl,
       serverTime: new Date().toISOString(),
-      aiScanEnabled: isAiScanEnabled_()
+      aiScanEnabled: isAiScanEnabled_(),
+      geminiKeySet: !!PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY')
     };
   } catch (err) {
     return { success: false, error: err.message };
@@ -142,6 +143,13 @@ function isAiScanEnabled_() {
 function setAiScanEnabled(enabled) {
   PropertiesService.getScriptProperties().setProperty('AI_SCAN_ENABLED', enabled ? 'true' : 'false');
   return { success: true, aiScanEnabled: !!enabled };
+}
+
+/** [관리자 전용] 스크립트 속성에 저장된 Gemini API 키를 완전히 삭제한다.
+ * (담당자가 학교를 옮기거나 개인 API 키를 더 이상 쓰지 않게 될 때 사용) */
+function deleteGeminiApiKey() {
+  PropertiesService.getScriptProperties().deleteProperty('GEMINI_API_KEY');
+  return { success: true };
 }
 
 /** 기기 정보 저장 (신규 등록 및 기존 수정) */
